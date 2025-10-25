@@ -3,43 +3,27 @@ A lexer and parser for scss-like files.
 
 ## FEATURES:
 ### Style types (expressed in pseudo regex)
-- int: [0-9]+
-- float: [0-9]+\.[0-9]\*
-- string: [^,;\s{}()[]]+
-- tuple[type,...]: \\( *\<style-type\>( \*, \*\<style-type\>)\* \*\\)
-- bool
+- int: `[0-9]+`
+- float: `[0-9]+\.[0-9]\*`
+- string: `[^,;\s{}()[]]+`
+- enum: `[a-zA-Z-]+`
+- tuple[type,...]: `\\( *\<style-type\>( \*, \*\<style-type\>)\* \*\\)`
 
-### Operators
+### Operators (TODO)
 - \+ addition
 - \- substraction
 - \* multiplication
 - \/ division
 
-### Functions
+### Functions (TODO)
 regex: [\w\d][\w\d\\-]+[\w\d]
 - round(int|float)
-
-#### Units
-An int can be followed by:
- - % to apply a percentage of the parent size (automatically choose width or height)
- - pw to apply a percentage of the parent width
- - ph to apply a percentage of the parent height
- - ww to apply a percentage of the window width
- - wh to apply a percentage of the window height
- - px to be in pixels (default)
 
 #### ! support custom styles
 
 ### Modifiers
-Shown in precedence priority order:
-
-focused
-</br>
-clicked
-</br>
-hovered
-
-Custom modifiers are not yet available
+A modifier can be added with
+`:modifier-name`
 
 ### Identifiers (single element)
 An identifier (id) can be used to apply to a specific element
@@ -57,9 +41,11 @@ Ampersand (&) at first element in nested style means to apply following style in
 
 ### Syntax
 
-styleComponents = <element-name|.class|#id|:modifier>
-componentsSpaceBeforeName = < element-name|.class|#id|:modifier
-dataTypes = int|float|bool|string
+styleComponents = `<element-name|.class|#id|:modifier>`
+
+componentsSpaceBeforeName = `< element-name|.class|#id|:modifier`
+
+dataTypes = `int|float|bool|string`
 ```
 <stylesComponents><['>'|' ']<componentsSpaceBeforeName>[...][, ...] { 
     <style-name>: <dataTypes|tuple[dataTypes,...]>[,...];
@@ -79,3 +65,16 @@ dataTypes = int|float|bool|string
 
 ### Examples
 <a href="../../tests/style_tests_lexer_and_parser/tests-files">See example files</a>
+
+### Tests
+Compile tests:
+
+`make tests`
+
+Run tests
+
+`bin/tests`
+
+You can add BASH_COLORS=1 in the make command to add colors in bash shells for tests
+
+`make tests BASH_COLORS=1`

@@ -26,7 +26,6 @@ ifdef DEBUG
 CPP_FLAGS += -DDEBUG
 endif
 
-# Build the final executable combining exe and style
 lib: $(LIB).a
 
 tests: $(TESTS)
@@ -54,7 +53,7 @@ $(OBJ_TEST_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CPP_C) $(CPP_FLAGS) -DDEBUG -c $< -o $@
 
 $(TESTS_LIB).a:
-	$(MAKE) -C cpp_tests -j lib DEBUG=DEBUG
+	$(MAKE) -C cpp_tests -j lib BASH_COLORS=$(BASH_COLORS)
 
 # Clean all generated files
 clean:
