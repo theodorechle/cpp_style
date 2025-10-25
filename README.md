@@ -1,3 +1,5 @@
+![build status](https://github.com/theodorechle/cpp_style/actions/workflows/c-cpp.yml/badge.svg)
+
 # style
 A lexer and parser for scss-like files.
 
