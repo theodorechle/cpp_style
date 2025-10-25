@@ -1,0 +1,11 @@
+label.blue { // labels with the class 'blue' will have a text in blue
+    text-color: #0000ff;
+}
+
+label.blue:hovered {
+    /*
+    labels with the class 'blue' will have a text in gray
+    this override the previous declaration block of 'label.blue' when it's hovered
+    */
+    text-color: (150, 255, 112);
+}

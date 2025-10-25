@@ -1,0 +1,110 @@
+#red-container {
+    border-color: #ff0000;
+    border: 10px;
+//    width: 50px;
+//    height: 50px;
+    background-color: #0000ff;
+    vertical: true;
+}
+
+#test-label {
+    font-name: "Courgette-Regular.ttf";
+    width: 150px;
+    border: 1px;
+    border-color: #00ff00;
+    text-wrap: wrapped;
+}
+/*
+root {
+    background-color: #00ff00;
+//    width: 100px;
+}
+*/
+@import "tests/style_deserialization_tests/tests-files/imported-file.txt";
+
+#red-container {
+    // padding: 100px;
+    border: 10px;
+    font-size: 20;
+    /*
+    you can specify the font default directory in your program using the setFontsPath method of the ElementsStyleManager class instances
+    */
+    font-name: "Courgette-Regular.ttf";
+    
+    > label.red#test-label {
+        text-color: (255, 102, 102);
+        padding: 5px;
+        border-left-color: #ff0000;
+        border-right-color: #000000;
+        border-top-color: #00ff00;
+        border-bottom-color: #0000ff;
+        border: 10px;
+        background-color: #555555;
+        margin: 20px;
+        max-height: 100px;
+        // max-width: 200px;
+        // min-width: 500px;
+        height: 200px;
+        vertical-alignment: end;
+
+        &:hovered {
+            background-color: #ff0000;
+            // border: 50px;
+        }
+    }
+
+    &:hovered {
+        border-color: #aa0099;
+        background-color: #dddddd;
+    }
+  
+}
+
+#red-container label.red#test-label:clicked {
+    border-color: #00ff00;
+}
+
+list {
+    vertical: true;
+    childs-size: biggest;
+}
+
+#aaaaa-label {
+    vertical-alignment: centered;
+    horizontal-alignment: centered;
+}
+
+#hello-world-button {
+    font-strike-through: true;
+    font-underline: true;
+    font-weight: bold;
+    font-italic: true;
+    :hovered {
+        background-color: #aaaaaa;
+    }
+
+    list {
+        vertical: false;
+        childs-size: biggest;
+        // height: 100%;
+
+        label {
+            border: 1px;
+            border-left: 0px;
+            horizontal-alignment: centered;
+
+            &.last {
+                border-right: 0px;
+            }
+        }
+    }
+}
+
+input {
+    border-top: 1px;
+    width: 50px;
+}
+
+#hello-world-button > list > * {
+    background-color:(203, 42, 198);
+}

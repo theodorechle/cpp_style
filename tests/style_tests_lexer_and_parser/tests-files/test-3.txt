@@ -1,0 +1,7 @@
+// same as test-3 but with an element instead of a modifier in the inner block
+label.blue {
+    text-color: #0000ff;
+    element {
+        text-color: (150,150,150);
+    }
+}

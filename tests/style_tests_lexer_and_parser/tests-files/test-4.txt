@@ -1,0 +1,6 @@
+label.blue:hovered element.red#root {
+    text-color: #0000ff;
+    element {
+        text-color: (150,150,150);
+    }
+}
