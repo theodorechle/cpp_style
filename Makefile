@@ -17,12 +17,12 @@ OBJ_STYLE=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_STYLE))
 OBJ_TESTS=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_TEST_DIR)/%.o, $(SRC_TESTS))
 
 # Executable targets
-LIB=$(BIN_DIR)/cpp_style
+LIB=$(BIN_DIR)/cpp_style_lib
 TESTS=$(BIN_DIR)/tests
 
 .PHONY: clean tests
 
-ifdef DEBUG
+ifeq ($(DEBUG),1)
 CPP_FLAGS += -DDEBUG
 endif
 
