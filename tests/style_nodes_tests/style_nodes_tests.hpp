@@ -4,6 +4,7 @@
 #include "../../cpp_tests/src/tests.hpp"
 #include "../../src/style/style_component.hpp"
 #include "../../src/style_nodes/style_node.hpp"
+#include "../style_config.hpp"
 
 namespace styleNodesTests {
     void displayValue(style::StyleValue *value);

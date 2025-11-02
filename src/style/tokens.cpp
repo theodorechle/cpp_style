@@ -30,13 +30,13 @@ namespace style {
         case Token::MultiLineComment:
             return "MultiLineComment";
         case Token::Sharp:
-        return "Sharp";
+            return "Sharp";
         case Token::Dot:
-        return "Dot";
+            return "Dot";
         case Token::Ampersand:
-        return "Ampersand";
+            return "Ampersand";
         case Token::At:
-        return "At";
+            return "At";
         case Token::Star:
             return "Star";
         // Used only by the parser
@@ -97,10 +97,8 @@ namespace style {
             return "Float";
         case Token::Bool:
             return "Bool";
-        case Token::PercentageUnit:
-            return "PercentageUnit";
-        case Token::PixelUnit:
-            return "PixelUnit";
+        case Token::Unit:
+            return "Unit";
         case Token::Hex:
             return "Hex";
         case Token::EnumValue:
@@ -115,4 +113,4 @@ namespace style {
         return o;
     }
 
-} // namespace Style
+} // namespace style

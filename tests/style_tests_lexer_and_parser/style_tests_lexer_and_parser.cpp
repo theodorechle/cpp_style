@@ -9,7 +9,7 @@ namespace styleTestsLexerAndParser {
         expected->displayNexts(std::cout);
         std::cout << ":\n";
         try {
-            style::Node *result = style::Lexer(expr).getResult();
+            style::Node *result = style::Lexer(&guiStyleConfig, expr).getResult();
             style::Node *n = result;
             std::cout << "result:\n";
             n->displayNexts();
@@ -63,7 +63,7 @@ namespace styleTestsLexerAndParser {
         expected->display(std::cout);
         std::cout << ":\n";
         try {
-            style::Node *tokens = style::Lexer(expr).getResult();
+            style::Node *tokens = style::Lexer(&guiStyleConfig, expr).getResult();
             style::Node *result = style::Parser(tokens).getFinalTree();
             if (areSameNodes(result, expected) == equal) testResult = test::Result::SUCCESS;
             else testResult = test::Result::FAILURE;
@@ -87,7 +87,7 @@ namespace styleTestsLexerAndParser {
 #endif
         style::Node *tokens = nullptr;
         try {
-            tokens = style::Lexer(expression).getResult();
+            tokens = style::Lexer(&guiStyleConfig, expression).getResult();
 #ifdef DEBUG
             tokens->display();
 #endif
@@ -115,7 +115,7 @@ namespace styleTestsLexerAndParser {
         style::Node *tokens = nullptr;
         style::Node *result = nullptr;
         try {
-            tokens = style::Lexer(expression).getResult();
+            tokens = style::Lexer(&guiStyleConfig, expression).getResult();
             result = style::Parser(tokens).getFinalTree();
             testResult = test::Result::FAILURE;
         }
@@ -1208,11 +1208,11 @@ namespace styleTestsLexerAndParser {
         expected = expected->appendChild(new style::Node(style::Token::BlockDefinition));
         expected = expected->appendChild(new style::Node(style::Token::Assignment));
         expected->appendChild(new style::Node(style::Token::RuleName, "width"));
-        expected->appendChild(new style::Node(style::Token::PixelUnit))->appendChild(new style::Node(style::Token::Int, "150"));
+        expected->appendChild(new style::Node(style::Token::Unit, "px"))->appendChild(new style::Node(style::Token::Int, "150"));
         expected = expected->getParent();
         expected = expected->appendChild(new style::Node(style::Token::Assignment));
         expected->appendChild(new style::Node(style::Token::RuleName, "height"));
-        expected->appendChild(new style::Node(style::Token::PercentageUnit))->appendChild(new style::Node(style::Token::Int, "40"));
+        expected->appendChild(new style::Node(style::Token::Unit, "%"))->appendChild(new style::Node(style::Token::Int, "40"));
 
         result = testLexerAndParser(true, fileContent, rootExpected);
         delete rootExpected;

@@ -12,6 +12,7 @@
 #include "../../src/style/lexer.hpp"
 #include "../../src/style/node.hpp"
 #include "../../src/style/parser.hpp"
+#include "../style_config.hpp"
 
 namespace styleTestsLexerAndParser {
     const std::string TESTS_FILES_DIR = "tests/style_tests_lexer_and_parser/tests-files";

@@ -57,15 +57,12 @@ namespace style {
         Int,
         Float,
         Bool,
-        PercentageUnit,
-        PixelUnit,
+        Unit,
         Hex,
     };
 
-    const std::map<std::string, Token> UNITS{{"%", Token::PercentageUnit}, {"px", Token::PixelUnit}};
-
-    const std::string TRUE = "true";
-    const std::string FALSE = "false";
+    constexpr std::string_view TRUE = "true";
+    constexpr std::string_view FALSE = "false";
 
     std::string tokenToString(const Token &type);
 

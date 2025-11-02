@@ -98,7 +98,7 @@ namespace style {
             && RESERVED_CHARACTERS.find(expression[index + i]) == RESERVED_CHARACTERS.cend()
             && expression[index + i] != ' '
             && expression[index + i] != '\n'
-            && getUnit(i, &tmpSize) == Token::NullRoot)
+            && !getUnit(i, &tmpSize).size())
             return; // not an int
         parsedTree->appendNext(new Node(Token::Int, expression.substr(index, i)));
         index += i;
@@ -127,7 +127,7 @@ namespace style {
             && RESERVED_CHARACTERS.find(expression[index + i]) == RESERVED_CHARACTERS.cend()
             && expression[index + i] != ' '
             && expression[index + i] != '\n'
-            && getUnit(i, &tmpSize) == Token::NullRoot)
+            && !getUnit(i, &tmpSize).size())
             return; // not a float
         parsedTree->appendNext(new Node(Token::Float, expression.substr(index, i)));
         index += i;
@@ -147,33 +147,33 @@ namespace style {
         }
     }
 
-    Token Lexer::getUnit(int expressionIndex, int *size) {
+    std::string Lexer::getUnit(int expressionIndex, int *size) {
         size_t i;
         bool equal;
-        for (std::pair<std::string, Token> unit : UNITS) {
+        for (const std::string &unit : config->units) {
             equal = true;
-            for (i = 0; i < unit.first.size(); i++) {
-                if (expression[index + expressionIndex + i] != unit.first[i]) {
+            for (i = 0; i < unit.size(); i++) {
+                if (expression[index + expressionIndex + i] != unit[i]) {
                     equal = false;
                     break;
                 }
             }
             if (equal) {
                 *size = i;
-                return unit.second;
+                return unit;
             }
         }
         *size = 0;
-        return Token::NullRoot;
+        return "";
     }
 
     void Lexer::lexeUnit() {
         int size;
-        Token unit = getUnit(0, &size);
-        if (unit == Token::NullRoot) return;
+        std::string unit = getUnit(0, &size);
+        if (!unit.size()) return;
         index += size;
         lexed = true;
-        parsedTree->appendNext(new Node(unit));
+        parsedTree->appendNext(new Node(Token::Unit, unit));
     }
 
     void Lexer::lexeReservedCharacters() {

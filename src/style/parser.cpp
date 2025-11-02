@@ -96,8 +96,7 @@ namespace style {
                 case Token::GreaterThan:
                     parseGreatherThan();
                     break;
-                case Token::PercentageUnit:
-                case Token::PixelUnit:
+                case Token::Unit:
                     parseUnit();
                     break;
                 case Token::OpeningParenthesis:

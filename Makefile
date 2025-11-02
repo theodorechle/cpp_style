@@ -7,6 +7,7 @@ SRC_DIR=src
 TESTS_DIR=tests
 LIB=bin/cpp_style_lib
 TESTS_LIB=cpp_tests/bin/cpp_tests_lib
+COMMONS_LIB=cpp_commons/bin/cpp_commons_lib
 
 # Source files
 SRC_STYLE=$(wildcard $(SRC_DIR)/style/*.cpp) $(wildcard $(SRC_DIR)/style_nodes/*.cpp)
@@ -20,7 +21,7 @@ OBJ_TESTS=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_TEST_DIR)/%.o, $(SRC_TESTS))
 LIB=$(BIN_DIR)/cpp_style_lib
 TESTS=$(BIN_DIR)/tests
 
-.PHONY: clean tests
+.PHONY: clean tests lib
 
 ifeq ($(DEBUG),1)
 CPP_FLAGS += -DDEBUG
@@ -43,7 +44,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 ## TESTS
 # Build the tests executable (tests + all style sources)
-$(TESTS): $(OBJ_TESTS) $(LIB).a $(TESTS_LIB).a
+$(TESTS): $(OBJ_TESTS) $(LIB).a $(COMMONS_LIB).a $(TESTS_LIB).a
 	@mkdir -p $(BIN_DIR)
 	$(CPP_C) $(CPP_FLAGS) -o $@ $^
 
@@ -54,6 +55,9 @@ $(OBJ_TEST_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 $(TESTS_LIB).a:
 	$(MAKE) -C cpp_tests -j lib BASH_COLORS=$(BASH_COLORS)
+
+$(COMMONS_LIB).a:
+	$(MAKE) -C cpp_commons -j lib
 
 # Clean all generated files
 clean:

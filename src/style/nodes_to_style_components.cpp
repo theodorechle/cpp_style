@@ -1,4 +1,4 @@
-#include "nodes_to_rules_blocks.hpp"
+#include "nodes_to_style_components.hpp"
 #include "style_component.hpp"
 
 namespace style {
@@ -34,10 +34,8 @@ namespace style {
             return StyleValueType::Tuple;
         case Token::Function:
             return StyleValueType::Function;
-        case Token::PercentageUnit:
-            return StyleValueType::PercentageUnit;
-        case Token::PixelUnit:
-            return StyleValueType::PixelUnit;
+        case Token::Unit:
+            return StyleValueType::Unit;
         case Token::Hex:
             return StyleValueType::Hex;
         case Token::EnumValue:
@@ -60,7 +58,7 @@ namespace style {
         }
     }
 
-    Node *NodeToStyleComponentList::importStyle(const std::string &fileName) {
+    Node *NodesToStyleComponents::importStyle(const std::string &fileName) {
         Node *tokens = nullptr;
         Node *result = nullptr;
         std::ifstream file(fileName);
@@ -71,7 +69,7 @@ namespace style {
         }
         buffer << file.rdbuf();
         try {
-            tokens = Lexer(buffer.str()).getResult();
+            tokens = Lexer(config, buffer.str()).getResult();
             result = Parser(tokens).getFinalTree();
         }
         catch (const ParserException &) {
@@ -88,7 +86,7 @@ namespace style {
         return result;
     }
 
-    Node *NodeToStyleComponentList::joinStyleDeclarations(Node *firstDeclarations, Node *secondDeclarations) {
+    Node *NodesToStyleComponents::joinStyleDeclarations(Node *firstDeclarations, Node *secondDeclarations) {
         Node *newDeclarations = new Node(Token::NullRoot);
         Node *actualDeclaration;
         Node *secondDeclarationsIt;
@@ -114,7 +112,7 @@ namespace style {
         return newDeclarations;
     }
 
-    void NodeToStyleComponentList::moveNestedBlocksToRoot(Node *style) {
+    void NodesToStyleComponents::moveNestedBlocksToRoot(Node *style) {
         Node *blockDeclarations = style->getChild();
         Node *definition = blockDeclarations->getNext()->getChild();
         Node *nextDeclaration;
@@ -136,7 +134,7 @@ namespace style {
         }
     }
 
-    void NodeToStyleComponentList::flattenStyle(Node *style) {
+    void NodesToStyleComponents::flattenStyle(Node *style) {
         if (style == nullptr) return;
         if (style->getToken() == Token::NullRoot) style = style->getChild();
         while (style != nullptr) {
@@ -154,7 +152,7 @@ namespace style {
         }
     }
 
-    std::list<StyleComponentDataList *> *NodeToStyleComponentList::convertStyleComponents() {
+    std::list<StyleComponentDataList *> *NodesToStyleComponents::convertStyleComponents() {
         std::list<StyleComponentDataList *> *styleComponentsLists;
         StyleComponentDataList *requiredStyleComponents;
         Node *declaration;
@@ -206,7 +204,7 @@ namespace style {
         return styleComponentsLists;
     }
 
-    StyleValue *NodeToStyleComponentList::convertStyleNodeToStyleValue(Node *node) {
+    StyleValue *NodesToStyleComponents::convertStyleNodeToStyleValue(Node *node) {
         if (node == nullptr) return nullptr;
         StyleValueType type;
         Node *next;
@@ -235,7 +233,7 @@ namespace style {
         return styleValue;
     }
 
-    StyleValuesMap *NodeToStyleComponentList::convertAppliedStyle(int fileNumber, int *ruleNumber) {
+    StyleValuesMap *NodesToStyleComponents::convertAppliedStyle(int fileNumber, int *ruleNumber) {
         StyleValuesMap *appliedStyleMap;
         StyleValue *styleValue;
         std::string ruleName;
@@ -279,7 +277,7 @@ namespace style {
     }
 
     std::list<StyleBlock *> *
-    NodeToStyleComponentList::createStyleComponents(std::list<std::list<StyleComponentDataList *> *>::const_iterator componentsListIt,
+    NodesToStyleComponents::createStyleComponents(std::list<std::list<StyleComponentDataList *> *>::const_iterator componentsListIt,
                                                     StyleComponentDataList *components, StyleValuesMap *appliedStyleMap) {
 
         if (components == nullptr) return nullptr;
@@ -314,7 +312,7 @@ namespace style {
         return styleComponentList;
     }
 
-    int NodeToStyleComponentList::computeRuleSpecifity(StyleComponentDataList *ruleComponents) {
+    int NodesToStyleComponents::computeRuleSpecifity(StyleComponentDataList *ruleComponents) {
         int specificity = 0;
         for (std::pair<StyleComponentData, StyleRelation> component : *ruleComponents) {
             switch (component.first.second) {
@@ -335,7 +333,7 @@ namespace style {
         return specificity;
     }
 
-    void NodeToStyleComponentList::convertStyleBlock(int fileNumber, int *ruleNumber) {
+    void NodesToStyleComponents::convertStyleBlock(int fileNumber, int *ruleNumber) {
         std::list<StyleComponentDataList *> *styleComponentsLists;
         if (tree == nullptr || tree->getToken() != Token::StyleBlock) return;
         tree = tree->getChild();
@@ -369,7 +367,7 @@ namespace style {
         }
     }
 
-    std::list<StyleBlock *> *NodeToStyleComponentList::convert(Node *styleTree, int fileNumber, int *ruleNumber) {
+    std::list<StyleBlock *> *NodesToStyleComponents::convert(Node *styleTree, int fileNumber, int *ruleNumber) {
         *ruleNumber = 0;
         if (styleTree->getToken() != Token::NullRoot) return nullptr;
         styleDefinitions = new std::list<StyleBlock *>();

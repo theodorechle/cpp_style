@@ -1,18 +1,19 @@
 #ifndef STYLE_NODE_HPP
 #define STYLE_NODE_HPP
 
+#include "../../cpp_commons/src/node.hpp"
 #include "../style/style_component.hpp"
 #include <algorithm>
 #include <set>
 #include <unordered_map>
 
-namespace gui {
+namespace style {
     namespace elementStyle {
 
-        typedef std::list<style::StyleRule> StyleRules;
+        typedef std::list<StyleRule> StyleRules;
         typedef std::unordered_map<std::string, StyleRules> AppliedStyleMap;
 
-        class StyleNode {
+        class StyleNode : public commons::Node<StyleNode> {
             AppliedStyleMap style = {};
             /**
              * key:
@@ -24,27 +25,16 @@ namespace gui {
              *   second: ruleNumber
              */
             std::unordered_map<std::string, std::pair<bool, std::list<std::pair<int, int>>>> modifiers = {};
-            std::set<style::StyleComponentData> selectors = {};
-            StyleNode *parent = nullptr;
-            StyleNode *child = nullptr;
-            StyleNode *next = nullptr;
+            std::set<StyleComponentData> selectors = {};
 
             std::string fontsPath = "/";
 
-            static bool compareRulesPriorityDescending(style::StyleRule rule1, style::StyleRule rule2); // TODO: take as references
-            static bool compareRulesPriorityAscending(style::StyleRule rule1, style::StyleRule rule2);
-            void setParent(StyleNode *parent) { this->parent = parent; }
-            style::StyleRule *findRule(int fileNumber, int ruleNumber);
-            const style::StyleRule *findRule(int fileNumber, int ruleNumber) const;
+            static bool compareRulesPriorityDescending(StyleRule rule1, StyleRule rule2); // TODO: take as references
+            static bool compareRulesPriorityAscending(StyleRule rule1, StyleRule rule2);
+            StyleRule *findRule(int fileNumber, int ruleNumber);
+            const StyleRule *findRule(int fileNumber, int ruleNumber) const;
 
         public:
-            virtual ~StyleNode();
-            StyleNode *getParent() { return parent; }
-            void addChild(StyleNode *child);
-            StyleNode *getChild() { return child; }
-            void removeChilds() { child = nullptr; }
-            void setNext(StyleNode *next) { this->next = next; }
-            StyleNode *getNext() { return next; }
             void setStyle(const AppliedStyleMap &style) { this->style = style; }
             void addStyle(AppliedStyleMap &newStyle);
             const AppliedStyleMap &getStyle() const;
@@ -67,8 +57,7 @@ namespace gui {
              * If canInherit is true and rule is not found, tries to search in parents style.
              * If no defaultStyle is given, returns false if no value were found.
              */
-            bool getRule(const std::string &ruleName, style::StyleValue **ruleValue, bool canInherit = false,
-                         style::StyleValue *defaultStyle = nullptr) const;
+            bool getRule(const std::string &ruleName, StyleValue **ruleValue, bool canInherit = false, StyleValue *defaultStyle = nullptr) const;
             /**
              * Set the value in the ruleValue parameter.
              * Returns true if found or default value is returned.
@@ -78,12 +67,12 @@ namespace gui {
              * Return the value with biggest specificity among all matching rules.
              * If two values have same specificity, first in the rulesNames list will be prioritized.
              */
-            bool getRule(const std::vector<std::string> &ruleNames, style::StyleValue **ruleValue, bool canInherit = false,
-                         style::StyleValue *defaultStyle = nullptr) const;
+            bool getRule(const std::vector<std::string> &ruleNames, StyleValue **ruleValue, bool canInherit = false,
+                         StyleValue *defaultStyle = nullptr) const;
             bool ruleExists(const std::string &ruleName) const;
             bool ruleExists(int fileNumber, int ruleNumber) const;
-            const std::set<style::StyleComponentData> *getSelectors() { return &selectors; }
-            void addSelector(std::string selectorName, style::StyleComponentType selectorType);
+            const std::set<StyleComponentData> *getSelectors() { return &selectors; }
+            void addSelector(std::string selectorName, StyleComponentType selectorType);
             void addModifier(std::string modifierName);
             void setModifierState(std::string modifierName, bool enabled);
             void deactivateAllModifiers();
@@ -96,6 +85,6 @@ namespace gui {
         };
 
     } // namespace elementStyle
-} // namespace gui
+} // namespace style
 
 #endif // STYLE_NODE_HPP

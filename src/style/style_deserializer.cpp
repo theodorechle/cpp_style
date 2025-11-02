@@ -2,7 +2,7 @@
 
 namespace style {
 
-    std::list<StyleBlock *> *StyleDeserializer::deserializeFromFile(const std::string &fileName, int fileNumber, int *ruleNumber) {
+    std::list<StyleBlock *> *StyleDeserializer::deserializeFromFile(const std::string &fileName, int fileNumber, int *ruleNumber, const Config *config) {
         std::ifstream file(fileName);
         std::stringstream buffer;
         if (!file.is_open()) {
@@ -11,17 +11,17 @@ namespace style {
         }
         buffer << file.rdbuf();
 
-        return deserialize(buffer.str(), fileNumber, ruleNumber);
+        return deserialize(buffer.str(), fileNumber, ruleNumber, config);
     }
 
-    std::list<StyleBlock *> *StyleDeserializer::deserialize(const std::string &style, int fileNumber, int *ruleNumber) {
+    std::list<StyleBlock *> *StyleDeserializer::deserialize(const std::string &style, int fileNumber, int *ruleNumber, const Config *config) {
         std::list<StyleBlock *> *deserializedStyle = nullptr;
         Node *tokens = nullptr;
         Node *result = nullptr;
         try {
-            tokens = Lexer(style).getResult();
+            tokens = Lexer(config, style).getResult();
             result = Parser(tokens).getFinalTree();
-            deserializedStyle = NodeToStyleComponentList().convert(result, fileNumber, ruleNumber);
+            deserializedStyle = NodesToStyleComponents(config).convert(result, fileNumber, ruleNumber);
         }
         catch (const ParserException &) {
             delete tokens;

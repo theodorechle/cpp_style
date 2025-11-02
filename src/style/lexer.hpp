@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "abstract_configuration.hpp"
 #include "node.hpp"
 
 constexpr int MAX_ERROR_COMPLEMENTARY_INFOS_SIZE = 20;
@@ -46,13 +47,14 @@ namespace style {
     class Lexer {
         bool lexed;
         size_t index = 0;
+        const Config *config;
         const std::string &expression;
         size_t expressionLength;
         Node *firstNode = new Node(Token::NullRoot);
         Node *parsedTree = firstNode;
 
     public:
-        Lexer(const std::string &expression) : expression{expression}, expressionLength{expression.length()} {
+        Lexer(const Config *config, const std::string &expression) : config{config}, expression{expression}, expressionLength{expression.length()} {
             lexe();
         };
         void lexe();
@@ -66,7 +68,7 @@ namespace style {
         void lexeInt();
         void lexeFloat();
         void lexeBool();
-        Token getUnit(int expressionIndex, int *size);
+        std::string getUnit(int expressionIndex, int *size);
         void lexeUnit();
         void lexeReservedCharacters();
         Node *getResult() { return firstNode; }

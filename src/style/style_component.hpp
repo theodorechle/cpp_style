@@ -14,7 +14,7 @@ namespace style {
 
     enum class StyleComponentType { StarWildcard, ElementName, Class, Modifier, Identifier, Null };
 
-    enum class StyleValueType { Int, Float, Bool, String, Tuple, Function, PercentageUnit, PixelUnit, Hex, EnumValue, Null };
+    enum class StyleValueType { Int, Float, Bool, String, Tuple, Function, Unit, Hex, EnumValue, Null };
 
     enum class StyleRelation { SameElement, DirectParent, AnyParent, Null };
 

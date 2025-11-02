@@ -35,10 +35,8 @@ namespace style {
             return "Tuple";
         case StyleValueType::Function:
             return "Function";
-        case StyleValueType::PercentageUnit:
-            return "PercentageUnit";
-        case StyleValueType::PixelUnit:
-            return "PixelUnit";
+        case StyleValueType::Unit:
+            return "Unit";
         case StyleValueType::Hex:
             return "Hex";
         case StyleValueType::EnumValue:

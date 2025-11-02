@@ -3,6 +3,7 @@
 
 #include "../../cpp_tests/src/tests.hpp"
 #include "../../src/style/style_deserializer.hpp"
+#include "../style_config.hpp"
 
 namespace styleDeserializationTests {
     test::Result checkStyleComponentDataList(const style::StyleComponentDataList *testedData, const style::StyleComponentDataList *expectedData);

@@ -1,3 +1,6 @@
 [submodule "cpp_tests"]
 	path = cpp_tests
 	url = https://github.com/theodorechle/cpp_tests
+[submodule "cpp_commons"]
+	path = cpp_commons
+	url = https://github.com/theodorechle/cpp_commons

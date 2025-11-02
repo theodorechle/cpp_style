@@ -141,7 +141,7 @@ namespace styleDeserializationTests {
         std::list<style::StyleBlock *> *styleBlocks;
         test::Result result;
         std::cout << "Tested style file:\n" << fileName << "\n";
-        styleBlocks = style::StyleDeserializer::deserializeFromFile(fileName, fileNumber, &ruleNumber);
+        styleBlocks = style::StyleDeserializer::deserializeFromFile(fileName, fileNumber, &ruleNumber, &guiStyleConfig);
         result = checkStyleBlocks(styleBlocks, expectedStyleBlocks);
 
         for (style::StyleBlock *component : *styleBlocks) {
@@ -157,7 +157,7 @@ namespace styleDeserializationTests {
         std::list<style::StyleBlock *> *styleBlocks;
         test::Result result;
         std::cout << "Tested style:\n" << style << "\n";
-        styleBlocks = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber);
+        styleBlocks = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber, &guiStyleConfig);
         result = checkStyleBlocks(styleBlocks, expectedStyleBlocks);
 
         for (style::StyleBlock *component : *styleBlocks) {
@@ -175,7 +175,7 @@ namespace styleDeserializationTests {
         std::list<style::StyleBlock *> *styleBlocks;
         std::cout << "Tested style:\n" << style << "\n";
         try {
-            styleBlocks = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber);
+            styleBlocks = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber, &guiStyleConfig);
             result = test::Result::FAILURE;
 
             for (style::StyleBlock *component : *styleBlocks) {
@@ -272,7 +272,7 @@ namespace styleDeserializationTests {
         test::Result result;
 
         expectedData.push_back(std::pair(std::pair("label", style::StyleComponentType::ElementName), style::StyleRelation::SameElement));
-        styleValue = new style::StyleValue("", style::StyleValueType::PixelUnit);
+        styleValue = new style::StyleValue("px", style::StyleValueType::Unit);
         style::StyleValue *styleValue2 = new style::StyleValue("100", style::StyleValueType::Int);
         styleValue->setChild(styleValue2);
         expectedStyleMap["padding"] = style::StyleRule{styleValue, true, 1, 0, 0};
@@ -294,7 +294,7 @@ namespace styleDeserializationTests {
         test::Result result;
 
         expectedData.push_back(std::pair(std::pair("hovered", style::StyleComponentType::Modifier), style::StyleRelation::SameElement));
-        styleValue = new style::StyleValue("", style::StyleValueType::PixelUnit);
+        styleValue = new style::StyleValue("px", style::StyleValueType::Unit);
         style::StyleValue *styleValue2 = new style::StyleValue("100", style::StyleValueType::Int);
         styleValue->setChild(styleValue2);
         expectedStyleMap["padding"] = style::StyleRule{styleValue, true, 10, 0, 0};
