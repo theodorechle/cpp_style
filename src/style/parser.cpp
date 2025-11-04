@@ -119,7 +119,7 @@ namespace style {
                 expressionTreeRoot->display(std::cerr);
                 std::cerr << "\n";
 #endif
-                currentNode = currentNode->getNext();
+                currentNode = currentNode->next();
             }
             removeWhiteSpaces();
 #ifdef DEBUG
@@ -140,7 +140,7 @@ namespace style {
     void Parser::parseSpace() {
         Node *lastChild;
         if (parsedTree->getToken() == Token::Declaration) {
-            if (parsedTree->getNbChilds() > 0) {
+            if (parsedTree->nbChilds() > 0) {
                 lastChild = parsedTree->getLastChild();
                 if (lastChild == nullptr || !isComponentRelation(lastChild->getToken())) parsedTree->appendChild(new Node(Token::AnyParent));
             }
@@ -175,7 +175,7 @@ namespace style {
             parsedTree->appendChild(currentNode->copyNode());
         }
         else {
-            if (parsedTree->getNbChilds() > 1) throw MalformedExpression("Can only have one rvalue in an assignment");
+            if (parsedTree->nbChilds() > 1) throw MalformedExpression("Can only have one rvalue in an assignment");
             parsedTree->appendChild(currentNode->copyNode());
         }
     }
@@ -187,7 +187,7 @@ namespace style {
             parsedTree->appendChild(new Node(Token::ArgSeparator));
             break;
         case Token::Declaration:
-            parsedTree = parsedTree->getParent()->appendChild(new Node(Token::Declaration));
+            parsedTree = parsedTree->parent()->appendChild(new Node(Token::Declaration));
             break;
         default:
             throw MalformedExpression("A comma must separate blocks definitions or be inside of a tuple");
@@ -206,8 +206,8 @@ namespace style {
             parsedTree->replaceChild(lastChild, newChild);
             parsedTree = newChild;
         }
-        else if (currentNode->getNext()->getToken() == Token::RawName) {
-            currentNode = currentNode->getNext();
+        else if (currentNode->next()->getToken() == Token::RawName) {
+            currentNode = currentNode->next();
             parseModifier();
         }
         else throw MalformedExpression("A colon must be inside of a style block");
@@ -215,15 +215,15 @@ namespace style {
 
     void Parser::parseSemiColon() {
         removeSpace();
-        if ((parsedTree->getToken() == Token::Assignment && parsedTree->getNbChilds() > 1) || parsedTree->getToken() == Token::Import)
-            parsedTree = parsedTree->getParent();
+        if ((parsedTree->getToken() == Token::Assignment && parsedTree->nbChilds() > 1) || parsedTree->getToken() == Token::Import)
+            parsedTree = parsedTree->parent();
         else throw MalformedExpression("A semi-colon must be at the end of an assignment");
     }
 
     void Parser::parseSharp() {
         Node *lastChild;
         removeSpace();
-        currentNode = currentNode->getNext();
+        currentNode = currentNode->next();
         if (parsedTree->getToken() != Token::Assignment) {
             if (parsedTree->getToken() != Token::Tuple && parsedTree->getToken() != Token::Function) {
                 parseIdentifier();
@@ -240,15 +240,15 @@ namespace style {
         }
         else {
             if (currentNode->getToken() != Token::RawName && currentNode->getToken() != Token::Int) return;
-            if (parsedTree->getNbChilds() > 1) throw MalformedExpression("Can only have one rvalue in an assignment");
+            if (parsedTree->nbChilds() > 1) throw MalformedExpression("Can only have one rvalue in an assignment");
             parsedTree->appendChild(new Node{Token::Hex, currentNode->getValue()});
         }
     }
 
     void Parser::parseDot() {
         removeSpace();
-        if (currentNode->getNext()->getToken() == Token::RawName) {
-            currentNode = currentNode->getNext();
+        if (currentNode->next()->getToken() == Token::RawName) {
+            currentNode = currentNode->next();
             parseClass();
         }
         else throw MalformedExpression("Illegal '.' placement");
@@ -295,7 +295,7 @@ namespace style {
 
     void Parser::parseAt() {
         if (parsedTree->getToken() != Token::NullRoot) throw MalformedExpression("A '@' (at) token must be on the root level");
-        currentNode = currentNode->getNext();
+        currentNode = currentNode->next();
         if (currentNode == nullptr) throw MalformedExpression("A '@' (at) token must not be alone");
         if (currentNode->getToken() == Token::RawName && currentNode->getValue() == "import")
             parsedTree = parsedTree->appendChild(new Node{Token::Import});
@@ -372,7 +372,7 @@ namespace style {
 
         Node *lastChild;
         if (parsedTree->getToken() == Token::Assignment) {
-            if (parsedTree->getNbChilds() > 1) {
+            if (parsedTree->nbChilds() > 1) {
                 lastChild = parsedTree->getLastChild();
                 if (lastChild != nullptr && lastChild->getToken() == Token::Name) {
                     parsedTree->replaceChild(lastChild, new Node{Token::Function, lastChild->getValue()});
@@ -403,7 +403,7 @@ namespace style {
 
         if (parsedTree->getToken() != Token::Function && parsedTree->getToken() != Token::Tuple)
             throw MissingToken("A closing parenthesis ')' needs an opening parenthesis '('");
-        parsedTree = parsedTree->getParent();
+        parsedTree = parsedTree->parent();
     }
 
     void Parser::parseOpeningCurlyBracket() {
@@ -430,7 +430,7 @@ namespace style {
                              ->appendChild(new Node(Token::Declaration));
             parsedTree->appendChild(lastChildCopy);
         }
-        parsedTree = parsedTree->getParent()->getParent()->appendChild(new Node(Token::BlockDefinition));
+        parsedTree = parsedTree->parent()->parent()->appendChild(new Node(Token::BlockDefinition));
     }
 
     void Parser::parseClosingCurlyBracket() {
@@ -441,7 +441,7 @@ namespace style {
             throw MalformedExpression("A block definition must only contains assgnments and other blocks");
         else if (parsedTree->getToken() != Token::BlockDefinition)
             throw MissingToken("A closing curly bracket '}' needs an opening curly bracket '{'");
-        parsedTree = parsedTree->getParent()->getParent();
+        parsedTree = parsedTree->parent()->parent();
     }
 
     void Parser::parseRawName() {
@@ -449,7 +449,7 @@ namespace style {
         if (parsedTree->getToken() == Token::Assignment) {
             removeSpace();
 
-            if (parsedTree->getNbChilds() != 1) throw MalformedExpression("Can only have one rvalue in an assignment");
+            if (parsedTree->nbChilds() != 1) throw MalformedExpression("Can only have one rvalue in an assignment");
             parsedTree->appendChild(new Node{Token::EnumValue, currentNode->getValue()});
         }
         else if (parsedTree->getToken() == Token::Tuple || parsedTree->getToken() == Token::Function) {
@@ -457,7 +457,7 @@ namespace style {
 
             //FIXME: wtf? With that, `test-rule: (aaa, bbb, ccc);` doesn't work.
             // But, can tuples have enums inside?
-            if (parsedTree->getNbChilds() != 1) throw MalformedExpression("Can only have one rvalue in an assignment");
+            if (parsedTree->nbChilds() != 1) throw MalformedExpression("Can only have one rvalue in an assignment");
             lastChild = parsedTree->getLastChild();
             if (lastChild != nullptr && lastChild->getToken() != Token::ArgSeparator)
                 throw MalformedExpression("The elements in a tuple or the parameters of a function must be comma separated");
@@ -503,7 +503,7 @@ namespace style {
         if (token == Token::Assignment) {
             removeSpace();
 
-            if (parsedTree->getNbChilds() > 1) throw MalformedExpression("A string|function must be the only right value of an assignment");
+            if (parsedTree->nbChilds() > 1) throw MalformedExpression("A string|function must be the only right value of an assignment");
             parsedTree->appendChild(new Node{Token::Name, currentNode->getValue()});
             return;
         }

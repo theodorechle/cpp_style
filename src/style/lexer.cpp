@@ -207,11 +207,11 @@ namespace style {
 #ifdef DEBUG
             std::cerr << tokenToString(parsedTree->getToken()) << ": '" << parsedTree->getValue() << "'\n";
 #endif
-            parsedTree = parsedTree->getNext();
+            parsedTree = parsedTree->next();
         }
         // remove the NullRoot token at the start
-        Node *nextList = firstNode->getNext();
-        firstNode->setNext(nullptr);
+        Node *nextList = firstNode->next();
+        firstNode->next(nullptr);
         delete firstNode;
         firstNode = nextList;
     }

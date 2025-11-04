@@ -4,39 +4,30 @@
 #include <iostream>
 #include <string>
 
+#include "../../cpp_commons/src/node.hpp"
 #include "tokens.hpp"
 
 namespace style {
 
-    class Node {
+    class Node : public commons::Node<Node> {
         Token type;
         std::string value;
-        Node *next = nullptr;
-        Node *child = nullptr;
-        Node *parent;
         void displayTree(std::ostream &flow = std::cout, int level = 0) const;
 
     public:
-        Node(Token type = Token::Empty, std::string value = "", Node *parent = nullptr) : type{type}, value{value}, parent{parent} {};
-        virtual ~Node();
+        Node(Token type = Token::Empty, std::string value = "", Node *parentNode = nullptr) : type{type}, value{value} { parent(parentNode); };
         virtual void setValue(const std::string &s) { value = s; };
         virtual const std::string &getValue() const { return value; };
         void setToken(const Token &t) { type = t; };
         const Token &getToken() const { return type; };
-        Node *getParent() const { return parent; };
         /**
          *Set parent for the node and the nexts nodes
          */
         void setParent(Node *parent);
-        Node *getNext() const { return next; };
-        void setNext(Node *n) { next = n; };
-        void removeNext() { setNext(nullptr); };
-        Node *getChild() const { return child; };
-        Node *getLastChild() const;
-        Node *getSpecificChild(int childNumber) const;
-        int getNbChilds() const;
+        Node *getLastChild();
+        Node *getSpecificChild(int childNumber);
         /*Set the child pointer*/
-        void setChild(Node *child);
+        void setChild(Node *childNode);
         void removeFirstChild() { setChild(nullptr); };
         void removeSpecificChild(Node *child);
         void deleteSpecificChild(Node *child);
