@@ -6,9 +6,9 @@
 namespace style {
 
     Node *Node::copyNode() const {
-        Node *n = createNewNode();
-        n->setToken(getToken());
-        n->setValue(getValue());
+        Node *n = new Node;
+        n->token(token());
+        n->value(value());
         return n;
     }
 
@@ -32,7 +32,7 @@ namespace style {
     void Node::displayTree(std::ostream &flow, int level) const {
         for (int i = 0; i < level; i++)
             flow << "\t";
-        flow << getValue() << " (" << getToken() << ")\n";
+        flow << value() << " (" << token() << ")\n";
         const Node *childNode = child();
         while (childNode != nullptr) {
             childNode->displayTree(flow, level + 1);
@@ -45,7 +45,7 @@ namespace style {
     void Node::displayNexts(std::ostream &flow) const {
         const Node *next = this;
         while (next != nullptr) {
-            flow << next->getValue() << " (" << next->getToken() << ")\n";
+            flow << next->value() << " (" << next->token() << ")\n";
             next = next->next();
         }
     }
@@ -120,24 +120,12 @@ namespace style {
         return next;
     }
 
-    Node *Node::appendChild(Node *childNode) {
-        Node *c = child();
-        if (c == nullptr) setChild(childNode);
-        else c->appendNext(childNode);
-        return childNode;
-    }
-
-    Node *Node::addEmptyChild() {
-        Node *child = new Node();
-        return appendChild(child);
-    }
-
     void Node::replaceData(Node *tree) {
         if (tree == nullptr) return;
         tree = tree->copyNodeWithChildsAndNexts();
         // copy node
-        setValue(tree->getValue());
-        setToken(tree->getToken());
+        value(tree->value());
+        token(tree->token());
         // replace child
         delete child();
         setChild(tree->child());
@@ -186,7 +174,7 @@ namespace style {
     }
 
     bool areSameNodes(const Node *node1, const Node *node2) {
-        if (*node1 != *node2) return false; // works because != is overrided
+        if (*node1 != *node2) return false; // works because != is overriden
         if (node1->nbChilds() != node2->nbChilds()) return false;
         const Node *child1 = node1->child();
         const Node *child2 = node2->child();
@@ -208,10 +196,10 @@ namespace style {
         node->setParent(nullptr);
     }
 
-    bool isNodeNull(Node *node) { return (node == nullptr || node->getToken() == Token::NullRoot); }
+    bool isNodeNull(Node *node) { return (node == nullptr || node->token() == Token::NullRoot); }
 
-    bool operator==(const Node &n1, const Node &n2) { return (n1.getValue() == n2.getValue() && n1.getToken() == n2.getToken()); }
+    bool operator==(const Node &n1, const Node &n2) { return (n1.value() == n2.value() && n1.token() == n2.token()); }
 
-    bool operator!=(const Node &n1, const Node &n2) { return (n1.getValue() != n2.getValue() || n1.getToken() != n2.getToken()); }
+    bool operator!=(const Node &n1, const Node &n2) { return (n1.value() != n2.value() || n1.token() != n2.token()); }
 
 } // namespace style

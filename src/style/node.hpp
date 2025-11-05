@@ -10,16 +10,16 @@
 namespace style {
 
     class Node : public commons::Node<Node> {
-        Token type;
-        std::string value;
+        Token _type;
+        std::string _value;
         void displayTree(std::ostream &flow = std::cout, int level = 0) const;
 
     public:
-        Node(Token type = Token::Empty, std::string value = "", Node *parentNode = nullptr) : type{type}, value{value} { parent(parentNode); };
-        virtual void setValue(const std::string &s) { value = s; };
-        virtual const std::string &getValue() const { return value; };
-        void setToken(const Token &t) { type = t; };
-        const Token &getToken() const { return type; };
+        Node(Token type = Token::Empty, std::string value = "", Node *parentNode = nullptr) : _type{type}, _value{value} { parent(parentNode); };
+        virtual void value(const std::string &value) { _value = value; };
+        virtual const std::string &value() const { return _value; };
+        void token(const Token &type) { _type = type; };
+        const Token &token() const { return _type; };
         /**
          *Set parent for the node and the nexts nodes
          */
@@ -32,11 +32,6 @@ namespace style {
         void removeSpecificChild(Node *child);
         void deleteSpecificChild(Node *child);
         Node *appendNext(Node *next);
-        /**add a child at the end of them
-         *Return the child
-         */
-        Node *appendChild(Node *child);
-        Node *addEmptyChild();
 
         /**
             *Replace the data of the node (value, type, childs and nexts)
@@ -46,7 +41,6 @@ namespace style {
         void replaceData(Node *tree);
         void replaceChild(Node *child, Node *newChild);
 
-        virtual Node *createNewNode() const { return new Node; }
         Node *copyNode() const;
         Node *copyNodeWithChilds() const;
         Node *copyNodeWithChildsAndNexts() const;

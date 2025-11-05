@@ -19,7 +19,7 @@ namespace style {
 
     class UnknownToken : public ParserException {
     public:
-        UnknownToken(const Node &token) : ParserException{"Unknown token: \"" + token.getValue() + " (" + tokenToString(token.getToken()) + ")\""} {};
+        UnknownToken(const Node &token) : ParserException{"Unknown token: \"" + token.value() + " (" + tokenToString(token.token()) + ")\""} {};
     };
 
     class MissingToken : public ParserException {
