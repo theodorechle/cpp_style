@@ -5,6 +5,8 @@
 
 namespace style {
 
+    std::string Node::debugValue() const { return _value + " (" + tokenToString(_token) + ")"; };
+
     Node *Node::copyNode() const {
         Node *n = new Node;
         n->token(token());
@@ -28,19 +30,6 @@ namespace style {
         if (nextNode != nullptr) n->next(nextNode->copyNodeWithChildsAndNexts());
         return n;
     }
-
-    void Node::displayTree(std::ostream &flow, int level) const {
-        for (int i = 0; i < level; i++)
-            flow << "\t";
-        flow << value() << " (" << token() << ")\n";
-        const Node *childNode = child();
-        while (childNode != nullptr) {
-            childNode->displayTree(flow, level + 1);
-            childNode = childNode->next();
-        }
-    }
-
-    void Node::display(std::ostream &flow) const { displayTree(flow, 0); }
 
     void Node::displayNexts(std::ostream &flow) const {
         const Node *next = this;
@@ -184,16 +173,6 @@ namespace style {
             child2 = child2->next();
         }
         return true;
-    }
-
-    bool areSameNodes(const Node &node1, const Node &node2) { return areSameNodes(&node1, &node2); }
-
-    void deleteNullRoot(Node *node) {
-        node = root(node);
-        if (node->parent() == nullptr) return;
-        node->parent()->setChild(nullptr);
-        delete node->parent();
-        node->setParent(nullptr);
     }
 
     bool isNodeNull(Node *node) { return (node == nullptr || node->token() == Token::NullRoot); }

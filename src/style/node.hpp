@@ -1,7 +1,6 @@
 #ifndef NODE_HPP
 #define NODE_HPP
 
-#include <iostream>
 #include <string>
 
 #include "../../cpp_commons/src/node.hpp"
@@ -10,16 +9,15 @@
 namespace style {
 
     class Node : public commons::Node<Node> {
-        Token _type;
+        Token _token;
         std::string _value;
-        void displayTree(std::ostream &flow = std::cout, int level = 0) const;
-
+        std::string debugValue() const override;
     public:
-        Node(Token type = Token::Empty, std::string value = "", Node *parentNode = nullptr) : _type{type}, _value{value} { parent(parentNode); };
-        virtual void value(const std::string &value) { _value = value; };
-        virtual const std::string &value() const { return _value; };
-        void token(const Token &type) { _type = type; };
-        const Token &token() const { return _type; };
+        Node(Token token = Token::Empty, std::string value = "", Node *parentNode = nullptr) : _token{token}, _value{value} { parent(parentNode); };
+        void value(const std::string &value) { _value = value; };
+        const std::string &value() const { return _value; };
+        void token(const Token &token) { _token = token; };
+        const Token &token() const { return _token; };
         /**
          *Set parent for the node and the nexts nodes
          */
@@ -34,7 +32,7 @@ namespace style {
         Node *appendNext(Node *next);
 
         /**
-            *Replace the data of the node (value, type, childs and nexts)
+            *Replace the data of the node (value, token, childs and nexts)
             *by the ones of the given tree.
             Delete the last childs
         */
@@ -44,7 +42,6 @@ namespace style {
         Node *copyNode() const;
         Node *copyNodeWithChilds() const;
         Node *copyNodeWithChildsAndNexts() const;
-        void display(std::ostream &flow = std::cout) const;
         void displayNexts(std::ostream &flow = std::cout) const;
 
         friend bool operator==(const Node &, const Node &);
@@ -57,9 +54,6 @@ namespace style {
     Node *root(Node *node);
 
     bool areSameNodes(const Node *node1, const Node *node2);
-    bool areSameNodes(const Node &node1, const Node &node2);
-
-    void deleteNullRoot(Node *node);
 
     bool isNodeNull(Node *node);
 

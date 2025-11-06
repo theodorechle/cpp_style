@@ -39,7 +39,7 @@ namespace styleTestsLexerAndParser {
         expr->displayNexts(std::cout);
         if (equal) std::cout << "equals to\n";
         else std::cout << "differs from\n";
-        expr->display(std::cout);
+        expr->debugDisplay(std::cout);
         std::cout << ":\n";
         try {
             style::Node *result = style::Parser(expr).getFinalTree();
@@ -60,7 +60,7 @@ namespace styleTestsLexerAndParser {
         std::cout << "Test if lexing and parsing\n'\n" << expr << "\n'\n";
         if (equal) std::cout << "equals to\n";
         else std::cout << "differs from\n";
-        expected->display(std::cout);
+        expected->debugDisplay(std::cout);
         std::cout << ":\n";
         try {
             style::Node *tokens = style::Lexer(&guiStyleConfig, expr).getResult();
@@ -89,7 +89,7 @@ namespace styleTestsLexerAndParser {
         try {
             tokens = style::Lexer(&guiStyleConfig, expression).getResult();
 #ifdef DEBUG
-            tokens->display();
+            tokens->debugDisplay();
 #endif
             testResult = test::Result::FAILURE;
         }
