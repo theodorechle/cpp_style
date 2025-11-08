@@ -326,18 +326,18 @@ namespace styleDeserializationTests {
     void testsDeserialization(test::Tests *tests) {
         tests->beginTestBlock("Deserialization tests");
 
-        tests->runTest(testSingleRule, "deserializing a single rule");
-        tests->runTest(testDirectParent, "direct parent");
-        tests->runTest(testDirectParentWithoutSpacesAround, "direct parent without spaces");
-        tests->runTest(testRuleNameAndValueStickedToAssignmentColon, "style name and value sticked to the assignment colon");
-        tests->runTest(testMissingSemiColonAfterAssignment, "missing semi-colon after assignment");
-        tests->runTest(testMissingStyleValue, "missing style value");
-        tests->runTest(testMissingRuleName, "missing style name");
-        tests->runTest(testMissingRuleNameAndValue, "missing style name and value");
-        tests->runTest(testMissingBlockDeclaration, "missing block declaration");
-        tests->runTest(testMissingBlockDeclarationComponentBeforeDirectParentRelation,
+        tests->addTest(testSingleRule, "deserializing a single rule");
+        tests->addTest(testDirectParent, "direct parent");
+        tests->addTest(testDirectParentWithoutSpacesAround, "direct parent without spaces");
+        tests->addTest(testRuleNameAndValueStickedToAssignmentColon, "style name and value sticked to the assignment colon");
+        tests->addTest(testMissingSemiColonAfterAssignment, "missing semi-colon after assignment");
+        tests->addTest(testMissingStyleValue, "missing style value");
+        tests->addTest(testMissingRuleName, "missing style name");
+        tests->addTest(testMissingRuleNameAndValue, "missing style name and value");
+        tests->addTest(testMissingBlockDeclaration, "missing block declaration");
+        tests->addTest(testMissingBlockDeclarationComponentBeforeDirectParentRelation,
                        "missing block declaration component before direct parent relation");
-        tests->runTest(testGlobalModifier, "global modifier");
+        tests->addTest(testGlobalModifier, "global modifier");
         tests->endTestBlock();
     }
 

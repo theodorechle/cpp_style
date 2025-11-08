@@ -4,11 +4,10 @@
 
 int main() {
     test::Tests tests = test::Tests();
-    tests.start();
     styleTestsLexerAndParser::testsLexerAndParser(&tests);
     styleDeserializationTests::testsDeserialization(&tests);
     styleNodesTests::testsStyleNodes(&tests);
-    tests.stop();
+    tests.runTests();
     tests.displaySummary();
     return !tests.allTestsPassed();
 }
