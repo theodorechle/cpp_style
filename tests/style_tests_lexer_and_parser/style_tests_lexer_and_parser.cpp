@@ -551,7 +551,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition))->addChild(new style::Node(style::Token::Assignment));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "b"));
         expected->addChild(new style::Node(style::Token::Hex, "a"));
         result = testLexerAndParser(true, "a {b: #a;}", rootExpected);
@@ -569,7 +569,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition))->addChild(new style::Node(style::Token::Assignment));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "b"));
         expected->addChild(new style::Node(style::Token::Hex, "abcdef"));
         result = testLexerAndParser(true, "a {b: #abcdef;}", rootExpected);
@@ -587,7 +587,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition))->addChild(new style::Node(style::Token::Assignment));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "b"));
         expected->addChild(new style::Node(style::Token::Hex, "000000"));
         result = testLexerAndParser(true, "a {b: #000000;}", rootExpected);
@@ -605,7 +605,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition))->addChild(new style::Node(style::Token::Assignment));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "b"));
         expected->addChild(new style::Node(style::Token::Int, "1"));
         result = testLexerAndParser(true, "a {b: 1;}", rootExpected);
@@ -623,7 +623,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition))->addChild(new style::Node(style::Token::Assignment));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "b"));
         expected->addChild(new style::Node(style::Token::Int, "123456"));
         result = testLexerAndParser(true, "a {b: 123456;}", rootExpected);
@@ -641,7 +641,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition))->addChild(new style::Node(style::Token::Assignment));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "b"));
         expected->addChild(new style::Node(style::Token::Tuple));
         result = testLexerAndParser(true, "a {b: ();}", rootExpected);
@@ -659,7 +659,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition))->addChild(new style::Node(style::Token::Assignment));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "b"));
         expected = expected->addChild(new style::Node(style::Token::Tuple));
         expected->addChild(new style::Node(style::Token::Int, "1"));
@@ -702,7 +702,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "a {}", rootExpected);
         delete rootExpected;
         return result;
@@ -717,7 +717,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::Identifier, "a"));
-        expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "#a {}", rootExpected);
         delete rootExpected;
         return result;
@@ -733,7 +733,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::Class, "a"));
-        expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, ".a {}", rootExpected);
         delete rootExpected;
         return result;
@@ -750,7 +750,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "a"));
         expected->addChild(new style::Node(style::Token::DirectParent));
         expected->addChild(new style::Node(style::Token::ElementName, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "a > b {}", rootExpected);
         delete rootExpected;
         return result;
@@ -767,7 +767,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "a"));
         expected->addChild(new style::Node(style::Token::DirectParent));
         expected->addChild(new style::Node(style::Token::Identifier, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "a > #b {}", rootExpected);
         delete rootExpected;
         return result;
@@ -784,7 +784,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "a"));
         expected->addChild(new style::Node(style::Token::DirectParent));
         expected->addChild(new style::Node(style::Token::Class, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "a > .b {}", rootExpected);
         delete rootExpected;
         return result;
@@ -800,7 +800,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::ElementName, "abc"));
-        expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "abc {}", rootExpected);
         delete rootExpected;
         return result;
@@ -816,7 +816,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::Identifier, "abc"));
-        expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "#abc {}", rootExpected);
         delete rootExpected;
         return result;
@@ -832,7 +832,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::Class, "abc"));
-        expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, ".abc {}", rootExpected);
         delete rootExpected;
         return result;
@@ -849,7 +849,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "a"));
         expected->addChild(new style::Node(style::Token::AnyParent));
         expected->addChild(new style::Node(style::Token::ElementName, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "a b {}", rootExpected);
         delete rootExpected;
         return result;
@@ -866,7 +866,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "a"));
         expected->addChild(new style::Node(style::Token::AnyParent));
         expected->addChild(new style::Node(style::Token::Identifier, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "a #b {}", rootExpected);
         delete rootExpected;
         return result;
@@ -883,7 +883,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "a"));
         expected->addChild(new style::Node(style::Token::AnyParent));
         expected->addChild(new style::Node(style::Token::Class, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "a .b {}", rootExpected);
         delete rootExpected;
         return result;
@@ -900,7 +900,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "a"));
         expected->addChild(new style::Node(style::Token::AnyParent));
         expected->addChild(new style::Node(style::Token::Identifier, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "a#b {}", rootExpected);
         delete rootExpected;
         return result;
@@ -917,7 +917,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "a"));
         expected->addChild(new style::Node(style::Token::AnyParent));
         expected->addChild(new style::Node(style::Token::Class, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockDefinition));
+        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
         result = testLexerAndParser(true, "a.b {}", rootExpected);
         delete rootExpected;
         return result;
@@ -933,7 +933,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "r"));
         expected->addChild(new style::Node(style::Token::Int, "1"));
@@ -955,7 +955,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::BlockDeclaration))
             ->addChild(new style::Node(style::Token::Declaration))
             ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "r"));
         expected->addChild(new style::Node(style::Token::Int, "1"));
@@ -993,7 +993,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::Class, "blue"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
         expected->addChild(new style::Node(style::Token::Hex, "0000ff"));
@@ -1006,7 +1006,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::Modifier, "hovered"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
         expected = expected->addChild(new style::Node(style::Token::Tuple));
@@ -1035,7 +1035,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::Class, "blue"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
         expected->addChild(new style::Node(style::Token::Hex, "0000ff"));
@@ -1046,7 +1046,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::Modifier, "hovered"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
         expected = expected->addChild(new style::Node(style::Token::Tuple));
@@ -1075,7 +1075,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::Class, "blue"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
         expected->addChild(new style::Node(style::Token::Hex, "0000ff"));
@@ -1086,7 +1086,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "element"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
         expected = expected->addChild(new style::Node(style::Token::Tuple));
@@ -1120,7 +1120,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::Identifier, "root"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
         expected->addChild(new style::Node(style::Token::Hex, "0000ff"));
@@ -1131,7 +1131,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "element"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
         expected = expected->addChild(new style::Node(style::Token::Tuple));
@@ -1166,7 +1166,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::Identifier, "root"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
         expected->addChild(new style::Node(style::Token::Hex, "0000ff"));
@@ -1177,7 +1177,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "element"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
         expected = expected->addChild(new style::Node(style::Token::Tuple));
@@ -1205,7 +1205,7 @@ namespace styleTestsLexerAndParser {
         expected->addChild(new style::Node(style::Token::ElementName, "element"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockDefinition));
+        expected = expected->addChild(new style::Node(style::Token::BlockContent));
         expected = expected->addChild(new style::Node(style::Token::Assignment));
         expected->addChild(new style::Node(style::Token::RuleName, "width"));
         expected->addChild(new style::Node(style::Token::Unit, "px"))->addChild(new style::Node(style::Token::Int, "150"));

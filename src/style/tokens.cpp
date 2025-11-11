@@ -46,8 +46,8 @@ namespace style {
             return "BlockDeclaration";
         case Token::Declaration:
             return "Declaration";
-        case Token::BlockDefinition:
-            return "BlockDefinition";
+        case Token::BlockContent:
+            return "BlockContent";
         case Token::DirectParent:
             return "DirectParent";
         case Token::AnyParent:

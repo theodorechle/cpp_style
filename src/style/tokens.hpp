@@ -29,7 +29,7 @@ namespace style {
         StyleBlock,
         BlockDeclaration,
         Declaration,
-        BlockDefinition,
+        BlockContent,
         DirectParent,
         AnyParent,
         SameElement,

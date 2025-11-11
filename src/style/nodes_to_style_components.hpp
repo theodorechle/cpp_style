@@ -29,6 +29,7 @@ namespace style {
         static Node *joinStyleDeclarations(Node *firstDeclarations, Node *secondDeclarations);
         static void moveNestedBlocksToRoot(Node *style);
         void flattenStyle(Node *style);
+        void removeEmptyBlocks(Node *style);
 
         std::list<StyleComponentDataList *> *convertStyleComponents();
 

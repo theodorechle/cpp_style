@@ -79,7 +79,7 @@ namespace style {
     /**
      * A block composed of a list of required components (parent classes, special identifier, ...) and the corresponding style
      */
-    class StyleBlock {
+    class StyleBlock { // TODO: why does this exists? It's just a wrapper around a StyleDefinition
         StyleDefinition *styleDef;
 
     public:

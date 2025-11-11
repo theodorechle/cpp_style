@@ -114,33 +114,33 @@ namespace style {
 
     void NodesToStyleComponents::moveNestedBlocksToRoot(Node *style) {
         Node *blockDeclarations = style->child();
-        Node *definition = blockDeclarations->next()->child();
+        Node *content = blockDeclarations->next()->child();
         Node *nextDeclaration;
 
-        while (definition != nullptr) {
-            if (definition->token() == Token::StyleBlock) {
-                definition->child()->replaceChild(definition->child()->child(),
-                                                     joinStyleDeclarations(blockDeclarations->child(), definition->child()->child()));
-                nextDeclaration = definition->next();
-                definition->parent()->removeSpecificChild(definition);
-                definition->next(style->next());
-                style->next(definition);
-                definition->setParent(style->parent());
-                style = definition;
-                definition = nextDeclaration;
+        while (content != nullptr) {
+            if (content->token() == Token::StyleBlock) {
+                content->child()->replaceChild(content->child()->child(),
+                                               joinStyleDeclarations(blockDeclarations->child(), content->child()->child()));
+                nextDeclaration = content->next();
+                content->parent()->removeSpecificChild(content);
+                content->next(style->next());
+                style->next(content);
+                content->setParent(style->parent());
+                style = content;
+                content = nextDeclaration;
                 continue;
             }
-            definition = definition->next();
+            content = content->next();
         }
     }
 
     void NodesToStyleComponents::flattenStyle(Node *style) {
         if (style == nullptr) return;
-        if (style->token() == Token::NullRoot) style = style->child();
+        style = style->child();
         while (style != nullptr) {
             if (style->token() == Token::StyleBlock) moveNestedBlocksToRoot(style);
             else if (style->token() == Token::Import) {
-                Node *importedStyle = importStyle(style->value());
+                Node *importedStyle = importStyle(style->value()); // refactor with StyleNodesManager
                 if (importedStyle != nullptr) {
                     importedStyle->addChild(style->next());
                     style->next(importedStyle->child());
@@ -152,46 +152,62 @@ namespace style {
         }
     }
 
+    void NodesToStyleComponents::removeEmptyBlocks(Node *style) {
+        if (style == nullptr) return;
+        style = style->child();
+        Node *next;
+        while (style != nullptr) {
+            if (style->getLastChild()->nbChilds() == 0) {
+                next = style->next();
+                style->parent()->removeSpecificChild(style);
+                style = next;
+            }
+            style = style->next();
+        }
+    }
+
     std::list<StyleComponentDataList *> *NodesToStyleComponents::convertStyleComponents() {
         std::list<StyleComponentDataList *> *styleComponentsLists;
         StyleComponentDataList *requiredStyleComponents;
         Node *declaration;
-        Node *componentDeclaration;
+        Node *declarationPart;
         Token nextDeclarationToken;
         StyleComponentType styleComponentType;
         StyleRelation styleRelationToken;
         std::string currentValue;
 
-        if (tree == nullptr || tree->token() != Token::BlockDeclaration) return nullptr;
+        if (tree == nullptr || tree->token() != Token::BlockDeclaration)
+            return nullptr; // TODO: it can't happen if previous steps passed (I think there is a lot of checks who are useless)
 
         styleComponentsLists = new std::list<StyleComponentDataList *>();
         declaration = tree->child();
         // loop through declarations
         while (declaration != nullptr) {
             if (declaration->token() != Token::Declaration) { // invalid block declaration
-                delete styleComponentsLists;
+                delete styleComponentsLists;                  // TODO: how could this even happen?
                 return nullptr;
             }
             requiredStyleComponents = new StyleComponentDataList();
-            componentDeclaration = declaration->child();
+            declarationPart = declaration->child();
             // loop through each value in a declaration
-            while (componentDeclaration != nullptr) {
-                styleComponentType = tokenTypeToStyleComponentType(componentDeclaration->token());
-                currentValue = componentDeclaration->value();
-                componentDeclaration = componentDeclaration->next();
+            while (declarationPart != nullptr) {
+                styleComponentType = tokenTypeToStyleComponentType(declarationPart->token());
+                currentValue = declarationPart->value();
+                declarationPart = declarationPart->next();
 
                 // if invalid declaration, skip it
+                // TODO: how can it happen too?
                 if (styleComponentType == StyleComponentType::Null) continue;
 
-                if (componentDeclaration == nullptr) styleRelationToken = StyleRelation::SameElement; // last value
+                if (declarationPart == nullptr) styleRelationToken = StyleRelation::SameElement; // last value
                 else {
-                    nextDeclarationToken = componentDeclaration->token();
+                    nextDeclarationToken = declarationPart->token();
                     if (tokenTypeToStyleComponentType(nextDeclarationToken) != StyleComponentType::Null) {
                         styleRelationToken = StyleRelation::SameElement;
                     }
                     else {
                         styleRelationToken = tokenTypeToStyleRelation(nextDeclarationToken);
-                        if (styleRelationToken != StyleRelation::Null) componentDeclaration = componentDeclaration->next();
+                        if (styleRelationToken != StyleRelation::Null) declarationPart = declarationPart->next();
                     }
                 }
                 if (styleRelationToken != StyleRelation::Null) {
@@ -237,20 +253,20 @@ namespace style {
         StyleValuesMap *appliedStyleMap;
         StyleValue *styleValue;
         std::string ruleName;
-        Node *definition;
+        Node *rule;
         Node *oldTree;
         Node *ruleNameNode;
         Token token;
-        if (tree == nullptr || tree->token() != Token::BlockDefinition) return nullptr;
+        if (tree == nullptr || tree->token() != Token::BlockContent) return nullptr;
 
         appliedStyleMap = new StyleValuesMap();
-        definition = tree->child();
-        while (definition != nullptr) {
-            token = definition->token();
+        rule = tree->child();
+        while (rule != nullptr) {
+            token = rule->token();
             if (token == Token::Assignment) {
-                ruleNameNode = definition->child();
+                ruleNameNode = rule->child();
                 if (ruleNameNode == nullptr || ruleNameNode->token() != Token::RuleName) {
-                    definition = definition->next();
+                    rule = rule->next();
                     continue;
                 }
                 ruleName = ruleNameNode->value();
@@ -265,12 +281,12 @@ namespace style {
             }
             else if (token == Token::StyleBlock) {
                 oldTree = tree;
-                tree = definition;
+                tree = rule;
                 convertStyleBlock(fileNumber, ruleNumber);
                 tree = oldTree;
             }
-            // if other token type, just don't use the definition
-            definition = definition->next();
+            // if other token type, just don't use it
+            rule = rule->next();
         }
 
         return appliedStyleMap;
@@ -278,14 +294,12 @@ namespace style {
 
     std::list<StyleBlock *> *
     NodesToStyleComponents::createStyleComponents(std::list<std::list<StyleComponentDataList *> *>::const_iterator componentsListIt,
-                                                    StyleComponentDataList *components, StyleValuesMap *appliedStyleMap) {
-
+                                                  StyleComponentDataList *components, StyleValuesMap *appliedStyleMap) {
         if (components == nullptr) return nullptr;
         std::list<StyleBlock *> *styleComponentList = new std::list<StyleBlock *>();
         std::list<StyleBlock *> *tmpStyleComponentList;
         StyleComponentDataList::const_iterator componentsIt;
-        bool islistHead = std::next(componentsListIt) == requiredStyleComponentsLists.cend();
-        if (islistHead) { // if at end of the declaration list
+        if (std::next(componentsListIt) == requiredStyleComponentsLists.cend()) { // if at end of the declaration list
             for (StyleComponentDataList *componentsDataList : **componentsListIt) {
                 componentsIt = std::prev(components->end());
                 std::copy(componentsDataList->begin(), componentsDataList->end(), std::back_inserter(*components));
@@ -294,7 +308,8 @@ namespace style {
                     rule.second.specificity = specificity;
                 }
                 styleComponentList->push_back(new StyleBlock(*components, *appliedStyleMap));
-                components->erase(componentsIt, components->end());
+                if (componentsIt == components->end()) components->clear();
+                else components->erase(componentsIt, components->end());
             }
         }
         else {
@@ -337,6 +352,7 @@ namespace style {
         std::list<StyleComponentDataList *> *styleComponentsLists;
         if (tree == nullptr || tree->token() != Token::StyleBlock) return;
         tree = tree->child();
+
         styleComponentsLists = convertStyleComponents();
         if (styleComponentsLists == nullptr || styleComponentsLists->empty()) {
             delete styleComponentsLists;
@@ -346,15 +362,16 @@ namespace style {
         tree = tree->next();
         StyleValuesMap *appliedStyleMap = convertAppliedStyle(fileNumber, ruleNumber);
         tree = tree->parent();
-        if (appliedStyleMap == nullptr || appliedStyleMap->empty()) {
+        if (appliedStyleMap == nullptr || appliedStyleMap->empty()) { // should be useless since there is now removeEmptyBlocks method
             delete styleComponentsLists;
             delete appliedStyleMap;
             return;
         }
 
-        requiredStyleComponentsLists.push_back(styleComponentsLists);
+        requiredStyleComponentsLists.push_back(styleComponentsLists); // TODO: I think there is one list who is useless
         StyleComponentDataList components = StyleComponentDataList();
         std::list<StyleBlock *> *finalStyleComponents = createStyleComponents(requiredStyleComponentsLists.cbegin(), &components, appliedStyleMap);
+
         delete appliedStyleMap;
         for (StyleComponentDataList *componentDataList : *(requiredStyleComponentsLists.back())) {
             delete componentDataList;
@@ -373,6 +390,7 @@ namespace style {
         styleDefinitions = new std::list<StyleBlock *>();
 
         flattenStyle(styleTree);
+        removeEmptyBlocks(styleTree);
 #ifdef DEBUG
         std::cerr << "flattened style\n";
         styleTree->debugDisplay(std::cerr);

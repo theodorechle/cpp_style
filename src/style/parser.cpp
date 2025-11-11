@@ -150,7 +150,7 @@ namespace style {
 
     void Parser::parseLineBreak() {
         Token token = parsedTree->token();
-        if (token != Token::NullRoot && token != Token::BlockDefinition) {
+        if (token != Token::NullRoot && token != Token::BlockContent) {
             throw MalformedExpression("A line break can only be between blocks declarations or assignments");
         }
         parsedTree->addChild(currentNode->copyNode());
@@ -199,7 +199,7 @@ namespace style {
 
         Node *lastChild = parsedTree->getLastChild();
         Node *newChild;
-        if (parsedTree->token() == Token::BlockDefinition && lastChild != nullptr && lastChild->token() == Token::Name) {
+        if (parsedTree->token() == Token::BlockContent && lastChild != nullptr && lastChild->token() == Token::Name) {
             lastChild->token(Token::RuleName);
             newChild = new Node(Token::Assignment);
             newChild->addChild(lastChild->copyNodeWithChilds());
@@ -258,7 +258,7 @@ namespace style {
         Node *lastChild;
         Node *lastChildCopy = nullptr;
         Token token = parsedTree->token();
-        if (token == Token::NullRoot || token == Token::BlockDefinition) {
+        if (token == Token::NullRoot || token == Token::BlockContent) {
             lastChild = parsedTree->getLastChild();
             if (lastChild != nullptr) {
                 if (isWhiteSpace(lastChild->token())) {
@@ -304,7 +304,7 @@ namespace style {
 
     void Parser::parseStar() {
         Token token = parsedTree->token();
-        if (token == Token::NullRoot || token == Token::BlockDefinition) {
+        if (token == Token::NullRoot || token == Token::BlockContent) {
             removeWhiteSpaces();
             parsedTree = parsedTree->addChild(new Node(Token::StyleBlock))
                              ->addChild(new Node(Token::BlockDeclaration))
@@ -331,7 +331,7 @@ namespace style {
         Node *lastChild;
         Node *lastChildCopy = nullptr;
         Token token = parsedTree->token();
-        if (token == Token::NullRoot || token == Token::BlockDefinition) {
+        if (token == Token::NullRoot || token == Token::BlockContent) {
             lastChild = parsedTree->getLastChild();
             if (lastChild != nullptr) {
                 if (isWhiteSpace(lastChild->token())) {
@@ -415,7 +415,7 @@ namespace style {
             parsedTree->deleteSpecificChild(lastChild);
         }
         if (parsedTree->token() != Token::NullRoot
-            && parsedTree->token() != Token::BlockDefinition
+            && parsedTree->token() != Token::BlockContent
             && parsedTree->token() != Token::Declaration)
             throw MalformedExpression("A style block must be defined in an other style block or at the root level of the file");
         if (parsedTree->token() != Token::Declaration) {
@@ -430,7 +430,7 @@ namespace style {
                              ->addChild(new Node(Token::Declaration));
             parsedTree->addChild(lastChildCopy);
         }
-        parsedTree = parsedTree->parent()->parent()->addChild(new Node(Token::BlockDefinition));
+        parsedTree = parsedTree->parent()->parent()->addChild(new Node(Token::BlockContent));
     }
 
     void Parser::parseClosingCurlyBracket() {
@@ -438,8 +438,8 @@ namespace style {
         if (parsedTree->token() == Token::Assignment) throw MissingToken("Missing semi-colon after assignment");
         Node *lastChild = parsedTree->getLastChild();
         if (lastChild != nullptr && lastChild->token() != Token::Assignment && lastChild->token() != Token::StyleBlock)
-            throw MalformedExpression("A block definition must only contains assgnments and other blocks");
-        else if (parsedTree->token() != Token::BlockDefinition)
+            throw MalformedExpression("A block content must only contains assignments and other blocks");
+        else if (parsedTree->token() != Token::BlockContent)
             throw MissingToken("A closing curly bracket '}' needs an opening curly bracket '{'");
         parsedTree = parsedTree->parent()->parent();
     }
@@ -483,7 +483,7 @@ namespace style {
             parsedTree->addChild(new Node{Token::ElementName, currentNode->value()});
             return;
         }
-        if (token == Token::BlockDefinition) {
+        if (token == Token::BlockContent) {
             removeWhiteSpaces();
             lastChild = parsedTree->getLastChild();
 
@@ -554,7 +554,7 @@ namespace style {
         Node *lastChild;
         Node *lastChildCopy = nullptr;
         Token token = parsedTree->token();
-        if (token == Token::NullRoot || token == Token::BlockDefinition) {
+        if (token == Token::NullRoot || token == Token::BlockContent) {
             lastChild = parsedTree->getLastChild();
             lastChildCopy = updateLastDeclarationComponentBeforeNewOne(lastChild);
             parsedTree = parsedTree->addChild(new Node(Token::StyleBlock))
