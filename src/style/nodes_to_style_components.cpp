@@ -375,7 +375,7 @@ namespace style {
         flattenStyle(styleTree);
 #ifdef DEBUG
         std::cerr << "flattened style\n";
-        styleTree->display(std::cerr);
+        styleTree->debugDisplay(std::cerr);
 #endif
         tree = styleTree->child();
 

@@ -205,7 +205,7 @@ namespace style {
                 throw UnknownValue(expression.substr(index, MAX_ERROR_COMPLEMENTARY_INFOS_SIZE));
             }
 #ifdef DEBUG
-            std::cerr << tokenToString(parsedTree->getToken()) << ": '" << parsedTree->getValue() << "'\n";
+            std::cerr << tokenToString(parsedTree->token()) << ": '" << parsedTree->value() << "'\n";
 #endif
             parsedTree = parsedTree->next();
         }

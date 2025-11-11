@@ -692,7 +692,7 @@ namespace styleTestsLexerAndParser {
 
     test::Result testParsingBlockWithoutClosingCurlyBracket() { return testLexerAndParserException<style::MalformedExpression>("a {b: #aaaaaa;"); }
 
-    test::Result testParsingElementName() {
+    test::Result testParsingElementNameSingleChar() {
         style::Node *rootExpected;
         style::Node *expected;
         test::Result result;
@@ -707,7 +707,7 @@ namespace styleTestsLexerAndParser {
         delete rootExpected;
         return result;
     }
-    test::Result testParsingIdentifier() {
+    test::Result testParsingIdentifierSingleChar() {
         style::Node *rootExpected;
         style::Node *expected;
         test::Result result;
@@ -723,7 +723,7 @@ namespace styleTestsLexerAndParser {
         return result;
     }
 
-    test::Result testParsingClass() {
+    test::Result testParsingClassSingleChar() {
         style::Node *rootExpected;
         style::Node *expected;
         test::Result result;
@@ -1227,7 +1227,6 @@ namespace styleTestsLexerAndParser {
     }
 
     void testsLexerAndParser(test::Tests *tests) {
-        tests->beginTestBlock("Tests style lexer and parser");
         tests->beginTestBlock("Tests lexer");
         tests->beginTestBlock("White spaces");
         tests->addTest(testLexingEmpty, "Empty");
@@ -1319,9 +1318,9 @@ namespace styleTestsLexerAndParser {
         tests->endTestBlock();
 
         tests->beginTestBlock("Declaration parts");
-        tests->addTest(testParsingElementName, "Element name");
-        tests->addTest(testParsingIdentifier, "Identifier");
-        tests->addTest(testParsingClass, "Class");
+        tests->addTest(testParsingElementNameSingleChar, "Element name single char");
+        tests->addTest(testParsingIdentifierSingleChar, "Identifier single char");
+        tests->addTest(testParsingClassSingleChar, "Class single char");
         tests->addTest(testParsingElementNameMultipleChars, "Element name multiple chars");
         tests->addTest(testParsingIdentifierMultipleChars, "Identfier multiple chars");
         tests->addTest(testParsingClassMultipleChars, "Class multiple chars");
@@ -1347,7 +1346,9 @@ namespace styleTestsLexerAndParser {
         tests->addTest(testParsingLineBreakBeforeAssignmentColon, "Line break before assignment colon");
         tests->addTest(testParsingLineBreakBeforeSemiColon, "Line break before semi-colon");
         tests->endTestBlock();
+        tests->endTestBlock();
 
+        tests->beginTestBlock("Tests style lexer and parser");
         tests->addTest(testTwoStyleBlocks, "Two style blocks");
         tests->addTest(testNestedModifierBlock, "Nested modifier block");
         tests->addTest(testNestedElementNameBlock, "Nested element name block");
@@ -1356,8 +1357,6 @@ namespace styleTestsLexerAndParser {
                        "Apply style block to any child component with nested element name");
         tests->addTest(testValuesUnits, "Values units");
         tests->addTest(testMultilineCommentNotClosed, "Multiline comment not closed");
-
-        tests->endTestBlock();
         tests->endTestBlock();
     }
 
