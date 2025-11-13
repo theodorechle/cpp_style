@@ -1,7 +1,7 @@
 #include "style_tests_lexer_and_parser.hpp"
 
 namespace styleTestsLexerAndParser {
-    test::Result testLexer(bool equal, const std::string &expr, const style::Node *expected) {
+    test::Result testLexer(bool equal, const std::string &expr, const style::DeserializationNode *expected) {
         test::Result testResult;
         std::cout << "Test if lexing\n'\n" << expr << "\n'\n";
         if (equal) std::cout << "equals to\n";
@@ -9,8 +9,8 @@ namespace styleTestsLexerAndParser {
         expected->displayNexts(std::cout);
         std::cout << ":\n";
         try {
-            style::Node *result = style::Lexer(&guiStyleConfig, expr).getResult();
-            style::Node *n = result;
+            style::DeserializationNode *result = style::Lexer(&guiStyleConfig, expr).getResult();
+            style::DeserializationNode *n = result;
             std::cout << "result:\n";
             n->displayNexts();
             while (n != nullptr) {
@@ -33,7 +33,7 @@ namespace styleTestsLexerAndParser {
         return testResult;
     }
 
-    test::Result testParser(bool equal, style::Node *expr, const style::Node *expected) {
+    test::Result testParser(bool equal, style::DeserializationNode *expr, const style::DeserializationNode *expected) {
         test::Result testResult;
         std::cout << "Test if parsing\n";
         expr->displayNexts(std::cout);
@@ -42,7 +42,7 @@ namespace styleTestsLexerAndParser {
         expr->debugDisplay(std::cout);
         std::cout << ":\n";
         try {
-            style::Node *result = style::Parser(expr).getFinalTree();
+            style::DeserializationNode *result = style::Parser(expr).getFinalTree();
             if (areSameNodes(result, expected) == equal) testResult = test::Result::SUCCESS;
             else testResult = test::Result::FAILURE;
             delete result;
@@ -55,7 +55,7 @@ namespace styleTestsLexerAndParser {
         return testResult;
     }
 
-    test::Result testLexerAndParser(bool equal, const std::string &expr, const style::Node *expected) {
+    test::Result testLexerAndParser(bool equal, const std::string &expr, const style::DeserializationNode *expected) {
         test::Result testResult;
         std::cout << "Test if lexing and parsing\n'\n" << expr << "\n'\n";
         if (equal) std::cout << "equals to\n";
@@ -63,8 +63,8 @@ namespace styleTestsLexerAndParser {
         expected->debugDisplay(std::cout);
         std::cout << ":\n";
         try {
-            style::Node *tokens = style::Lexer(&guiStyleConfig, expr).getResult();
-            style::Node *result = style::Parser(tokens).getFinalTree();
+            style::DeserializationNode *tokens = style::Lexer(&guiStyleConfig, expr).getResult();
+            style::DeserializationNode *result = style::Parser(tokens).getFinalTree();
             if (areSameNodes(result, expected) == equal) testResult = test::Result::SUCCESS;
             else testResult = test::Result::FAILURE;
             delete result;
@@ -85,7 +85,7 @@ namespace styleTestsLexerAndParser {
 #ifdef DEBUG
         std::cout << "\n";
 #endif
-        style::Node *tokens = nullptr;
+        style::DeserializationNode *tokens = nullptr;
         try {
             tokens = style::Lexer(&guiStyleConfig, expression).getResult();
 #ifdef DEBUG
@@ -112,8 +112,8 @@ namespace styleTestsLexerAndParser {
 #ifdef DEBUG
         std::cout << "\n";
 #endif
-        style::Node *tokens = nullptr;
-        style::Node *result = nullptr;
+        style::DeserializationNode *tokens = nullptr;
+        style::DeserializationNode *result = nullptr;
         try {
             tokens = style::Lexer(&guiStyleConfig, expression).getResult();
             result = style::Parser(tokens).getFinalTree();
@@ -140,7 +140,7 @@ namespace styleTestsLexerAndParser {
     }
 
     test::Result testLexingEmpty() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
         rootExpected = nullptr;
@@ -150,150 +150,150 @@ namespace styleTestsLexerAndParser {
     }
 
     test::Result testLexingSingleSpace() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Space);
+        rootExpected = new style::DeserializationNode(style::Token::Space);
         result = testLexer(true, " ", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingMultipleSpaces() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Space);
+        rootExpected = new style::DeserializationNode(style::Token::Space);
         result = testLexer(true, "   ", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingTabulation() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Space);
+        rootExpected = new style::DeserializationNode(style::Token::Space);
         result = testLexer(true, "\t", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingSingleLineBreak() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::LineBreak);
+        rootExpected = new style::DeserializationNode(style::Token::LineBreak);
         result = testLexer(true, "\n", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingMultipleLineBreaks() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::LineBreak);
+        rootExpected = new style::DeserializationNode(style::Token::LineBreak);
         result = testLexer(true, "\n\n\n\n", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingPositiveInteger() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Int, "1");
+        rootExpected = new style::DeserializationNode(style::Token::Int, "1");
         result = testLexer(true, "1", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingIntegerZero() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Int, "0");
+        rootExpected = new style::DeserializationNode(style::Token::Int, "0");
         result = testLexer(true, "0", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingNegativeInteger() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Int, "-5");
+        rootExpected = new style::DeserializationNode(style::Token::Int, "-5");
         result = testLexer(true, "-5", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingIntegerWithMultipleChars() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Int, "2679");
+        rootExpected = new style::DeserializationNode(style::Token::Int, "2679");
         result = testLexer(true, "2679", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingPositiveFloat() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Float, "26.3");
+        rootExpected = new style::DeserializationNode(style::Token::Float, "26.3");
         result = testLexer(true, "26.3", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingFloatZero() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Float, "0.");
+        rootExpected = new style::DeserializationNode(style::Token::Float, "0.");
         result = testLexer(true, "0.", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingNegativeFloat() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Float, "-12.6");
+        rootExpected = new style::DeserializationNode(style::Token::Float, "-12.6");
         result = testLexer(true, "-12.6", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingFloatNoIntegralPart() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Float, ".3");
+        rootExpected = new style::DeserializationNode(style::Token::Float, ".3");
         result = testLexer(true, ".3", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingFloatNoDecimalPart() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Float, "5.");
+        rootExpected = new style::DeserializationNode(style::Token::Float, "5.");
         result = testLexer(true, "5.", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingNegativeFloatNoIntegerPart() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Float, "-.6");
+        rootExpected = new style::DeserializationNode(style::Token::Float, "-.6");
         result = testLexer(true, "-.6", rootExpected);
         delete rootExpected;
         return result;
@@ -302,170 +302,170 @@ namespace styleTestsLexerAndParser {
     test::Result testLexingNegativeFloatNoParts() { return testLexerException<style::LexerException>("-."); }
 
     test::Result testLexingSemiColon() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::SemiColon);
+        rootExpected = new style::DeserializationNode(style::Token::SemiColon);
         result = testLexer(true, ";", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingColon() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Colon);
+        rootExpected = new style::DeserializationNode(style::Token::Colon);
         result = testLexer(true, ":", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingComma() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Comma);
+        rootExpected = new style::DeserializationNode(style::Token::Comma);
         result = testLexer(true, ",", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingOpeningCurlyBracket() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::OpeningCurlyBracket);
+        rootExpected = new style::DeserializationNode(style::Token::OpeningCurlyBracket);
         result = testLexer(true, "{", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingClosingCurlyBracket() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::ClosingCurlyBracket);
+        rootExpected = new style::DeserializationNode(style::Token::ClosingCurlyBracket);
         result = testLexer(true, "}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingOpeningParenthesis() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::OpeningParenthesis);
+        rootExpected = new style::DeserializationNode(style::Token::OpeningParenthesis);
         result = testLexer(true, "(", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingClosingParenthesis() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::ClosingParenthesis);
+        rootExpected = new style::DeserializationNode(style::Token::ClosingParenthesis);
         result = testLexer(true, ")", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingGreatherThan() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::GreaterThan);
+        rootExpected = new style::DeserializationNode(style::Token::GreaterThan);
         result = testLexer(true, ">", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingSharp() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Sharp);
+        rootExpected = new style::DeserializationNode(style::Token::Sharp);
         result = testLexer(true, "#", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingDot() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Dot);
+        rootExpected = new style::DeserializationNode(style::Token::Dot);
         result = testLexer(true, ".", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingAt() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::At);
+        rootExpected = new style::DeserializationNode(style::Token::At);
         result = testLexer(true, "@", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingStar() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::Star);
+        rootExpected = new style::DeserializationNode(style::Token::Star);
         result = testLexer(true, "*", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingRawName() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::RawName, "test");
+        rootExpected = new style::DeserializationNode(style::Token::RawName, "test");
         result = testLexer(true, "test", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingRawNameWithHyphen() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::RawName, "test-a");
+        rootExpected = new style::DeserializationNode(style::Token::RawName, "test-a");
         result = testLexer(true, "test-a", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingRawNameWithNumber() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::RawName, "test2");
+        rootExpected = new style::DeserializationNode(style::Token::RawName, "test2");
         result = testLexer(true, "test2", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingRawNameWithUnderscore() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::RawName, "test_2");
+        rootExpected = new style::DeserializationNode(style::Token::RawName, "test_2");
         result = testLexer(true, "test_2", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingRawNameStartingWithNumber() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::RawName, "2a");
+        rootExpected = new style::DeserializationNode(style::Token::RawName, "2a");
         result = testLexer(true, "2a", rootExpected);
         delete rootExpected;
         return result;
@@ -474,20 +474,20 @@ namespace styleTestsLexerAndParser {
     test::Result testLexingMinusSign() { return testLexerException<style::LexerException>("-"); }
 
     test::Result testLexingStringDoubleQuotes() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::String, "value");
+        rootExpected = new style::DeserializationNode(style::Token::String, "value");
         result = testLexer(true, "\"value\"", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingStringSingleQuotes() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::String, "value");
+        rootExpected = new style::DeserializationNode(style::Token::String, "value");
         result = testLexer(true, "'value'", rootExpected);
         delete rootExpected;
         return result;
@@ -498,173 +498,173 @@ namespace styleTestsLexerAndParser {
     test::Result testLexingStringUnclosedSingleQuotes() { return testLexerException<style::LexerException>("'value"); }
 
     test::Result testLexingStringEmptyDoubleQuotes() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::String, "");
+        rootExpected = new style::DeserializationNode(style::Token::String, "");
         result = testLexer(true, "\"\"", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingStringEmptySingleQuotes() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::String, "");
+        rootExpected = new style::DeserializationNode(style::Token::String, "");
         result = testLexer(true, "''", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingImport() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::At);
-        rootExpected->appendNext(new style::Node(style::Token::RawName, "import"))
-            ->appendNext(new style::Node(style::Token::Space))
-            ->appendNext(new style::Node(style::Token::String, "test"))
-            ->appendNext(new style::Node(style::Token::SemiColon));
+        rootExpected = new style::DeserializationNode(style::Token::At);
+        rootExpected->appendNext(new style::DeserializationNode(style::Token::RawName, "import"))
+            ->appendNext(new style::DeserializationNode(style::Token::Space))
+            ->appendNext(new style::DeserializationNode(style::Token::String, "test"))
+            ->appendNext(new style::DeserializationNode(style::Token::SemiColon));
         result = testLexer(true, "@import \"test\";", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingEmpty() {
-        style::Node *rootExpected;
+        style::DeserializationNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
         result = testLexerAndParser(true, "", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingHexRule() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "b"));
-        expected->addChild(new style::Node(style::Token::Hex, "a"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent))->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
+        expected->addChild(new style::DeserializationNode(style::Token::Hex, "a"));
         result = testLexerAndParser(true, "a {b: #a;}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingHexRuleMultipleChars() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "b"));
-        expected->addChild(new style::Node(style::Token::Hex, "abcdef"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent))->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
+        expected->addChild(new style::DeserializationNode(style::Token::Hex, "abcdef"));
         result = testLexerAndParser(true, "a {b: #abcdef;}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingHexRuleOnlyInts() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "b"));
-        expected->addChild(new style::Node(style::Token::Hex, "000000"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent))->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
+        expected->addChild(new style::DeserializationNode(style::Token::Hex, "000000"));
         result = testLexerAndParser(true, "a {b: #000000;}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingIntRule() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "b"));
-        expected->addChild(new style::Node(style::Token::Int, "1"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent))->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "1"));
         result = testLexerAndParser(true, "a {b: 1;}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingIntRuleMultipleChars() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "b"));
-        expected->addChild(new style::Node(style::Token::Int, "123456"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent))->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "123456"));
         result = testLexerAndParser(true, "a {b: 123456;}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingEmptyTuple() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "b"));
-        expected->addChild(new style::Node(style::Token::Tuple));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent))->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
+        expected->addChild(new style::DeserializationNode(style::Token::Tuple));
         result = testLexerAndParser(true, "a {b: ();}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingIntTuple() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockContent))->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "b"));
-        expected = expected->addChild(new style::Node(style::Token::Tuple));
-        expected->addChild(new style::Node(style::Token::Int, "1"));
-        expected->addChild(new style::Node(style::Token::Int, "2"));
-        expected->addChild(new style::Node(style::Token::Int, "3"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent))->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Tuple));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "1"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "2"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "3"));
         result = testLexerAndParser(true, "a {b: (1, 2,3);}", rootExpected);
         delete rootExpected;
         return result;
@@ -693,275 +693,275 @@ namespace styleTestsLexerAndParser {
     test::Result testParsingBlockWithoutClosingCurlyBracket() { return testLexerAndParserException<style::MalformedExpression>("a {b: #aaaaaa;"); }
 
     test::Result testParsingElementNameSingleChar() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "a {}", rootExpected);
         delete rootExpected;
         return result;
     }
     test::Result testParsingIdentifierSingleChar() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::Identifier, "a"));
-        expected->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::Identifier, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "#a {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingClassSingleChar() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::Class, "a"));
-        expected->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::Class, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, ".a {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingDirectParentRelationElementName() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration))->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected->addChild(new style::Node(style::Token::DirectParent));
-        expected->addChild(new style::Node(style::Token::ElementName, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::DirectParent));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "b"));
+        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "a > b {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingDirectParentRelationIdentifier() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration))->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected->addChild(new style::Node(style::Token::DirectParent));
-        expected->addChild(new style::Node(style::Token::Identifier, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::DirectParent));
+        expected->addChild(new style::DeserializationNode(style::Token::Identifier, "b"));
+        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "a > #b {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingDirectParentRelationClass() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration))->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected->addChild(new style::Node(style::Token::DirectParent));
-        expected->addChild(new style::Node(style::Token::Class, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::DirectParent));
+        expected->addChild(new style::DeserializationNode(style::Token::Class, "b"));
+        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "a > .b {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingElementNameMultipleChars() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::ElementName, "abc"));
-        expected->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "abc"));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "abc {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingIdentifierMultipleChars() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::Identifier, "abc"));
-        expected->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::Identifier, "abc"));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "#abc {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingClassMultipleChars() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::Class, "abc"));
-        expected->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::Class, "abc"));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, ".abc {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingAnyParentRelationElementName() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration))->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected->addChild(new style::Node(style::Token::AnyParent));
-        expected->addChild(new style::Node(style::Token::ElementName, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "b"));
+        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "a b {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingAnyParentRelationIdentifier() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration))->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected->addChild(new style::Node(style::Token::AnyParent));
-        expected->addChild(new style::Node(style::Token::Identifier, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
+        expected->addChild(new style::DeserializationNode(style::Token::Identifier, "b"));
+        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "a #b {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingAnyParentRelationClass() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration))->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected->addChild(new style::Node(style::Token::AnyParent));
-        expected->addChild(new style::Node(style::Token::Class, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
+        expected->addChild(new style::DeserializationNode(style::Token::Class, "b"));
+        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "a .b {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingAnyParentRelationIdentifierStickedToFirstDeclarationPart() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration))->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected->addChild(new style::Node(style::Token::AnyParent));
-        expected->addChild(new style::Node(style::Token::Identifier, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
+        expected->addChild(new style::DeserializationNode(style::Token::Identifier, "b"));
+        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "a#b {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingAnyParentRelationClassStickedToFirstDeclarationPart() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration))->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected->addChild(new style::Node(style::Token::AnyParent));
-        expected->addChild(new style::Node(style::Token::Class, "b"));
-        expected->parent()->parent()->addChild(new style::Node(style::Token::BlockContent));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
+        expected->addChild(new style::DeserializationNode(style::Token::Class, "b"));
+        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockContent));
         result = testLexerAndParser(true, "a.b {}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingMultipleRulesInline() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "r"));
-        expected->addChild(new style::Node(style::Token::Int, "1"));
-        expected = expected->parent()->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "j"));
-        expected->addChild(new style::Node(style::Token::Int, "2"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "r"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "1"));
+        expected = expected->parent()->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "j"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "2"));
         result = testLexerAndParser(true, "a {r: 1; j: 2;}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testParsingMultipleRulesMultipleLines() {
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected->addChild(new style::Node(style::Token::BlockDeclaration))
-            ->addChild(new style::Node(style::Token::Declaration))
-            ->addChild(new style::Node(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "r"));
-        expected->addChild(new style::Node(style::Token::Int, "1"));
-        expected = expected->parent()->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "j"));
-        expected->addChild(new style::Node(style::Token::Int, "2"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration))
+            ->addChild(new style::DeserializationNode(style::Token::Declaration))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "r"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "1"));
+        expected = expected->parent()->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "j"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "2"));
         result = testLexerAndParser(true, "a {\nr: 1;\nj: 2;}", rootExpected);
         delete rootExpected;
         return result;
@@ -979,40 +979,40 @@ namespace styleTestsLexerAndParser {
 
     test::Result testTwoStyleBlocks() {
         std::string fileContent;
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
         fileContent = getFileContent(TESTS_FILES_DIR + "/test-1.txt");
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration));
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "label"));
-        expected->addChild(new style::Node(style::Token::Class, "blue"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
-        expected->addChild(new style::Node(style::Token::Hex, "0000ff"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "text-color"));
+        expected->addChild(new style::DeserializationNode(style::Token::Hex, "0000ff"));
 
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration));
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "label"));
-        expected->addChild(new style::Node(style::Token::Class, "blue"));
-        expected->addChild(new style::Node(style::Token::Modifier, "hovered"));
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
+        expected->addChild(new style::DeserializationNode(style::Token::Modifier, "hovered"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
-        expected = expected->addChild(new style::Node(style::Token::Tuple));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
-        expected->addChild(new style::Node(style::Token::Int, "255"));
-        expected->addChild(new style::Node(style::Token::Int, "112"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "text-color"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Tuple));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "255"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "112"));
 
         result = testLexerAndParser(true, fileContent, rootExpected);
         delete rootExpected;
@@ -1021,38 +1021,38 @@ namespace styleTestsLexerAndParser {
 
     test::Result testNestedModifierBlock() {
         std::string fileContent;
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
         fileContent = getFileContent(TESTS_FILES_DIR + "/test-2.txt");
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration));
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "label"));
-        expected->addChild(new style::Node(style::Token::Class, "blue"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
-        expected->addChild(new style::Node(style::Token::Hex, "0000ff"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "text-color"));
+        expected->addChild(new style::DeserializationNode(style::Token::Hex, "0000ff"));
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration));
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::Modifier, "hovered"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::Modifier, "hovered"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
-        expected = expected->addChild(new style::Node(style::Token::Tuple));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "text-color"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Tuple));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
 
         result = testLexerAndParser(true, fileContent, rootExpected);
         delete rootExpected;
@@ -1061,38 +1061,38 @@ namespace styleTestsLexerAndParser {
 
     test::Result testNestedElementNameBlock() {
         std::string fileContent;
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
         fileContent = getFileContent(TESTS_FILES_DIR + "/test-3.txt");
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration));
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "label"));
-        expected->addChild(new style::Node(style::Token::Class, "blue"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
-        expected->addChild(new style::Node(style::Token::Hex, "0000ff"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "text-color"));
+        expected->addChild(new style::DeserializationNode(style::Token::Hex, "0000ff"));
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration));
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "element"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "element"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
-        expected = expected->addChild(new style::Node(style::Token::Tuple));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "text-color"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Tuple));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
 
         result = testLexerAndParser(true, fileContent, rootExpected);
         delete rootExpected;
@@ -1101,43 +1101,43 @@ namespace styleTestsLexerAndParser {
 
     test::Result testApplyingStyleBlockUsingAnyParentRelation() {
         std::string fileContent;
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
         fileContent = getFileContent(TESTS_FILES_DIR + "/test-4.txt");
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration));
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "label"));
-        expected->addChild(new style::Node(style::Token::Class, "blue"));
-        expected->addChild(new style::Node(style::Token::Modifier, "hovered"));
-        expected->addChild(new style::Node(style::Token::AnyParent));
-        expected->addChild(new style::Node(style::Token::ElementName, "element"));
-        expected->addChild(new style::Node(style::Token::Class, "red"));
-        expected->addChild(new style::Node(style::Token::Identifier, "root"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
+        expected->addChild(new style::DeserializationNode(style::Token::Modifier, "hovered"));
+        expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "element"));
+        expected->addChild(new style::DeserializationNode(style::Token::Class, "red"));
+        expected->addChild(new style::DeserializationNode(style::Token::Identifier, "root"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
-        expected->addChild(new style::Node(style::Token::Hex, "0000ff"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "text-color"));
+        expected->addChild(new style::DeserializationNode(style::Token::Hex, "0000ff"));
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration));
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "element"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "element"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
-        expected = expected->addChild(new style::Node(style::Token::Tuple));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "text-color"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Tuple));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
 
         result = testLexerAndParser(true, fileContent, rootExpected);
         delete rootExpected;
@@ -1146,44 +1146,44 @@ namespace styleTestsLexerAndParser {
 
     test::Result testApplyingStyleBlockUsingAnyChildComponentWithNestedElementName() {
         std::string fileContent;
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
         fileContent = getFileContent(TESTS_FILES_DIR + "/test-5.txt");
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration));
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "label"));
-        expected->addChild(new style::Node(style::Token::Class, "blue"));
-        expected->addChild(new style::Node(style::Token::Modifier, "hovered"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
+        expected->addChild(new style::DeserializationNode(style::Token::Modifier, "hovered"));
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "element"));
-        expected->addChild(new style::Node(style::Token::Class, "red"));
-        expected->addChild(new style::Node(style::Token::Identifier, "root"));
-        expected = expected->parent();
-        expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
-        expected->addChild(new style::Node(style::Token::Hex, "0000ff"));
-        expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration));
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "element"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "element"));
+        expected->addChild(new style::DeserializationNode(style::Token::Class, "red"));
+        expected->addChild(new style::DeserializationNode(style::Token::Identifier, "root"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "text-color"));
-        expected = expected->addChild(new style::Node(style::Token::Tuple));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
-        expected->addChild(new style::Node(style::Token::Int, "150"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "text-color"));
+        expected->addChild(new style::DeserializationNode(style::Token::Hex, "0000ff"));
+        expected = expected->parent();
+        expected = expected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "element"));
+        expected = expected->parent();
+        expected = expected->parent();
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "text-color"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Tuple));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
 
         result = testLexerAndParser(true, fileContent, rootExpected);
         delete rootExpected;
@@ -1192,27 +1192,27 @@ namespace styleTestsLexerAndParser {
 
     test::Result testValuesUnits() {
         std::string fileContent;
-        style::Node *rootExpected;
-        style::Node *expected;
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
         test::Result result;
 
         fileContent = getFileContent(TESTS_FILES_DIR + "/test-7.txt");
 
-        rootExpected = new style::Node(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::Node(style::Token::StyleBlock));
-        expected = expected->addChild(new style::Node(style::Token::BlockDeclaration));
-        expected = expected->addChild(new style::Node(style::Token::Declaration));
-        expected->addChild(new style::Node(style::Token::ElementName, "element"));
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclaration));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Declaration));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "element"));
         expected = expected->parent();
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::BlockContent));
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "width"));
-        expected->addChild(new style::Node(style::Token::Unit, "px"))->addChild(new style::Node(style::Token::Int, "150"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockContent));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "width"));
+        expected->addChild(new style::DeserializationNode(style::Token::Unit, "px"))->addChild(new style::DeserializationNode(style::Token::Int, "150"));
         expected = expected->parent();
-        expected = expected->addChild(new style::Node(style::Token::Assignment));
-        expected->addChild(new style::Node(style::Token::RuleName, "height"));
-        expected->addChild(new style::Node(style::Token::Unit, "%"))->addChild(new style::Node(style::Token::Int, "40"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "height"));
+        expected->addChild(new style::DeserializationNode(style::Token::Unit, "%"))->addChild(new style::DeserializationNode(style::Token::Int, "40"));
 
         result = testLexerAndParser(true, fileContent, rootExpected);
         delete rootExpected;

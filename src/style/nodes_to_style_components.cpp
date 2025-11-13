@@ -58,9 +58,9 @@ namespace style {
         }
     }
 
-    Node *NodesToStyleComponents::importStyle(const std::string &fileName) {
-        Node *tokens = nullptr;
-        Node *result = nullptr;
+    DeserializationNode *NodesToStyleComponents::importStyle(const std::string &fileName) {
+        DeserializationNode *tokens = nullptr;
+        DeserializationNode *result = nullptr;
         std::ifstream file(fileName);
         std::stringstream buffer;
         if (!file.is_open()) {
@@ -86,17 +86,17 @@ namespace style {
         return result;
     }
 
-    Node *NodesToStyleComponents::joinStyleDeclarations(Node *firstDeclarations, Node *secondDeclarations) {
-        Node *newDeclarations = new Node(Token::NullRoot);
-        Node *actualDeclaration;
-        Node *secondDeclarationsIt;
+    DeserializationNode *NodesToStyleComponents::joinStyleDeclarations(DeserializationNode *firstDeclarations, DeserializationNode *secondDeclarations) {
+        DeserializationNode *newDeclarations = new DeserializationNode(Token::NullRoot);
+        DeserializationNode *actualDeclaration;
+        DeserializationNode *secondDeclarationsIt;
 
         while (firstDeclarations != nullptr) {
             secondDeclarationsIt = secondDeclarations;
             while (secondDeclarationsIt != nullptr) {
                 actualDeclaration = newDeclarations->appendNext(firstDeclarations->copyNodeWithChilds());
                 if (tokenTypeToStyleRelation(secondDeclarationsIt->child()->token()) == StyleRelation::Null)
-                    actualDeclaration->addChild(new Node(Token::AnyParent));
+                    actualDeclaration->addChild(new DeserializationNode(Token::AnyParent));
                 if (tokenTypeToStyleRelation(secondDeclarationsIt->child()->token()) == StyleRelation::SameElement)
                     secondDeclarationsIt->deleteSpecificChild(secondDeclarationsIt->child());
                 actualDeclaration->addChild(secondDeclarationsIt->child()->copyNodeWithChildsAndNexts());
@@ -105,17 +105,17 @@ namespace style {
             firstDeclarations = firstDeclarations->next();
         }
 
-        Node *root = newDeclarations;
+        DeserializationNode *root = newDeclarations;
         newDeclarations = newDeclarations->next();
         root->next(nullptr);
         delete root;
         return newDeclarations;
     }
 
-    void NodesToStyleComponents::moveNestedBlocksToRoot(Node *style) {
-        Node *blockDeclarations = style->child();
-        Node *content = blockDeclarations->next()->child();
-        Node *nextDeclaration;
+    void NodesToStyleComponents::moveNestedBlocksToRoot(DeserializationNode *style) {
+        DeserializationNode *blockDeclarations = style->child();
+        DeserializationNode *content = blockDeclarations->next()->child();
+        DeserializationNode *nextDeclaration;
 
         while (content != nullptr) {
             if (content->token() == Token::StyleBlock) {
@@ -134,13 +134,13 @@ namespace style {
         }
     }
 
-    void NodesToStyleComponents::flattenStyle(Node *style) {
+    void NodesToStyleComponents::flattenStyle(DeserializationNode *style) {
         if (style == nullptr) return;
         style = style->child();
         while (style != nullptr) {
             if (style->token() == Token::StyleBlock) moveNestedBlocksToRoot(style);
             else if (style->token() == Token::Import) {
-                Node *importedStyle = importStyle(style->value()); // refactor with StyleNodesManager
+                DeserializationNode *importedStyle = importStyle(style->value()); // refactor with StyleNodesManager
                 if (importedStyle != nullptr) {
                     importedStyle->addChild(style->next());
                     style->next(importedStyle->child());
@@ -152,10 +152,10 @@ namespace style {
         }
     }
 
-    void NodesToStyleComponents::removeEmptyBlocks(Node *style) {
+    void NodesToStyleComponents::removeEmptyBlocks(DeserializationNode *style) {
         if (style == nullptr) return;
         style = style->child();
-        Node *next;
+        DeserializationNode *next;
         while (style != nullptr) {
             if (style->getLastChild()->nbChilds() == 0) {
                 next = style->next();
@@ -169,8 +169,8 @@ namespace style {
     std::list<StyleComponentDataList *> *NodesToStyleComponents::convertStyleComponents() {
         std::list<StyleComponentDataList *> *styleComponentsLists;
         StyleComponentDataList *requiredStyleComponents;
-        Node *declaration;
-        Node *declarationPart;
+        DeserializationNode *declaration;
+        DeserializationNode *declarationPart;
         Token nextDeclarationToken;
         StyleComponentType styleComponentType;
         StyleRelation styleRelationToken;
@@ -220,10 +220,10 @@ namespace style {
         return styleComponentsLists;
     }
 
-    StyleValue *NodesToStyleComponents::convertStyleNodeToStyleValue(Node *node) {
+    StyleValue *NodesToStyleComponents::convertStyleNodeToStyleValue(DeserializationNode *node) {
         if (node == nullptr) return nullptr;
         StyleValueType type;
-        Node *next;
+        DeserializationNode *next;
         StyleValue *styleValue;
         StyleValue *tmpStyleValue;
         StyleValue *styleNext;
@@ -253,9 +253,9 @@ namespace style {
         StyleValuesMap *appliedStyleMap;
         StyleValue *styleValue;
         std::string ruleName;
-        Node *rule;
-        Node *oldTree;
-        Node *ruleNameNode;
+        DeserializationNode *rule;
+        DeserializationNode *oldTree;
+        DeserializationNode *ruleNameNode;
         Token token;
         if (tree == nullptr || tree->token() != Token::BlockContent) return nullptr;
 
@@ -384,7 +384,7 @@ namespace style {
         }
     }
 
-    std::list<StyleBlock *> *NodesToStyleComponents::convert(Node *styleTree, int fileNumber, int *ruleNumber) {
+    std::list<StyleBlock *> *NodesToStyleComponents::convert(DeserializationNode *styleTree, int fileNumber, int *ruleNumber) {
         *ruleNumber = 0;
         if (styleTree->token() != Token::NullRoot) return nullptr;
         styleDefinitions = new std::list<StyleBlock *>();

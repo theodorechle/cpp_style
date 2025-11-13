@@ -16,8 +16,8 @@ namespace style {
 
     std::list<StyleBlock *> *StyleDeserializer::deserialize(const std::string &style, int fileNumber, int *ruleNumber, const Config *config) {
         std::list<StyleBlock *> *deserializedStyle = nullptr;
-        Node *tokens = nullptr;
-        Node *result = nullptr;
+        DeserializationNode *tokens = nullptr;
+        DeserializationNode *result = nullptr;
         try {
             tokens = Lexer(config, style).getResult();
             result = Parser(tokens).getFinalTree();

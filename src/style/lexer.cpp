@@ -8,7 +8,7 @@ namespace style {
             i++;
         }
         if (i > 0) {
-            parsedTree->appendNext(new Node(Token::Space));
+            parsedTree->appendNext(new DeserializationNode(Token::Space));
             lexed = true;
             index += i;
         }
@@ -20,7 +20,7 @@ namespace style {
             i++;
         }
         if (i == 0) return;
-        parsedTree->appendNext(new Node(Token::LineBreak));
+        parsedTree->appendNext(new DeserializationNode(Token::LineBreak));
         lexed = true;
         index += i;
     }
@@ -31,7 +31,7 @@ namespace style {
         while (index + i + 1 < expression.size() && expression[index + i + 1] != '\n') {
             i++;
         }
-        parsedTree->appendNext(new Node(Token::OneLineComment, expression.substr(index + 2, i - 1)));
+        parsedTree->appendNext(new DeserializationNode(Token::OneLineComment, expression.substr(index + 2, i - 1)));
         lexed = true;
         index += i + 1;
     }
@@ -43,7 +43,7 @@ namespace style {
             i++;
         }
         if (index + i + 2 >= expression.size()) return;
-        parsedTree->appendNext(new Node(Token::MultiLineComment, expression.substr(index + 2, i - 1)));
+        parsedTree->appendNext(new DeserializationNode(Token::MultiLineComment, expression.substr(index + 2, i - 1)));
         lexed = true;
         index += i + 3;
     }
@@ -56,7 +56,7 @@ namespace style {
                       != RAW_NAME_ALLOWED_SPECIAL_CHARACTERS.cend()) {
             i++;
         }
-        parsedTree->appendNext(new Node(Token::RawName, expression.substr(index, i)));
+        parsedTree->appendNext(new DeserializationNode(Token::RawName, expression.substr(index, i)));
         index += i;
         lexed = true;
     }
@@ -68,7 +68,7 @@ namespace style {
             i++;
         }
         if (i != 1 && (index + i >= expressionLength || expression[index + i + 1] != '"')) return;
-        parsedTree->appendNext(new Node(Token::String, (i == 1) ? "" : expression.substr(index + 1, i)));
+        parsedTree->appendNext(new DeserializationNode(Token::String, (i == 1) ? "" : expression.substr(index + 1, i)));
         lexed = true;
         index += i + 2;
     }
@@ -81,7 +81,7 @@ namespace style {
         }
 
         if (i != 1 && (index + i >= expressionLength || expression[index + i + 1] != '\'')) return;
-        parsedTree->appendNext(new Node(Token::String, (i == 1) ? "" : expression.substr(index + 1, i)));
+        parsedTree->appendNext(new DeserializationNode(Token::String, (i == 1) ? "" : expression.substr(index + 1, i)));
         lexed = true;
         index += i + 2;
     }
@@ -100,7 +100,7 @@ namespace style {
             && expression[index + i] != '\n'
             && !getUnit(i, &tmpSize).size())
             return; // not an int
-        parsedTree->appendNext(new Node(Token::Int, expression.substr(index, i)));
+        parsedTree->appendNext(new DeserializationNode(Token::Int, expression.substr(index, i)));
         index += i;
         lexed = true;
     }
@@ -129,19 +129,19 @@ namespace style {
             && expression[index + i] != '\n'
             && !getUnit(i, &tmpSize).size())
             return; // not a float
-        parsedTree->appendNext(new Node(Token::Float, expression.substr(index, i)));
+        parsedTree->appendNext(new DeserializationNode(Token::Float, expression.substr(index, i)));
         index += i;
         lexed = true;
     }
 
     void Lexer::lexeBool() {
         if (expression.substr(index, TRUE.size()) == TRUE) {
-            parsedTree->appendNext(new Node(Token::Bool, expression.substr(index, TRUE.size())));
+            parsedTree->appendNext(new DeserializationNode(Token::Bool, expression.substr(index, TRUE.size())));
             index += TRUE.size();
             lexed = true;
         }
         else if (expression.substr(index, FALSE.size()) == FALSE) {
-            parsedTree->appendNext(new Node(Token::Bool, expression.substr(index, FALSE.size())));
+            parsedTree->appendNext(new DeserializationNode(Token::Bool, expression.substr(index, FALSE.size())));
             index += FALSE.size();
             lexed = true;
         }
@@ -173,13 +173,13 @@ namespace style {
         if (!unit.size()) return;
         index += size;
         lexed = true;
-        parsedTree->appendNext(new Node(Token::Unit, unit));
+        parsedTree->appendNext(new DeserializationNode(Token::Unit, unit));
     }
 
     void Lexer::lexeReservedCharacters() {
         std::map<char, Token>::const_iterator specialCharIt = RESERVED_CHARACTERS.find(expression[index]);
         if (specialCharIt == RESERVED_CHARACTERS.cend()) return;
-        parsedTree->appendNext(new Node(specialCharIt->second));
+        parsedTree->appendNext(new DeserializationNode(specialCharIt->second));
         index++;
         lexed = true;
     }
@@ -210,7 +210,7 @@ namespace style {
             parsedTree = parsedTree->next();
         }
         // remove the NullRoot token at the start
-        Node *nextList = firstNode->next();
+        DeserializationNode *nextList = firstNode->next();
         firstNode->next(nullptr);
         delete firstNode;
         firstNode = nextList;

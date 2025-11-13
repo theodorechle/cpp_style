@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "abstract_configuration.hpp"
-#include "node.hpp"
+#include "deserialization_node.hpp"
 
 constexpr int MAX_ERROR_COMPLEMENTARY_INFOS_SIZE = 20;
 
@@ -50,8 +50,8 @@ namespace style {
         const Config *config;
         const std::string &expression;
         size_t expressionLength;
-        Node *firstNode = new Node(Token::NullRoot);
-        Node *parsedTree = firstNode;
+        DeserializationNode *firstNode = new DeserializationNode(Token::NullRoot);
+        DeserializationNode *parsedTree = firstNode;
 
     public:
         Lexer(const Config *config, const std::string &expression) : config{config}, expression{expression}, expressionLength{expression.length()} {
@@ -71,7 +71,7 @@ namespace style {
         std::string getUnit(int expressionIndex, int *size);
         void lexeUnit();
         void lexeReservedCharacters();
-        Node *getResult() { return firstNode; }
+        DeserializationNode *getResult() { return firstNode; }
     };
 
 } // namespace style

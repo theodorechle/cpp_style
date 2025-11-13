@@ -1,7 +1,7 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
-#include "node.hpp"
+#include "deserialization_node.hpp"
 #include <algorithm>
 #include <exception>
 #include <string>
@@ -19,7 +19,7 @@ namespace style {
 
     class UnknownToken : public ParserException {
     public:
-        UnknownToken(const Node &token) : ParserException{"Unknown token: \"" + token.value() + " (" + tokenToString(token.token()) + ")\""} {};
+        UnknownToken(const DeserializationNode &token) : ParserException{"Unknown token: \"" + token.value() + " (" + tokenToString(token.token()) + ")\""} {};
     };
 
     class MissingToken : public ParserException {
@@ -41,11 +41,11 @@ namespace style {
          * because it could be used and freed in the calling program after the parser call.
          * Consider currentNode as const
          */
-        Node *currentNode;
+        DeserializationNode *currentNode;
 
         // only used to avoid recalculating many times the root
-        Node *expressionTreeRoot = new Node(Token::NullRoot);
-        Node *parsedTree = expressionTreeRoot;
+        DeserializationNode *expressionTreeRoot = new DeserializationNode(Token::NullRoot);
+        DeserializationNode *parsedTree = expressionTreeRoot;
         bool isValidName(const std::string &str, size_t start, size_t end);
         bool isValidElementOrRuleName(const std::string &str);
         bool isWhiteSpace(Token token);
@@ -82,15 +82,15 @@ namespace style {
         void parseUnit();
 
         // if you don't know how to use it, don't use it
-        Node *updateLastDeclarationComponentBeforeNewOne(Node *lastChild);
+        DeserializationNode *updateLastDeclarationComponentBeforeNewOne(DeserializationNode *lastChild);
         void parseDeclarationComponent(Token outputTokenType);
         void parseClass();
         void parseIdentifier();
         void parseModifier();
 
     public:
-        Parser(Node *currentNode) : currentNode{currentNode} { parse(); };
-        Node *getFinalTree() { return expressionTreeRoot; }
+        Parser(DeserializationNode *currentNode) : currentNode{currentNode} { parse(); };
+        DeserializationNode *getFinalTree() { return expressionTreeRoot; }
     };
 
 } // namespace style

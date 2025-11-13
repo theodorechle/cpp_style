@@ -1,7 +1,7 @@
 #ifndef NODES_TO_STYLE_COMPONENT_HPP
 #define NODES_TO_STYLE_COMPONENT_HPP
 
-#include "node.hpp"
+#include "deserialization_node.hpp"
 #include "style_component.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
@@ -19,21 +19,21 @@ namespace style {
 
     class NodesToStyleComponents {
         const Config *config;
-        Node *tree = nullptr;
+        DeserializationNode *tree = nullptr;
         // for each inner style block, multiple components list definitions (separated by commas in the style files)
         std::list<std::list<StyleComponentDataList *> *> requiredStyleComponentsLists = std::list<std::list<StyleComponentDataList *> *>();
         std::list<StyleBlock *> *styleDefinitions = nullptr;
 
-        Node *importStyle(const std::string &fileName);
+        DeserializationNode *importStyle(const std::string &fileName);
 
-        static Node *joinStyleDeclarations(Node *firstDeclarations, Node *secondDeclarations);
-        static void moveNestedBlocksToRoot(Node *style);
-        void flattenStyle(Node *style);
-        void removeEmptyBlocks(Node *style);
+        static DeserializationNode *joinStyleDeclarations(DeserializationNode *firstDeclarations, DeserializationNode *secondDeclarations);
+        static void moveNestedBlocksToRoot(DeserializationNode *style);
+        void flattenStyle(DeserializationNode *style);
+        void removeEmptyBlocks(DeserializationNode *style);
 
         std::list<StyleComponentDataList *> *convertStyleComponents();
 
-        StyleValue *convertStyleNodeToStyleValue(Node *node);
+        StyleValue *convertStyleNodeToStyleValue(DeserializationNode *node);
 
         StyleValuesMap *convertAppliedStyle(int fileNumber, int *ruleNumber);
 
@@ -49,7 +49,7 @@ namespace style {
 
     public:
             NodesToStyleComponents(const Config *config): config{config} {}
-        std::list<StyleBlock *> *convert(Node *tree, int fileNumber, int *ruleNumber);
+        std::list<StyleBlock *> *convert(DeserializationNode *tree, int fileNumber, int *ruleNumber);
     };
 
 } // namespace style
