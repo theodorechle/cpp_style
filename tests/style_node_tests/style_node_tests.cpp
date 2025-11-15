@@ -1,4 +1,4 @@
-#include "style_nodes_tests.hpp"
+#include "style_node_tests.hpp"
 
 namespace styleNodesTests {
     void displayValue(style::StyleValue *value) {

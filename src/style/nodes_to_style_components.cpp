@@ -69,24 +69,19 @@ namespace style {
         }
         buffer << file.rdbuf();
         try {
-            tokens = Lexer(config, buffer.str()).getResult();
+            tokens = Lexer().lexe(buffer.str());
             result = Parser(tokens).getFinalTree();
+            delete tokens;
+            return result;
         }
         catch (const ParserException &) {
             delete tokens;
-            delete result;
             throw;
         }
-        catch (const LexerException &) {
-            delete tokens;
-            delete result;
-            throw;
-        }
-        delete tokens;
-        return result;
     }
 
-    DeserializationNode *NodesToStyleComponents::joinStyleDeclarations(DeserializationNode *firstDeclarations, DeserializationNode *secondDeclarations) {
+    DeserializationNode *NodesToStyleComponents::joinStyleDeclarations(DeserializationNode *firstDeclarations,
+                                                                       DeserializationNode *secondDeclarations) {
         DeserializationNode *newDeclarations = new DeserializationNode(Token::NullRoot);
         DeserializationNode *actualDeclaration;
         DeserializationNode *secondDeclarationsIt;
@@ -157,7 +152,7 @@ namespace style {
         style = style->child();
         DeserializationNode *next;
         while (style != nullptr) {
-            if (style->getLastChild()->nbChilds() == 0) {
+            if (style->child() != nullptr && style->getLastChild()->nbChilds() == 0) {
                 next = style->next();
                 style->parent()->removeSpecificChild(style);
                 style = next;

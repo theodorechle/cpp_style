@@ -297,8 +297,10 @@ namespace style {
         if (parsedTree->token() != Token::NullRoot) throw MalformedExpression("A '@' (at) token must be on the root level");
         currentNode = currentNode->next();
         if (currentNode == nullptr) throw MalformedExpression("A '@' (at) token must not be alone");
-        if (currentNode->token() == Token::RawName && currentNode->value() == "import")
+        if (currentNode->token() == Token::RawName && currentNode->value() == "import") {
+            removeWhiteSpaces();
             parsedTree = parsedTree->addChild(new DeserializationNode{Token::Import});
+        }
         else throw MalformedExpression("Invalid '@' (at) placement");
     }
 

@@ -1,6 +1,6 @@
-#include "style_deserialization_tests.hpp"
+#include "deserialization_tests.hpp"
 
-namespace styleDeserializationTests {
+namespace deserializationTests {
 
     test::Result checkStyleComponentDataList(const style::StyleComponentDataList *testedData, const style::StyleComponentDataList *expectedData) {
         if (testedData == nullptr && expectedData == nullptr) return test::Result::SUCCESS;
@@ -341,4 +341,4 @@ namespace styleDeserializationTests {
         tests->endTestBlock();
     }
 
-} // namespace styleDeserializationTests
+} // namespace deserializationTests

@@ -38,6 +38,6 @@ constexpr std::string_view PERCENTAGE_UNIT = "%";
 //                                                     {"padding", {false, true, true, true, false, {}}}},
 //                                                    {std::string(PIXEL_UNIT), std::string(PERCENTAGE_UNIT)}};
 
-const style::Config guiStyleConfig = style::Config{{}, {std::string(PIXEL_UNIT), std::string(PERCENTAGE_UNIT)}};
+const style::config::Config guiStyleConfig = style::config::Config{{}, {std::string(PIXEL_UNIT), std::string(PERCENTAGE_UNIT)}};
 
 #endif // STYLE_CONFIG_HPP

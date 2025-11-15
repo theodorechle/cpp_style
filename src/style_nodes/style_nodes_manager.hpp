@@ -17,7 +17,7 @@ namespace style {
         namespace manager {
 
             class StyleNodesManager {
-                const Config *config;
+                const config::Config *config;
                 elementStyle::StyleNode *elements = nullptr;
                 std::list<StyleBlock *> style = {};
                 int fileCount = 0;
@@ -36,7 +36,7 @@ namespace style {
                                                      elementStyle::StyleNode *elementStyle);
 
             public:
-                StyleNodesManager(const Config *config) : config{config} {}
+                StyleNodesManager(const config::Config *config) : config{config} {}
                 ~StyleNodesManager();
                 void setParentElementStyle(elementStyle::StyleNode *elementStyle) { elements = elementStyle; }
                 void setFontsPath(const std::string &path);

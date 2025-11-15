@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include "abstract_configuration.hpp"
 #include "deserialization_node.hpp"
 
 constexpr int MAX_ERROR_COMPLEMENTARY_INFOS_SIZE = 20;
@@ -26,52 +25,42 @@ namespace style {
         UnknownValue(const std::string &value) : LexerException{"Error : Unknown value '" + value + "'"} {};
     };
 
-    const std::map<char, Token> RESERVED_CHARACTERS = {
-        {'(', Token::OpeningParenthesis},
-        {')', Token::ClosingParenthesis},
-        {'{', Token::OpeningCurlyBracket},
-        {'}', Token::ClosingCurlyBracket},
-        {',', Token::Comma},
-        {':', Token::Colon},
-        {';', Token::SemiColon},
-        {'>', Token::GreaterThan},
-        {'#', Token::Sharp},
-        {'.', Token::Dot},
-        {'&', Token::Ampersand},
-        {'@', Token::At},
-        {'*', Token::Star}
-    };
+    const std::map<char, Token> RESERVED_CHARACTERS = {{'(', Token::OpeningParenthesis},
+                                                       {')', Token::ClosingParenthesis},
+                                                       {'{', Token::OpeningCurlyBracket},
+                                                       {'}', Token::ClosingCurlyBracket},
+                                                       {',', Token::Comma},
+                                                       {':', Token::Colon},
+                                                       {';', Token::SemiColon},
+                                                       {'>', Token::GreaterThan},
+                                                       {'#', Token::Sharp},
+                                                       {'.', Token::Dot},
+                                                       {'&', Token::Ampersand},
+                                                       {'@', Token::At},
+                                                       {'*', Token::Star}};
 
     const std::vector<char> RAW_NAME_ALLOWED_SPECIAL_CHARACTERS = {'-', '_'};
 
     class Lexer {
-        bool lexed;
         size_t index = 0;
-        const Config *config;
-        const std::string &expression;
-        size_t expressionLength;
-        DeserializationNode *firstNode = new DeserializationNode(Token::NullRoot);
-        DeserializationNode *parsedTree = firstNode;
+        std::string expression = "";
+        DeserializationNode *parsedTree = nullptr;
 
     public:
-        Lexer(const Config *config, const std::string &expression) : config{config}, expression{expression}, expressionLength{expression.length()} {
-            lexe();
-        };
-        void lexe();
-        void lexeSpace();
-        void lexeLineReturn();
-        void lexeOneLineComment();
-        void lexeMultiLineComment();
-        void lexeRawName();
-        void lexeStringDoubleQuotes();
-        void lexeStringSingleQuotes();
-        void lexeInt();
-        void lexeFloat();
-        void lexeBool();
+        DeserializationNode *lexe(const std::string &expression);
+        size_t lexeSpace();
+        size_t lexeLineReturn();
+        size_t lexeOneLineComment();
+        size_t lexeMultiLineComment();
+        size_t lexeRawName();
+        size_t lexeStringDoubleQuotes();
+        size_t lexeStringSingleQuotes();
+        size_t lexeInt();
+        size_t lexeFloat();
+        size_t lexeBool();
         std::string getUnit(int expressionIndex, int *size);
-        void lexeUnit();
-        void lexeReservedCharacters();
-        DeserializationNode *getResult() { return firstNode; }
+        size_t lexeUnit();
+        size_t lexeReservedCharacters();
     };
 
 } // namespace style

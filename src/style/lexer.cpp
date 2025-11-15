@@ -2,54 +2,50 @@
 
 namespace style {
 
-    void Lexer::lexeSpace() {
+    size_t Lexer::lexeSpace() {
         size_t i = 0;
-        while (index + i < expressionLength && (expression[index + i] == ' ' || expression[index + i] == '\t')) {
+        while (index + i < expression.length() && (expression[index + i] == ' ' || expression[index + i] == '\t')) {
             i++;
         }
         if (i > 0) {
             parsedTree->appendNext(new DeserializationNode(Token::Space));
-            lexed = true;
-            index += i;
         }
+        return i;
     }
 
-    void Lexer::lexeLineReturn() {
+    size_t Lexer::lexeLineReturn() {
         size_t i = 0;
-        while (index + i < expressionLength && expression[index + i] == '\n') {
+        while (index + i < expression.length() && expression[index + i] == '\n') {
             i++;
         }
-        if (i == 0) return;
+        if (i == 0) return 0;
         parsedTree->appendNext(new DeserializationNode(Token::LineBreak));
-        lexed = true;
-        index += i;
+        return i;
     }
 
-    void Lexer::lexeOneLineComment() {
-        if (expression[index] != '/' || expression[index + 1] != '/') return;
-        int i = 1;
+    size_t Lexer::lexeOneLineComment() {
+        if (expression[index] != '/' || expression[index + 1] != '/') return 0;
+        size_t i = 1;
         while (index + i + 1 < expression.size() && expression[index + i + 1] != '\n') {
             i++;
         }
         parsedTree->appendNext(new DeserializationNode(Token::OneLineComment, expression.substr(index + 2, i - 1)));
-        lexed = true;
-        index += i + 1;
+        return i + 1;
     }
 
-    void Lexer::lexeMultiLineComment() {
-        if (expression[index] != '/' || index + 1 == expression.size() || expression[index + 1] != '*') return;
-        int i = 1;
+    size_t Lexer::lexeMultiLineComment() {
+        if (expression[index] != '/' || index + 1 == expression.size() || expression[index + 1] != '*') return 0;
+        size_t i = 1;
         while (index + i + 2 < expression.size() && !(expression[index + i + 1] == '*' && expression[index + i + 2] == '/')) {
             i++;
         }
-        if (index + i + 2 >= expression.size()) return;
+        if (index + i + 2 >= expression.size()) return 0;
         parsedTree->appendNext(new DeserializationNode(Token::MultiLineComment, expression.substr(index + 2, i - 1)));
-        lexed = true;
-        index += i + 3;
+        return i + 3;
     }
 
-    void Lexer::lexeRawName() {
-        if (!std::isalnum(expression[index])) return;
+    size_t Lexer::lexeRawName() {
+        if (!std::isalnum(expression[index])) return 0;
         size_t i = 1;
         while (std::isalnum(expression[index + i])
                || std::find(RAW_NAME_ALLOWED_SPECIAL_CHARACTERS.cbegin(), RAW_NAME_ALLOWED_SPECIAL_CHARACTERS.cend(), expression[index + i])
@@ -57,55 +53,51 @@ namespace style {
             i++;
         }
         parsedTree->appendNext(new DeserializationNode(Token::RawName, expression.substr(index, i)));
-        index += i;
-        lexed = true;
+        return i;
     }
 
-    void Lexer::lexeStringDoubleQuotes() {
-        if (expression[index] != '"') return;
-        int i = 1;
-        while (index + i + 1 < expressionLength && expression[index + i + 1] != '"') {
+    size_t Lexer::lexeStringDoubleQuotes() {
+        if (expression[index] != '"') return 0;
+        size_t i = 1;
+        while (index + i + 1 < expression.length() && expression[index + i + 1] != '"') {
             i++;
         }
-        if (i != 1 && (index + i >= expressionLength || expression[index + i + 1] != '"')) return;
+        if (i != 1 && (index + i >= expression.length() || expression[index + i + 1] != '"')) return 0;
         parsedTree->appendNext(new DeserializationNode(Token::String, (i == 1) ? "" : expression.substr(index + 1, i)));
-        lexed = true;
-        index += i + 2;
+        return i + 2;
     }
 
-    void Lexer::lexeStringSingleQuotes() {
-        if (expression[index] != '\'') return;
-        int i = 1;
-        while (index + i + 1 < expressionLength && expression[index + i + 1] != '\'') {
+    size_t Lexer::lexeStringSingleQuotes() {
+        if (expression[index] != '\'') return 0;
+        size_t i = 1;
+        while (index + i + 1 < expression.length() && expression[index + i + 1] != '\'') {
             i++;
         }
 
-        if (i != 1 && (index + i >= expressionLength || expression[index + i + 1] != '\'')) return;
+        if (i != 1 && (index + i >= expression.length() || expression[index + i + 1] != '\'')) return 0;
         parsedTree->appendNext(new DeserializationNode(Token::String, (i == 1) ? "" : expression.substr(index + 1, i)));
-        lexed = true;
-        index += i + 2;
+        return i + 2;
     }
 
-    void Lexer::lexeInt() {
+    size_t Lexer::lexeInt() {
         size_t i = 0;
         if (expression[index] == '-') i++;
-        if (!isdigit(expression[index + i])) return;
+        if (!isdigit(expression[index + i])) return 0;
         int tmpSize;
-        while (index + i < expressionLength && isdigit(expression[index + i])) {
+        while (index + i < expression.length() && isdigit(expression[index + i])) {
             i++;
         }
-        if (index + i < expressionLength
+        if (index + i < expression.length()
             && RESERVED_CHARACTERS.find(expression[index + i]) == RESERVED_CHARACTERS.cend()
             && expression[index + i] != ' '
             && expression[index + i] != '\n'
             && !getUnit(i, &tmpSize).size())
-            return; // not an int
+            return 0;
         parsedTree->appendNext(new DeserializationNode(Token::Int, expression.substr(index, i)));
-        index += i;
-        lexed = true;
+        return i;
     }
 
-    void Lexer::lexeFloat() {
+    size_t Lexer::lexeFloat() {
         int tmpSize;
         bool dotFound = false;
         size_t i = 0;
@@ -114,43 +106,44 @@ namespace style {
             i++;
             min_index++;
         }
-        while (index + i < expressionLength) {
+        while (index + i < expression.length()) {
             if (expression[index + i] == '.') {
                 if (!dotFound) dotFound = true;
-                else return;
+                else return 0;
             }
-            else if (!isdigit(expression[index + i])) return;
+            else if (!isdigit(expression[index + i])) return 0;
             i++;
         }
-        if (!dotFound || i < min_index) return; // need at least one int (0-9) and a dot
-        if (index + i < expressionLength
+        if (!dotFound || i < min_index) return 0; // need at least one int (0-9) and a dot
+        if (index + i < expression.length()
             && RESERVED_CHARACTERS.find(expression[index + i]) == RESERVED_CHARACTERS.cend()
             && expression[index + i] != ' '
             && expression[index + i] != '\n'
             && !getUnit(i, &tmpSize).size())
-            return; // not a float
+            return 0;
         parsedTree->appendNext(new DeserializationNode(Token::Float, expression.substr(index, i)));
-        index += i;
-        lexed = true;
+        return i;
     }
 
-    void Lexer::lexeBool() {
+    size_t Lexer::lexeBool() {
         if (expression.substr(index, TRUE.size()) == TRUE) {
             parsedTree->appendNext(new DeserializationNode(Token::Bool, expression.substr(index, TRUE.size())));
-            index += TRUE.size();
-            lexed = true;
+            return TRUE.size();
         }
         else if (expression.substr(index, FALSE.size()) == FALSE) {
             parsedTree->appendNext(new DeserializationNode(Token::Bool, expression.substr(index, FALSE.size())));
-            index += FALSE.size();
-            lexed = true;
+            return FALSE.size();
         }
+        return 0;
     }
 
     std::string Lexer::getUnit(int expressionIndex, int *size) {
         size_t i;
         bool equal;
-        for (const std::string &unit : config->units) {
+        // TODO: either use config or parse all possible units (need a definition of what a unit can be)
+        constexpr std::string_view PIXEL_UNIT = "px";
+        constexpr std::string_view PERCENTAGE_UNIT = "%";
+        for (const std::string &unit : {std::string(PIXEL_UNIT), std::string(PERCENTAGE_UNIT)}) {
             equal = true;
             for (i = 0; i < unit.size(); i++) {
                 if (expression[index + expressionIndex + i] != unit[i]) {
@@ -167,43 +160,46 @@ namespace style {
         return "";
     }
 
-    void Lexer::lexeUnit() {
+    size_t Lexer::lexeUnit() {
         int size;
         std::string unit = getUnit(0, &size);
-        if (!unit.size()) return;
-        index += size;
-        lexed = true;
+        if (!unit.size()) return 0;
         parsedTree->appendNext(new DeserializationNode(Token::Unit, unit));
+        return size;
     }
 
-    void Lexer::lexeReservedCharacters() {
+    size_t Lexer::lexeReservedCharacters() {
         std::map<char, Token>::const_iterator specialCharIt = RESERVED_CHARACTERS.find(expression[index]);
-        if (specialCharIt == RESERVED_CHARACTERS.cend()) return;
+        if (specialCharIt == RESERVED_CHARACTERS.cend()) return 0;
         parsedTree->appendNext(new DeserializationNode(specialCharIt->second));
-        index++;
-        lexed = true;
+        return 1;
     }
 
-    void Lexer::lexe() {
-        while (index < expressionLength) {
-            lexed = false;
-            lexeSpace();
-            if (!lexed) lexeLineReturn();
-            if (!lexed) lexeOneLineComment();
-            if (!lexed) lexeMultiLineComment();
-            if (!lexed) lexeStringDoubleQuotes();
-            if (!lexed) lexeStringSingleQuotes();
-            if (!lexed) lexeFloat();
-            if (!lexed) lexeInt();
-            if (!lexed) lexeBool();
-            if (!lexed) lexeUnit();
-            if (!lexed) lexeRawName();
-            if (!lexed) lexeReservedCharacters();
-            if (!lexed) {
+    DeserializationNode *Lexer::lexe(const std::string &expression) {
+        this->expression = expression;
+        DeserializationNode *firstNode = new DeserializationNode(Token::NullRoot);
+        parsedTree = firstNode;
+        size_t increment;
+
+        while (index < expression.length()) {
+            increment = lexeSpace();
+            if (!increment) increment = lexeLineReturn();
+            if (!increment) increment = lexeOneLineComment();
+            if (!increment) increment = lexeMultiLineComment();
+            if (!increment) increment = lexeStringDoubleQuotes();
+            if (!increment) increment = lexeStringSingleQuotes();
+            if (!increment) increment = lexeFloat();
+            if (!increment) increment = lexeInt();
+            if (!increment) increment = lexeBool();
+            if (!increment) increment = lexeUnit();
+            if (!increment) increment = lexeRawName();
+            if (!increment) increment = lexeReservedCharacters();
+            if (!increment) {
                 delete firstNode;
                 firstNode = nullptr;
                 throw UnknownValue(expression.substr(index, MAX_ERROR_COMPLEMENTARY_INFOS_SIZE));
             }
+            index += increment;
 #ifdef DEBUG
             std::cerr << tokenToString(parsedTree->token()) << ": '" << parsedTree->value() << "'\n";
 #endif
@@ -213,7 +209,7 @@ namespace style {
         DeserializationNode *nextList = firstNode->next();
         firstNode->next(nullptr);
         delete firstNode;
-        firstNode = nextList;
+        return nextList;
     }
 
 } // namespace style

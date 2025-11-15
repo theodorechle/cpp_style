@@ -1,27 +1,38 @@
 #ifndef ABSTRACT_CONFIGURATION_HPP
 #define ABSTRACT_CONFIGURATION_HPP
 
-#include "../../cpp_commons/src/value_node.hpp"
+#include "../../cpp_commons/src/node.hpp"
 #include "tokens.hpp"
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-namespace style {
-    struct Rule {
-        // replace with list of trees of allowed tokens
-        bool string;
-        bool intNumber;
-        bool floatNumber;
-        bool withUnit;
-        bool hexadecimal; // + tuples
-        std::vector<std::string> enumValues;
+namespace style::config {
+    class ConfigRuleNode : public commons::Node<ConfigRuleNode> {
+        Token _token;
+
+    public:
+        ConfigRuleNode(const Token token) : _token{token} {}
+        const Token &token() const { return _token; }
+    };
+
+    class ConfigRuleNodeEnum : public ConfigRuleNode {
+        const std::vector<std::string> _allowedValues;
+
+    public:
+        ConfigRuleNodeEnum(const std::vector<std::string> allowedValues) : ConfigRuleNode{Token::EnumValue}, _allowedValues{allowedValues} {}
+        const std::vector<std::string> &allowedValues() const { return _allowedValues; }
     };
 
     struct Config {
-        std::unordered_map<std::string, commons::ValueNode<Token>> rules;
+        std::unordered_map<std::string, ConfigRuleNode> rules;
         std::vector<std::string> units;
     };
-} // namespace style
+
+    /*
+    return whether the config is valid
+    */
+    bool configChecker(Config config);
+} // namespace style::config
 
 #endif // ABSTRACT_CONFIGURATION_HPP

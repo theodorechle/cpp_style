@@ -2,7 +2,8 @@
 
 namespace style {
 
-    std::list<StyleBlock *> *StyleDeserializer::deserializeFromFile(const std::string &fileName, int fileNumber, int *ruleNumber, const Config *config) {
+    std::list<StyleBlock *> *StyleDeserializer::deserializeFromFile(const std::string &fileName, int fileNumber, int *ruleNumber,
+                                                                    const config::Config *config) {
         std::ifstream file(fileName);
         std::stringstream buffer;
         if (!file.is_open()) {
@@ -14,12 +15,12 @@ namespace style {
         return deserialize(buffer.str(), fileNumber, ruleNumber, config);
     }
 
-    std::list<StyleBlock *> *StyleDeserializer::deserialize(const std::string &style, int fileNumber, int *ruleNumber, const Config *config) {
+    std::list<StyleBlock *> *StyleDeserializer::deserialize(const std::string &style, int fileNumber, int *ruleNumber, const config::Config *config) {
         std::list<StyleBlock *> *deserializedStyle = nullptr;
         DeserializationNode *tokens = nullptr;
         DeserializationNode *result = nullptr;
         try {
-            tokens = Lexer(config, style).getResult();
+            tokens = Lexer().lexe(style);
             result = Parser(tokens).getFinalTree();
             deserializedStyle = NodesToStyleComponents(config).convert(result, fileNumber, ruleNumber);
         }
@@ -38,4 +39,4 @@ namespace style {
         return deserializedStyle;
     }
 
-} // namespace Style
+} // namespace style

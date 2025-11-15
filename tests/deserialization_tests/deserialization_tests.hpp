@@ -5,7 +5,7 @@
 #include "../../src/style/style_deserializer.hpp"
 #include "../style_config.hpp"
 
-namespace styleDeserializationTests {
+namespace deserializationTests {
     test::Result checkStyleComponentDataList(const style::StyleComponentDataList *testedData, const style::StyleComponentDataList *expectedData);
     test::Result checkStyleValue(style::StyleValue *testedValue, style::StyleValue *expectedValue);
     test::Result checkStyleRule(const style::StyleRule *testedRule, const style::StyleRule *expectedRule);
@@ -22,6 +22,6 @@ namespace styleDeserializationTests {
 
     void testsDeserialization(test::Tests *tests);
 
-} // namespace styleDeserializationTests
+} // namespace deserializationTests
 
 #endif // DESERIALIZATION_TESTS_HPP
