@@ -21,7 +21,7 @@ namespace style {
         DeserializationNode *result = nullptr;
         try {
             tokens = Lexer().lexe(style);
-            result = Parser(tokens).getFinalTree();
+            result = Parser().parse(tokens);
             deserializedStyle = NodesToStyleComponents(config).convert(result, fileNumber, ruleNumber);
         }
         catch (const ParserException &) {

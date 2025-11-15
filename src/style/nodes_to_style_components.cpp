@@ -70,7 +70,7 @@ namespace style {
         buffer << file.rdbuf();
         try {
             tokens = Lexer().lexe(buffer.str());
-            result = Parser(tokens).getFinalTree();
+            result = Parser().parse(tokens);
             delete tokens;
             return result;
         }

@@ -19,7 +19,8 @@ namespace style {
 
     class UnknownToken : public ParserException {
     public:
-        UnknownToken(const DeserializationNode &token) : ParserException{"Unknown token: \"" + token.value() + " (" + tokenToString(token.token()) + ")\""} {};
+        UnknownToken(const DeserializationNode &token)
+            : ParserException{"Unknown token: \"" + token.value() + " (" + tokenToString(token.token()) + ")\""} {};
     };
 
     class MissingToken : public ParserException {
@@ -37,15 +38,15 @@ namespace style {
      */
     class Parser {
         /**
-         * The expressionTreeRoot should never contains a pointer pointing to currentNode in any way,
+         * The expressionTreeRoot should never contains a pointer pointing to _currentNode in any way,
          * because it could be used and freed in the calling program after the parser call.
          * Consider currentNode as const
          */
-        DeserializationNode *currentNode;
+        DeserializationNode *_currentNode;
 
         // only used to avoid recalculating many times the root
-        DeserializationNode *expressionTreeRoot = new DeserializationNode(Token::NullRoot);
-        DeserializationNode *parsedTree = expressionTreeRoot;
+        DeserializationNode *_expressionTreeRoot = nullptr;
+        DeserializationNode *_parsedTree = nullptr;
         bool isValidName(const std::string &str, size_t start, size_t end);
         bool isValidElementOrRuleName(const std::string &str);
         bool isWhiteSpace(Token token);
@@ -55,8 +56,6 @@ namespace style {
         void removeLineReturn();
         // removes all spaces and line returns childs
         void removeWhiteSpaces();
-
-        void parse();
 
         void parseSpace();
         void parseLineBreak();
@@ -89,8 +88,7 @@ namespace style {
         void parseModifier();
 
     public:
-        Parser(DeserializationNode *currentNode) : currentNode{currentNode} { parse(); };
-        DeserializationNode *getFinalTree() { return expressionTreeRoot; }
+        DeserializationNode *parse(DeserializationNode *currentNode);
     };
 
 } // namespace style

@@ -11,7 +11,7 @@ namespace testsParser {
         std::cout << ":\n";
         try {
             style::DeserializationNode *tokens = style::Lexer().lexe(expression);
-            style::DeserializationNode *result = style::Parser(tokens).getFinalTree();
+            style::DeserializationNode *result = style::Parser().parse(tokens);
             if (areSameNodes(result, expected) == equal) testResult = test::Result::SUCCESS;
             else testResult = test::Result::FAILURE;
             delete result;
@@ -36,7 +36,7 @@ namespace testsParser {
         style::DeserializationNode *result = nullptr;
         try {
             tokens = style::Lexer().lexe(expression);
-            result = style::Parser(tokens).getFinalTree();
+            result = style::Parser().parse(tokens);
             testResult = test::Result::FAILURE;
         }
         catch (std::exception &exception) {
@@ -776,7 +776,7 @@ namespace testsParser {
         tests->beginTestBlock("Tests parser");
         tests->addTest(testParsingEmpty, "Empty");
 
-        tests->beginTestBlock("Data types");
+        tests->beginTestBlock("Data types", false);
         tests->addTest(testParsingHexRule, "Hex rule");
         tests->addTest(testParsingHexRuleMultipleChars, "Hex rule multiple chars");
         tests->addTest(testParsingHexRuleOnlyInts, "Hex rule only ints");

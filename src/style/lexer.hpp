@@ -42,9 +42,9 @@ namespace style {
     const std::vector<char> RAW_NAME_ALLOWED_SPECIAL_CHARACTERS = {'-', '_'};
 
     class Lexer {
-        size_t index = 0;
-        std::string expression = "";
-        DeserializationNode *parsedTree = nullptr;
+        size_t _index = 0;
+        std::string _expression = "";
+        DeserializationNode *_parsedTree = nullptr;
 
     public:
         DeserializationNode *lexe(const std::string &expression);
