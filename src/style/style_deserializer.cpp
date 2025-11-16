@@ -16,10 +16,12 @@ namespace style {
     }
 
     std::list<StyleBlock *> *StyleDeserializer::deserialize(const std::string &style, int fileNumber, int *ruleNumber, const config::Config *config) {
+
         std::list<StyleBlock *> *deserializedStyle = nullptr;
         DeserializationNode *tokens = nullptr;
         DeserializationNode *result = nullptr;
         try {
+            config::configChecker(config);
             tokens = Lexer().lexe(style);
             result = Parser().parse(tokens);
             deserializedStyle = NodesToStyleComponents(config).convert(result, fileNumber, ruleNumber);

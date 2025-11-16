@@ -17,20 +17,20 @@ namespace style {
         const char *what() const noexcept override { return message.c_str(); }
     };
 
-    class UnknownToken : public ParserException {
+    class UnknownTokenException : public ParserException {
     public:
-        UnknownToken(const DeserializationNode &token)
+        UnknownTokenException(const DeserializationNode &token)
             : ParserException{"Unknown token: \"" + token.value() + " (" + tokenToString(token.token()) + ")\""} {};
     };
 
-    class MissingToken : public ParserException {
+    class MissingTokenException : public ParserException {
     public:
-        MissingToken(const std::string &token) : ParserException{"Missing token: \"" + token + "\""} {};
+        MissingTokenException(const std::string &token) : ParserException{"Missing token: \"" + token + "\""} {};
     };
 
-    class MalformedExpression : public ParserException {
+    class MalformedExpressionException : public ParserException {
     public:
-        MalformedExpression(const std::string &expression) : ParserException{"Malformed expression: \"" + expression + "\""} {};
+        MalformedExpressionException(const std::string &expression) : ParserException{"Malformed expression: \"" + expression + "\""} {};
     };
 
     /**
@@ -47,11 +47,15 @@ namespace style {
         // only used to avoid recalculating many times the root
         DeserializationNode *_expressionTreeRoot = nullptr;
         DeserializationNode *_parsedTree = nullptr;
-        bool isValidName(const std::string &str, size_t start, size_t end);
-        bool isValidElementOrRuleName(const std::string &str);
-        bool isWhiteSpace(Token token);
+        static bool isValidName(const std::string &str, size_t start, size_t end);
+
+    public:
+        static bool isValidElementOrRuleName(const std::string &str);
+
+    private:
+        static bool isWhiteSpace(Token token);
         // relations are direct parent, any parent, same element, ...
-        bool isComponentRelation(Token token);
+        static bool isComponentRelation(Token token);
         void removeSpace();
         void removeLineReturn();
         // removes all spaces and line returns childs

@@ -171,14 +171,14 @@ namespace style {
         StyleRelation styleRelationToken;
         std::string currentValue;
 
-        if (tree == nullptr || tree->token() != Token::BlockDeclaration)
+        if (tree == nullptr || tree->token() != Token::BlockSelectors)
             return nullptr; // TODO: it can't happen if previous steps passed (I think there is a lot of checks who are useless)
 
         styleComponentsLists = new std::list<StyleComponentDataList *>();
         declaration = tree->child();
         // loop through declarations
         while (declaration != nullptr) {
-            if (declaration->token() != Token::Declaration) { // invalid block declaration
+            if (declaration->token() != Token::Selector) { // invalid block declaration
                 delete styleComponentsLists;                  // TODO: how could this even happen?
                 return nullptr;
             }
@@ -252,7 +252,7 @@ namespace style {
         DeserializationNode *oldTree;
         DeserializationNode *ruleNameNode;
         Token token;
-        if (tree == nullptr || tree->token() != Token::BlockContent) return nullptr;
+        if (tree == nullptr || tree->token() != Token::BlockDeclarations) return nullptr;
 
         appliedStyleMap = new StyleValuesMap();
         rule = tree->child();

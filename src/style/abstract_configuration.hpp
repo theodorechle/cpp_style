@@ -3,11 +3,21 @@
 
 #include "../../cpp_commons/src/node.hpp"
 #include "tokens.hpp"
+#include <algorithm>
+#include <exception>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace style::config {
+    class InvalidStyleConfigException : public std::exception {
+        std::string message;
+
+    public:
+        InvalidStyleConfigException(const std::string &message) : message{message} {};
+        const char *what() const noexcept override { return message.c_str(); }
+    };
+
     class ConfigRuleNode : public commons::Node<ConfigRuleNode> {
         Token _token;
 
@@ -25,14 +35,18 @@ namespace style::config {
     };
 
     struct Config {
-        std::unordered_map<std::string, ConfigRuleNode> rules;
+        std::unordered_map<std::string, const ConfigRuleNode *> rules;
         std::vector<std::string> units;
     };
+
+    extern std::array<Token, 2> NESTABLE_TOKENS;
+
+    void configNodeChecker(const ConfigRuleNode *node);
 
     /*
     return whether the config is valid
     */
-    bool configChecker(Config config);
+    void configChecker(const Config *config);
 } // namespace style::config
 
 #endif // ABSTRACT_CONFIGURATION_HPP

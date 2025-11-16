@@ -308,19 +308,19 @@ namespace deserializationTests {
     }
 
     test::Result testMissingSemiColonAfterAssignment() {
-        return checkDeserializationError<style::MissingToken>(".container      label#red{text-color : #ff0000}");
+        return checkDeserializationError<style::MissingTokenException>(".container      label#red{text-color : #ff0000}");
     }
 
-    test::Result testMissingStyleValue() { return checkDeserializationError<style::MalformedExpression>(".container>label#red{text-color;}"); }
+    test::Result testMissingStyleValue() { return checkDeserializationError<style::MalformedExpressionException>(".container>label#red{text-color;}"); }
 
-    test::Result testMissingRuleName() { return checkDeserializationError<style::MalformedExpression>(".container>label#red{: value}"); }
+    test::Result testMissingRuleName() { return checkDeserializationError<style::MalformedExpressionException>(".container>label#red{: value}"); }
 
-    test::Result testMissingRuleNameAndValue() { return checkDeserializationError<style::MalformedExpression>(".container>label#red{:}"); }
+    test::Result testMissingRuleNameAndValue() { return checkDeserializationError<style::MalformedExpressionException>(".container>label#red{:}"); }
 
-    test::Result testMissingBlockDeclaration() { return checkDeserializationError<style::MalformedExpression>("{text-color: #ffffff;}"); }
+    test::Result testMissingBlockDeclaration() { return checkDeserializationError<style::MalformedExpressionException>("{text-color: #ffffff;}"); }
 
     test::Result testMissingBlockDeclarationComponentBeforeDirectParentRelation() {
-        return checkDeserializationError<style::MissingToken>(">label#red{text-color: #ffffff;}");
+        return checkDeserializationError<style::MissingTokenException>(">label#red{text-color: #ffffff;}");
     }
 
     void testsDeserialization(test::Tests *tests) {

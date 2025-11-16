@@ -27,9 +27,9 @@ namespace style {
         Star,
         // Used only by the parser
         StyleBlock,
-        BlockDeclaration,
-        Declaration,
-        BlockContent,
+        BlockSelectors,
+        Selector,
+        BlockDeclarations,
         DirectParent,
         AnyParent,
         SameElement,
@@ -61,6 +61,8 @@ namespace style {
         Hex,
     };
 
+    extern std::array<Token, 9> VALUE_TYPE_TOKENS;
+
     constexpr std::string_view TRUE = "true";
     constexpr std::string_view FALSE = "false";
 
@@ -68,6 +70,6 @@ namespace style {
 
     std::ostream &operator<<(std::ostream &o, const Token type);
 
-} // namespace Style
+} // namespace style
 
 #endif // TOKENS_HPP

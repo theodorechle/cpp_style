@@ -42,12 +42,12 @@ namespace style {
         // Used only by the parser
         case Token::StyleBlock:
             return "StyleBlock";
-        case Token::BlockDeclaration:
-            return "BlockDeclaration";
-        case Token::Declaration:
-            return "Declaration";
-        case Token::BlockContent:
-            return "BlockContent";
+        case Token::BlockSelectors:
+            return "BlockSelectors";
+        case Token::Selector:
+            return "Selector";
+        case Token::BlockDeclarations:
+            return "BlockDeclarations";
         case Token::DirectParent:
             return "DirectParent";
         case Token::AnyParent:
@@ -112,5 +112,8 @@ namespace style {
         o << tokenToString(type);
         return o;
     }
+
+    std::array<Token, 9> VALUE_TYPE_TOKENS = {Token::EnumValue, Token::Tuple, Token::String, Token::Function, Token::Int,
+                                    Token::Float,     Token::Bool,  Token::Unit,   Token::Hex};
 
 } // namespace style
