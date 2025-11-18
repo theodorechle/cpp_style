@@ -91,7 +91,7 @@ namespace style {
 #ifdef DEBUG
                 std::cerr << "Adding file '" << fileName << "'\n";
 #endif
-                int fileNumber = findFile(fileName); //  TODO: allow force reload
+                int fileNumber = findFile(fileName);
                 if (fileNumber != -1) removeStyle(fileNumber);
                 std::ifstream file(fileName);
                 std::stringstream buffer;

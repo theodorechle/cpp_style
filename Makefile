@@ -11,7 +11,7 @@ COMMONS_LIB=cpp_commons/bin/cpp_commons_lib
 
 # Source files
 SRC_STYLE=$(wildcard $(SRC_DIR)/style/*.cpp) $(wildcard $(SRC_DIR)/style_nodes/*.cpp)
-SRC_TESTS=$(wildcard $(TESTS_DIR)/*/*.cpp) $(TESTS_DIR)/main.cpp
+SRC_TESTS=$(wildcard $(TESTS_DIR)/*.cpp) $(wildcard $(TESTS_DIR)/*/*.cpp)
 
 # Object files
 OBJ_STYLE=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_STYLE))

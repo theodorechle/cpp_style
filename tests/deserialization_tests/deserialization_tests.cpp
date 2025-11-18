@@ -4,7 +4,8 @@ namespace deserializationTests {
 
     test::Result checkStyleComponentDataList(const style::StyleComponentDataList *testedData, const style::StyleComponentDataList *expectedData) {
         if (testedData == nullptr && expectedData == nullptr) return test::Result::SUCCESS;
-        if ((testedData == nullptr && expectedData != nullptr) || (testedData != nullptr && expectedData == nullptr)
+        if ((testedData == nullptr && expectedData != nullptr)
+            || (testedData != nullptr && expectedData == nullptr)
             || (testedData->size() != expectedData->size())) {
             std::cerr << "One of the data list is null or the lists doesn't have the same size\n";
             return test::Result::FAILURE;
@@ -13,8 +14,11 @@ namespace deserializationTests {
         style::StyleComponentDataList::const_iterator expectedDataListIt = expectedData->cbegin();
         while (testedDataListIt != testedData->cend()) {
             if (testedDataListIt->second != expectedDataListIt->second) {
-                std::cerr << styleRelationToString(testedDataListIt->second) << " instead of relation "
-                          << styleRelationToString(expectedDataListIt->second) << "\n";
+                std::cerr
+                    << styleRelationToString(testedDataListIt->second)
+                    << " instead of relation "
+                    << styleRelationToString(expectedDataListIt->second)
+                    << "\n";
                 return test::Result::FAILURE;
             }
             if (testedDataListIt->first.first != expectedDataListIt->first.first) {
@@ -22,8 +26,11 @@ namespace deserializationTests {
                 return test::Result::FAILURE;
             }
             if (testedDataListIt->first.second != expectedDataListIt->first.second) {
-                std::cerr << styleComponentTypeToString(testedDataListIt->first.second) << " instead of type "
-                          << styleComponentTypeToString(expectedDataListIt->first.second) << "\n";
+                std::cerr
+                    << styleComponentTypeToString(testedDataListIt->first.second)
+                    << " instead of type "
+                    << styleComponentTypeToString(expectedDataListIt->first.second)
+                    << "\n";
                 return test::Result::FAILURE;
             }
             testedDataListIt++;
@@ -45,8 +52,12 @@ namespace deserializationTests {
             return test::Result::FAILURE;
         }
         if (testedValue->getType() != expectedValue->getType()) {
-            std::cerr << "The type is different (have '" << styleValueTypeToString(testedValue->getType()) << "', expected '"
-                      << styleValueTypeToString(expectedValue->getType()) << "')\n";
+            std::cerr
+                << "The type is different (have '"
+                << styleValueTypeToString(testedValue->getType())
+                << "', expected '"
+                << styleValueTypeToString(expectedValue->getType())
+                << "')\n";
             return test::Result::FAILURE;
         }
 
@@ -87,7 +98,8 @@ namespace deserializationTests {
         style::StyleValuesMap::const_iterator ruleIt;
         test::Result styleRuleCheckResult;
         if (testedStyleMap == nullptr && expectedStyleMap == nullptr) return test::Result::SUCCESS;
-        if ((testedStyleMap == nullptr && expectedStyleMap != nullptr) || (testedStyleMap != nullptr && expectedStyleMap == nullptr)
+        if ((testedStyleMap == nullptr && expectedStyleMap != nullptr)
+            || (testedStyleMap != nullptr && expectedStyleMap == nullptr)
             || (testedStyleMap->size() != expectedStyleMap->size())) {
             std::cerr << "One of the style maps list is null or the maps doesn't have the same size\n";
             return test::Result::FAILURE;
@@ -138,32 +150,36 @@ namespace deserializationTests {
     test::Result testDeserializationFromFile(const std::string &fileName, const std::list<style::StyleBlock *> *expectedStyleBlocks) {
         int fileNumber = 0;
         int ruleNumber;
+        style::config::Config *config = testConfig();
         std::list<style::StyleBlock *> *styleBlocks;
         test::Result result;
         std::cout << "Tested style file:\n" << fileName << "\n";
-        styleBlocks = style::StyleDeserializer::deserializeFromFile(fileName, fileNumber, &ruleNumber, &guiStyleConfig);
+        styleBlocks = style::StyleDeserializer::deserializeFromFile(fileName, fileNumber, &ruleNumber, config);
         result = checkStyleBlocks(styleBlocks, expectedStyleBlocks);
 
         for (style::StyleBlock *component : *styleBlocks) {
             delete component;
         }
         delete styleBlocks;
+        delete config;
         return result;
     }
 
     test::Result testDeserialization(const std::string &style, const std::list<style::StyleBlock *> *expectedStyleBlocks) {
         int fileNumber = 0;
         int ruleNumber;
+        style::config::Config *config = testConfig();
         std::list<style::StyleBlock *> *styleBlocks;
         test::Result result;
         std::cout << "Tested style:\n" << style << "\n";
-        styleBlocks = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber, &guiStyleConfig);
+        styleBlocks = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber, config);
         result = checkStyleBlocks(styleBlocks, expectedStyleBlocks);
 
         for (style::StyleBlock *component : *styleBlocks) {
             delete component;
         }
         delete styleBlocks;
+        delete config;
         return result;
     }
 
@@ -171,17 +187,19 @@ namespace deserializationTests {
     test::Result checkDeserializationError(const std::string &style) {
         int fileNumber = 0;
         int ruleNumber;
+        style::config::Config *config = testConfig();
         test::Result result;
         std::list<style::StyleBlock *> *styleBlocks;
         std::cout << "Tested style:\n" << style << "\n";
         try {
-            styleBlocks = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber, &guiStyleConfig);
+            styleBlocks = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber, config);
             result = test::Result::FAILURE;
 
             for (style::StyleBlock *component : *styleBlocks) {
                 delete component;
             }
             delete styleBlocks;
+            delete config;
         }
         catch (std::exception &exception) {
             if (dynamic_cast<T *>(&exception)) result = test::Result::SUCCESS;
@@ -202,6 +220,7 @@ namespace deserializationTests {
         style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
         style::StyleValue *styleValue;
         style::StyleBlock *styleBlock;
+        style::config::Config *config = testConfig();
         std::list<style::StyleBlock *> expectedStyleBlocks;
         test::Result result;
 
@@ -214,6 +233,7 @@ namespace deserializationTests {
         expectedStyleBlocks = {styleBlock};
         result = testDeserialization(".container      label#red{text-color : #ff0000;}", &expectedStyleBlocks);
         delete styleBlock;
+        delete config;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -307,11 +327,19 @@ namespace deserializationTests {
         return result;
     }
 
+    test::Result testEmptyBlock() {
+        std::list<style::StyleBlock *> expectedStyleBlocks = {};
+        test::Result result = testDeserialization("a {}", &expectedStyleBlocks);
+        return result;
+    }
+
     test::Result testMissingSemiColonAfterAssignment() {
         return checkDeserializationError<style::MissingTokenException>(".container      label#red{text-color : #ff0000}");
     }
 
-    test::Result testMissingStyleValue() { return checkDeserializationError<style::MalformedExpressionException>(".container>label#red{text-color;}"); }
+    test::Result testMissingStyleValue() {
+        return checkDeserializationError<style::MalformedExpressionException>(".container>label#red{text-color;}");
+    }
 
     test::Result testMissingRuleName() { return checkDeserializationError<style::MalformedExpressionException>(".container>label#red{: value}"); }
 
@@ -325,19 +353,19 @@ namespace deserializationTests {
 
     void testsDeserialization(test::Tests *tests) {
         tests->beginTestBlock("Deserialization tests");
-
-        tests->addTest(testSingleRule, "deserializing a single rule");
-        tests->addTest(testDirectParent, "direct parent");
-        tests->addTest(testDirectParentWithoutSpacesAround, "direct parent without spaces");
-        tests->addTest(testRuleNameAndValueStickedToAssignmentColon, "style name and value sticked to the assignment colon");
-        tests->addTest(testMissingSemiColonAfterAssignment, "missing semi-colon after assignment");
-        tests->addTest(testMissingStyleValue, "missing style value");
-        tests->addTest(testMissingRuleName, "missing style name");
-        tests->addTest(testMissingRuleNameAndValue, "missing style name and value");
-        tests->addTest(testMissingBlockDeclaration, "missing block declaration");
+        tests->addTest(testSingleRule, "Deserializing a single rule");
+        tests->addTest(testDirectParent, "Direct parent");
+        tests->addTest(testDirectParentWithoutSpacesAround, "Direct parent without spaces");
+        tests->addTest(testRuleNameAndValueStickedToAssignmentColon, "Style name and value sticked to the assignment colon");
+        tests->addTest(testGlobalModifier, "Global modifier");
+        tests->addTest(testEmptyBlock, "Empty block");
+        tests->addTest(testMissingSemiColonAfterAssignment, "Missing semi-colon after assignment");
+        tests->addTest(testMissingStyleValue, "Missing style value");
+        tests->addTest(testMissingRuleName, "Missing style name");
+        tests->addTest(testMissingRuleNameAndValue, "Missing style name and value");
+        tests->addTest(testMissingBlockDeclaration, "Missing block declaration");
         tests->addTest(testMissingBlockDeclarationComponentBeforeDirectParentRelation,
-                       "missing block declaration component before direct parent relation");
-        tests->addTest(testGlobalModifier, "global modifier");
+                       "Missing block declaration component before direct parent relation");
         tests->endTestBlock();
     }
 

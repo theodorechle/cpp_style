@@ -493,16 +493,16 @@ namespace testsLexer {
         tests->addTest(testLexingStar, "Star");
         tests->endTestBlock();
 
-        tests->beginTestBlock("Pseudo names");
-        tests->addTest(testLexingRawName, "Pseudo name");
-        tests->addTest(testLexingRawNameWithHyphen, "Pseudo name with hyphen");
-        tests->addTest(testLexingRawNameWithNumber, "Pseudo name with number");
-        tests->addTest(testLexingRawNameWithUnderscore, "Pseudo name with underscore");
-        tests->addTest(testLexingRawNameStartingWithNumber, "Pseudo name with starting with number");
+        tests->beginTestBlock("Raw names");
+        tests->addTest(testLexingRawName, "Raw name");
+        tests->addTest(testLexingRawNameWithHyphen, "Raw name with hyphen");
+        tests->addTest(testLexingRawNameWithNumber, "Raw name with number");
+        tests->addTest(testLexingRawNameWithUnderscore, "Raw name with underscore");
+        tests->addTest(testLexingRawNameStartingWithNumber, "Raw name with starting with number");
         tests->addTest(testLexingMinusSign, "Minus sign");
         tests->endTestBlock();
 
-        tests->beginTestBlock("Pseudo names");
+        tests->beginTestBlock("Strings");
         tests->addTest(testLexingStringDoubleQuotes, "String double quotes");
         tests->addTest(testLexingStringSingleQuotes, "String single quotes");
         tests->addTest(testLexingStringUnclosedDoubleQuotes, "String unclosed double quotes");

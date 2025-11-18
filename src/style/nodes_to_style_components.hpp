@@ -30,7 +30,10 @@ namespace style {
         static DeserializationNode *joinStyleDeclarations(DeserializationNode *firstDeclarations, DeserializationNode *secondDeclarations);
         static void moveNestedBlocksToRoot(DeserializationNode *style);
         void flattenStyle(DeserializationNode *style);
-        void removeEmptyBlocks(DeserializationNode *style);
+
+        bool ruleNodesValid(const DeserializationNode *ruleNode, const config::ConfigRuleNode *configNode);
+        bool ruleValid(const DeserializationNode *rule);
+        void filterRulesWithConfiguration(DeserializationNode *style);
 
         std::list<StyleComponentDataList *> *convertStyleComponents();
 

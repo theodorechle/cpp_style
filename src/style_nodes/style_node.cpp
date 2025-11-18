@@ -192,7 +192,7 @@ namespace style {
             }
         }
 
-        void StyleNode::addRuleAffectedByModifier(int fileNumber, int ruleNumber, std::string modifierName) {
+        void StyleNode::addRuleAffectedByModifier(int fileNumber, int ruleNumber, std::string modifierName) { // TODO: should not even be accessible from outside, only from addStyle
             std::unordered_map<std::string, std::pair<bool, std::list<std::pair<int, int>>>>::iterator modifier;
             modifier = modifiers.find(modifierName);
             if (modifier == modifiers.end()) return;

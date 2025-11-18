@@ -11,6 +11,7 @@ namespace style {
     class DeserializationNode : public commons::Node<DeserializationNode> {
         Token _token;
         std::string _value;
+    protected:
         std::string debugValue() const override;
     public:
         DeserializationNode(Token token = Token::Empty, std::string value = "", DeserializationNode *parentNode = nullptr) : _token{token}, _value{value} { parent(parentNode); };

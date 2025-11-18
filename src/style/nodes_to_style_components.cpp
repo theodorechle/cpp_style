@@ -147,17 +147,66 @@ namespace style {
         }
     }
 
-    void NodesToStyleComponents::removeEmptyBlocks(DeserializationNode *style) {
+    bool NodesToStyleComponents::ruleNodesValid(const DeserializationNode *ruleNode, const config::ConfigRuleNode *configNode) {
+        if ((ruleNode == nullptr && configNode != nullptr) || (ruleNode != nullptr && configNode == nullptr)) return false;
+        if (ruleNode->token() != configNode->token()) return false;
+        if (configNode->token() == Token::EnumValue) {
+            const std::set<std::string> &allowedValues = static_cast<const config::ConfigRuleNodeEnum *>(configNode)->allowedValues();
+            return allowedValues.find(ruleNode->value()) != allowedValues.cend();
+        }
+        return true;
+    }
+
+    bool NodesToStyleComponents::ruleValid(const DeserializationNode *rule) {
+        const DeserializationNode *ruleName = rule->child();
+        const DeserializationNode *ruleValue = ruleName->next();
+        std::unordered_map<std::string, std::vector<const config::ConfigRuleNode *>>::const_iterator configRules = config->rules.find(ruleName->value());
+        if (configRules == config->rules.cend()) return false;
+        for (const config::ConfigRuleNode *configRule : configRules->second) {
+            if (ruleNodesValid(ruleValue, configRule)) return true;
+        }
+        return false;
+    }
+
+    void NodesToStyleComponents::filterRulesWithConfiguration(DeserializationNode *style) {
         if (style == nullptr) return;
-        style = style->child();
+        DeserializationNode *block = style->child();
+        DeserializationNode *declaration;
+        DeserializationNode *rule;
+        DeserializationNode *nextRule;
         DeserializationNode *next;
-        while (style != nullptr) {
-            if (style->child() != nullptr && style->getLastChild()->nbChilds() == 0) {
-                next = style->next();
-                style->parent()->removeSpecificChild(style);
-                style = next;
+
+        while (block) {
+            declaration = block->getLastChild();
+            rule = declaration->child();
+            while (rule) {
+                nextRule = rule->next();
+                if (rule->token() == Token::Assignment && !ruleValid(rule)) {
+#ifdef DEBUG
+                    std::cerr << "invalid rule:\n";
+                    rule->debugDisplay();
+                    std::unordered_map<std::string, std::vector<const config::ConfigRuleNode *>>::const_iterator configRules =
+                        config->rules.find(rule->child()->value());
+                    if (configRules != config->rules.cend()) {
+                        std::cerr << "available config rules:\n";
+                        for (const config::ConfigRuleNode *configRule : configRules->second) {
+                            configRule->debugDisplay();
+                        }
+                    }
+
+#endif
+                    declaration->removeSpecificChild(rule);
+                    delete rule;
+                }
+                rule = nextRule;
             }
-            style = style->next();
+            if (declaration->nbChilds() == 0) {
+                next = block->next();
+                style->removeSpecificChild(block);
+                delete block;
+                block = next;
+            }
+            else block = block->next();
         }
     }
 
@@ -179,7 +228,7 @@ namespace style {
         // loop through declarations
         while (declaration != nullptr) {
             if (declaration->token() != Token::Selector) { // invalid block declaration
-                delete styleComponentsLists;                  // TODO: how could this even happen?
+                delete styleComponentsLists;               // TODO: how could this even happen?
                 return nullptr;
             }
             requiredStyleComponents = new StyleComponentDataList();
@@ -382,15 +431,20 @@ namespace style {
     std::list<StyleBlock *> *NodesToStyleComponents::convert(DeserializationNode *styleTree, int fileNumber, int *ruleNumber) {
         *ruleNumber = 0;
         if (styleTree->token() != Token::NullRoot) return nullptr;
-        styleDefinitions = new std::list<StyleBlock *>();
 
         flattenStyle(styleTree);
-        removeEmptyBlocks(styleTree);
 #ifdef DEBUG
         std::cerr << "flattened style\n";
         styleTree->debugDisplay(std::cerr);
 #endif
+        filterRulesWithConfiguration(styleTree);
+#ifdef DEBUG
+        std::cerr << "filtered style\n";
+        styleTree->debugDisplay(std::cerr);
+#endif
         tree = styleTree->child();
+
+        styleDefinitions = new std::list<StyleBlock *>();
 
         while (tree != nullptr) {
             convertStyleBlock(fileNumber, ruleNumber);

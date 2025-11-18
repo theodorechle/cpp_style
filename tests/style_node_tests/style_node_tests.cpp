@@ -40,14 +40,10 @@ namespace styleNodesTests {
 
     bool testRule(bool equal, const style::StyleRule &rule, const style::StyleRule &expected) {
         std::cout << "test if two rules are " << (equal ? "equal" : "not equal") << "\n";
-        if ((rule.enabled
-             != expected.enabled
-             || rule.fileNumber
-             != expected.fileNumber
-             || rule.ruleNumber
-             != expected.ruleNumber
-             || rule.specificity
-             != expected.specificity
+        if ((rule.enabled != expected.enabled
+             || rule.fileNumber != expected.fileNumber
+             || rule.ruleNumber != expected.ruleNumber
+             || rule.specificity != expected.specificity
              || testValue(equal, rule.value, expected.value))
             != equal) {
             std::cerr << "rules are " << (equal ? "not equal" : "equal") << "\n";
@@ -975,10 +971,9 @@ namespace styleNodesTests {
             testResult = test::Result::FAILURE;
         }
         else
-            testResult = test::booleanToResult(result->find(style::StyleComponentData{"myClass", style::StyleComponentType::Class})
-                                               != result->cend()
-                                               && result->find(style::StyleComponentData{"myId", style::StyleComponentType::Identifier})
-                                               != result->cend());
+            testResult =
+                test::booleanToResult(result->find(style::StyleComponentData{"myClass", style::StyleComponentType::Class}) != result->cend()
+                                      && result->find(style::StyleComponentData{"myId", style::StyleComponentType::Identifier}) != result->cend());
         delete node;
         return testResult;
     }
@@ -995,10 +990,9 @@ namespace styleNodesTests {
             testResult = test::Result::FAILURE;
         }
         else
-            testResult = test::booleanToResult(result->find(style::StyleComponentData{"myClass", style::StyleComponentType::Class})
-                                               != result->cend()
+            testResult = test::booleanToResult(result->find(style::StyleComponentData{"myClass", style::StyleComponentType::Class}) != result->cend()
                                                && result->find(style::StyleComponentData{"mySecondClass", style::StyleComponentType::Class})
-                                               != result->cend());
+                                                      != result->cend());
         delete node;
         return testResult;
     }
@@ -1091,6 +1085,32 @@ namespace styleNodesTests {
         node->addRuleAffectedByModifier(5, 4, "myModifier");
         node->setModifierState("myModifier", true);
         node->setModifierState("myModifier", false);
+        style::StyleValue *styleValue;
+        bool result = node->getRule("test", &styleValue, false, nullptr);
+        if (!result) {
+            std::cerr << "getRule returned false instead of expected true\n";
+            testResult = test::Result::FAILURE;
+        }
+        else {
+            style::StyleValue expectedValue = style::StyleValue("abc", style::StyleValueType::String);
+            testResult = test::booleanToResult(testValue(true, styleValue, &expectedValue, true));
+        }
+        delete node;
+        return testResult;
+    }
+
+    test::Result testAddRuleWithDisabledModifier() {
+        style::elementStyle::StyleNode *node = new style::elementStyle::StyleNode();
+        test::Result testResult;
+        style::StyleValue value = style::StyleValue("abc", style::StyleValueType::String);
+        style::elementStyle::AppliedStyleMap style = {{"test", {style::StyleRule(&value, true, 3, 5, 3)}}};
+        node->addStyle(style);
+        style::StyleValue value2 = style::StyleValue("def", style::StyleValueType::String);
+        style::elementStyle::AppliedStyleMap style2 = {{"test", {style::StyleRule(&value2, true, 15, 5, 4)}}};
+        node->addModifier("myModifier");
+        node->setModifierState("myModifier", true);
+        node->setModifierState("myModifier", false);
+        node->addStyle(style2);
         style::StyleValue *styleValue;
         bool result = node->getRule("test", &styleValue, false, nullptr);
         if (!result) {
@@ -1310,6 +1330,7 @@ namespace styleNodesTests {
         tests->addTest(testAddRuleAffectedByModifier, "add rule affected by modifier");
         tests->addTest(testEnableModifier, "enable modifier");
         tests->addTest(testDisableModifier, "disable modifier");
+        tests->addTest(testAddRuleWithDisabledModifier, "add rule with disabled modifier");
         tests->endTestBlock();
         tests->beginTestBlock("toggle rules");
         tests->addTest(testToggleRuleDisable, "toggle rule disable");
