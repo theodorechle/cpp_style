@@ -1,6 +1,9 @@
-- register where errors occurs to be able to signal them
-- check for multiple same identifiers
+- register where errors occurs to be able to signal them (without raising errors and killing the app)
+- check for multiple same identifiers (in style_nodes_manager, not when parsing)
 - nested tuples?
+
+## Tests
+Add tests for config units
 
 ## Rework modifiers
 - enable modifiers who aren't at the end of the required components list
