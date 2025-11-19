@@ -1,10 +1,10 @@
 #ifndef TOKENS_HPP
 #define TOKENS_HPP
 
+#include <array>
 #include <iostream>
 #include <map>
 #include <string>
-#include <array>
 
 namespace style {
 

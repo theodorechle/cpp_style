@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "abstract_configuration.hpp"
 #include "deserialization_node.hpp"
 
 constexpr int MAX_ERROR_COMPLEMENTARY_INFOS_SIZE = 20;
@@ -42,12 +43,13 @@ namespace style {
     const std::vector<char> RAW_NAME_ALLOWED_SPECIAL_CHARACTERS = {'-', '_'};
 
     class Lexer {
+        const config::Config *_config = nullptr;
         size_t _index = 0;
         std::string _expression = "";
         DeserializationNode *_parsedTree = nullptr;
 
     public:
-        DeserializationNode *lexe(const std::string &expression);
+        DeserializationNode *lexe(const std::string &expression, const config::Config *config);
         size_t lexeSpace();
         size_t lexeLineReturn();
         size_t lexeOneLineComment();

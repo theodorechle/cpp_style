@@ -3,6 +3,7 @@
 namespace testsParser {
 
     test::Result testLexerAndParser(bool equal, const std::string &expression, const style::DeserializationNode *expected) {
+        style::config::Config *config = testConfig();
         test::Result testResult;
         std::cout << "Test if lexing and parsing\n'\n" << expression << "\n'\n";
         if (equal) std::cout << "equals to\n";
@@ -10,12 +11,13 @@ namespace testsParser {
         expected->debugDisplay(std::cout);
         std::cout << ":\n";
         try {
-            style::DeserializationNode *tokens = style::Lexer().lexe(expression);
+            style::DeserializationNode *tokens = style::Lexer().lexe(expression, config);
             style::DeserializationNode *result = style::Parser().parse(tokens);
             if (areSameNodes(result, expected) == equal) testResult = test::Result::SUCCESS;
             else testResult = test::Result::FAILURE;
             delete result;
             delete tokens;
+            delete config;
         }
         catch (const std::exception &e) {
             testResult = test::Result::ERROR;
@@ -27,6 +29,7 @@ namespace testsParser {
 
     template <typename T>
     test::Result testLexerAndParserException(const std::string &expression) {
+        style::config::Config *config = testConfig();
         test::Result testResult;
         std::cout << "Test if lexing and parsing\n'\n" << expression << "\n'\n raises an exception : ";
 #ifdef DEBUG
@@ -35,7 +38,7 @@ namespace testsParser {
         style::DeserializationNode *tokens = nullptr;
         style::DeserializationNode *result = nullptr;
         try {
-            tokens = style::Lexer().lexe(expression);
+            tokens = style::Lexer().lexe(expression, config);
             result = style::Parser().parse(tokens);
             testResult = test::Result::FAILURE;
         }
@@ -48,6 +51,7 @@ namespace testsParser {
         }
         delete tokens;
         delete result;
+        delete config;
         std::cout << "\n";
         return testResult;
     }
@@ -213,7 +217,9 @@ namespace testsParser {
 
     test::Result testParsingRuleWithoutValueAndSemiColon() { return testLexerAndParserException<style::MissingTokenException>("a {b:}"); }
 
-    test::Result testParsingRuleWithoutColonAndValueAndSemiColon() { return testLexerAndParserException<style::MalformedExpressionException>("a {b}"); }
+    test::Result testParsingRuleWithoutColonAndValueAndSemiColon() {
+        return testLexerAndParserException<style::MalformedExpressionException>("a {b}");
+    }
 
     test::Result testParsingRuleWithoutColonAndValue() { return testLexerAndParserException<style::MalformedExpressionException>("a {b;}"); }
 
@@ -223,9 +229,13 @@ namespace testsParser {
 
     test::Result testParsingBlockWithoutDeclaration() { return testLexerAndParserException<style::MalformedExpressionException>("{b: #aaaaaa;}"); }
 
-    test::Result testParsingBlockWithoutOpeningCurlyBracket() { return testLexerAndParserException<style::MalformedExpressionException>("a b: #aaaaaa;}"); }
+    test::Result testParsingBlockWithoutOpeningCurlyBracket() {
+        return testLexerAndParserException<style::MalformedExpressionException>("a b: #aaaaaa;}");
+    }
 
-    test::Result testParsingBlockWithoutClosingCurlyBracket() { return testLexerAndParserException<style::MalformedExpressionException>("a {b: #aaaaaa;"); }
+    test::Result testParsingBlockWithoutClosingCurlyBracket() {
+        return testLexerAndParserException<style::MalformedExpressionException>("a {b: #aaaaaa;");
+    }
 
     test::Result testParsingElementNameSingleChar() {
         style::DeserializationNode *rootExpected;
@@ -514,9 +524,13 @@ namespace testsParser {
 
     test::Result testParsingLineBreakAfterBlockDeclaration() { return testLexerAndParserException<style::MalformedExpressionException>("a\n{}"); }
 
-    test::Result testParsingLineBreakAfterAssignmentColon() { return testLexerAndParserException<style::MalformedExpressionException>("a\n{b:\n2;}"); }
+    test::Result testParsingLineBreakAfterAssignmentColon() {
+        return testLexerAndParserException<style::MalformedExpressionException>("a\n{b:\n2;}");
+    }
 
-    test::Result testParsingLineBreakBeforeAssignmentColon() { return testLexerAndParserException<style::MalformedExpressionException>("a\n{b\n:2;}"); }
+    test::Result testParsingLineBreakBeforeAssignmentColon() {
+        return testLexerAndParserException<style::MalformedExpressionException>("a\n{b\n:2;}");
+    }
 
     test::Result testParsingLineBreakBeforeSemiColon() { return testLexerAndParserException<style::MalformedExpressionException>("a\n{b:2\n;}"); }
 

@@ -22,7 +22,7 @@ namespace style {
         DeserializationNode *result = nullptr;
         try {
             config::configChecker(config);
-            tokens = Lexer().lexe(style);
+            tokens = Lexer().lexe(style, config);
             result = Parser().parse(tokens);
             deserializedStyle = NodesToStyleComponents(config).convert(result, fileNumber, ruleNumber);
         }

@@ -12,6 +12,7 @@
 #include "../../src/style/lexer.hpp"
 #include "../../src/style/deserialization_node.hpp"
 #include "../../src/style/parser.hpp"
+#include "../test_config.hpp"
 
 namespace testsParser {
     const std::string TESTS_FILES_DIR = "tests/tests_parser/tests-files";

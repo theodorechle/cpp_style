@@ -49,7 +49,7 @@ namespace style {
         size_t i = 1;
         while (std::isalnum(_expression[_index + i])
                || std::find(RAW_NAME_ALLOWED_SPECIAL_CHARACTERS.cbegin(), RAW_NAME_ALLOWED_SPECIAL_CHARACTERS.cend(), _expression[_index + i])
-                      != RAW_NAME_ALLOWED_SPECIAL_CHARACTERS.cend()) {
+               != RAW_NAME_ALLOWED_SPECIAL_CHARACTERS.cend()) {
             i++;
         }
         _parsedTree->appendNext(new DeserializationNode(Token::RawName, _expression.substr(_index, i)));
@@ -87,10 +87,15 @@ namespace style {
         while (_index + i < _expression.length() && isdigit(_expression[_index + i])) {
             i++;
         }
-        if (_index + i < _expression.length()
-            && RESERVED_CHARACTERS.find(_expression[_index + i]) == RESERVED_CHARACTERS.cend()
-            && _expression[_index + i] != ' '
-            && _expression[_index + i] != '\n'
+        if (_index
+            + i
+            < _expression.length()
+            && RESERVED_CHARACTERS.find(_expression[_index + i])
+            == RESERVED_CHARACTERS.cend()
+            && _expression[_index + i]
+            != ' '
+            && _expression[_index + i]
+            != '\n'
             && !getUnit(i, &tmpSize).size())
             return 0;
         _parsedTree->appendNext(new DeserializationNode(Token::Int, _expression.substr(_index, i)));
@@ -115,10 +120,15 @@ namespace style {
             i++;
         }
         if (!dotFound || i < min_index) return 0; // need at least one int (0-9) and a dot
-        if (_index + i < _expression.length()
-            && RESERVED_CHARACTERS.find(_expression[_index + i]) == RESERVED_CHARACTERS.cend()
-            && _expression[_index + i] != ' '
-            && _expression[_index + i] != '\n'
+        if (_index
+            + i
+            < _expression.length()
+            && RESERVED_CHARACTERS.find(_expression[_index + i])
+            == RESERVED_CHARACTERS.cend()
+            && _expression[_index + i]
+            != ' '
+            && _expression[_index + i]
+            != '\n'
             && !getUnit(i, &tmpSize).size())
             return 0;
         _parsedTree->appendNext(new DeserializationNode(Token::Float, _expression.substr(_index, i)));
@@ -141,9 +151,8 @@ namespace style {
         size_t i;
         bool equal;
         // TODO: either use config or parse all possible units (need a definition of what a unit can be)
-        constexpr std::string_view PIXEL_UNIT = "px";
-        constexpr std::string_view PERCENTAGE_UNIT = "%";
-        for (const std::string &unit : {std::string(PIXEL_UNIT), std::string(PERCENTAGE_UNIT)}) {
+
+        for (const std::string &unit : _config->units) {
             equal = true;
             for (i = 0; i < unit.size(); i++) {
                 if (_expression[_index + expressionIndex + i] != unit[i]) {
@@ -175,8 +184,9 @@ namespace style {
         return 1;
     }
 
-    DeserializationNode *Lexer::lexe(const std::string &expression) {
+    DeserializationNode *Lexer::lexe(const std::string &expression, const config::Config *config) {
         _expression = expression;
+        _config = config;
         DeserializationNode *firstNode = new DeserializationNode(Token::NullRoot);
         _parsedTree = firstNode;
         size_t increment;

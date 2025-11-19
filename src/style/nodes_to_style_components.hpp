@@ -19,7 +19,7 @@
 namespace style {
 
     class NodesToStyleComponents {
-        const config::Config *config;
+        const config::Config *_config = nullptr;
         DeserializationNode *tree = nullptr;
         // for each inner style block, multiple components list definitions (separated by commas in the style files)
         std::list<std::list<StyleComponentDataList *> *> requiredStyleComponentsLists = std::list<std::list<StyleComponentDataList *> *>();
@@ -52,7 +52,7 @@ namespace style {
         void convertStyleBlock(int fileNumber, int *ruleNumber);
 
     public:
-        NodesToStyleComponents(const config::Config *config) : config{config} {}
+        NodesToStyleComponents(const config::Config *config) : _config{config} {}
         std::list<StyleBlock *> *convert(DeserializationNode *tree, int fileNumber, int *ruleNumber);
     };
 

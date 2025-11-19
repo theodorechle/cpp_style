@@ -114,6 +114,6 @@ namespace style {
     }
 
     std::array<Token, 9> VALUE_TYPE_TOKENS = {Token::EnumValue, Token::Tuple, Token::String, Token::Function, Token::Int,
-                                    Token::Float,     Token::Bool,  Token::Unit,   Token::Hex};
+                                              Token::Float,     Token::Bool,  Token::Unit,   Token::Hex};
 
 } // namespace style

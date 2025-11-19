@@ -3,9 +3,6 @@
 
 #include "../../cpp_style/src/style/abstract_configuration.hpp"
 
-constexpr std::string_view PIXEL_UNIT = "px";
-constexpr std::string_view PERCENTAGE_UNIT = "%";
-
 // const style::Config guiStyleConfig = style::Config{{{"margin-left", {false, true, true, true, false, {}}},
 //                                                     {"margin-right", {false, true, true, true, false, {}}},
 //                                                     {"margin-top", {false, true, true, true, false, {}}},

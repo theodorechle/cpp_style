@@ -26,7 +26,8 @@ namespace style::config {
         std::string debugValue() const override { return style::tokenToString(_token); }
 
     public:
-        ConfigRuleNode(const Token token) : _token{token} {}
+        ConfigRuleNode(const Token token, ConfigRuleNode *child = nullptr, ConfigRuleNode *next = nullptr)
+            : commons::Node<ConfigRuleNode>(child, next), _token{token} {}
         const Token &token() const { return _token; }
     };
 

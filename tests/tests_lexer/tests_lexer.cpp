@@ -2,6 +2,7 @@
 
 namespace testsLexer {
     test::Result testLexer(bool equal, const std::string &expression, const style::DeserializationNode *expected) {
+        style::config::Config *config = testConfig();
         test::Result testResult;
         std::cout << "Test if lexing\n'\n" << expression << "\n'\n";
         if (equal) std::cout << "equals to\n";
@@ -9,13 +10,14 @@ namespace testsLexer {
         expected->displayNexts(std::cout);
         std::cout << ":\n";
         try {
-            style::DeserializationNode *result = style::Lexer().lexe(expression);
+            style::DeserializationNode *result = style::Lexer().lexe(expression, config);
             style::DeserializationNode *n = result;
             std::cout << "result:\n";
             n->displayNexts();
             while (n != nullptr) {
                 if ((expected == nullptr || !(*n == *expected)) == equal) {
                     delete result;
+                    delete config;
                     return test::Result::FAILURE;
                 }
                 n = n->next();
@@ -24,6 +26,7 @@ namespace testsLexer {
             if (expected == nullptr) testResult = test::Result::SUCCESS;
             else testResult = test::Result::FAILURE;
             delete result;
+            delete config;
         }
         catch (const std::exception &e) {
             testResult = test::Result::ERROR;
@@ -35,6 +38,7 @@ namespace testsLexer {
 
     template <typename T>
     test::Result testLexerException(const std::string &expression) {
+        style::config::Config *config = testConfig();
         test::Result testResult;
         std::cout << "Test if lexing\n'\n" << expression << "\n'\n raises an exception : ";
 #ifdef DEBUG
@@ -42,7 +46,7 @@ namespace testsLexer {
 #endif
         style::DeserializationNode *tokens = nullptr;
         try {
-            tokens = style::Lexer().lexe(expression);
+            tokens = style::Lexer().lexe(expression, config);
 #ifdef DEBUG
             tokens->debugDisplay();
 #endif
@@ -55,6 +59,7 @@ namespace testsLexer {
                 std::cerr << "Error : " << exception.what();
             }
         }
+        delete config;
         delete tokens;
         std::cout << "\n";
         return testResult;

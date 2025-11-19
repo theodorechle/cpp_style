@@ -59,6 +59,7 @@ namespace style {
     }
 
     DeserializationNode *NodesToStyleComponents::importStyle(const std::string &fileName) {
+        // FIXME: duplicate with style_deserializer
         DeserializationNode *tokens = nullptr;
         DeserializationNode *result = nullptr;
         std::ifstream file(fileName);
@@ -69,7 +70,7 @@ namespace style {
         }
         buffer << file.rdbuf();
         try {
-            tokens = Lexer().lexe(buffer.str());
+            tokens = Lexer().lexe(buffer.str(), _config);
             result = Parser().parse(tokens);
             delete tokens;
             return result;
@@ -160,8 +161,8 @@ namespace style {
     bool NodesToStyleComponents::ruleValid(const DeserializationNode *rule) {
         const DeserializationNode *ruleName = rule->child();
         const DeserializationNode *ruleValue = ruleName->next();
-        std::unordered_map<std::string, std::vector<const config::ConfigRuleNode *>>::const_iterator configRules = config->rules.find(ruleName->value());
-        if (configRules == config->rules.cend()) return false;
+        std::unordered_map<std::string, std::vector<const config::ConfigRuleNode *>>::const_iterator configRules = _config->rules.find(ruleName->value());
+        if (configRules == _config->rules.cend()) return false;
         for (const config::ConfigRuleNode *configRule : configRules->second) {
             if (ruleNodesValid(ruleValue, configRule)) return true;
         }
@@ -186,8 +187,8 @@ namespace style {
                     std::cerr << "invalid rule:\n";
                     rule->debugDisplay();
                     std::unordered_map<std::string, std::vector<const config::ConfigRuleNode *>>::const_iterator configRules =
-                        config->rules.find(rule->child()->value());
-                    if (configRules != config->rules.cend()) {
+                        _config->rules.find(rule->child()->value());
+                    if (configRules != _config->rules.cend()) {
                         std::cerr << "available config rules:\n";
                         for (const config::ConfigRuleNode *configRule : configRules->second) {
                             configRule->debugDisplay();

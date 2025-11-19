@@ -3,6 +3,7 @@
 
 #include "../../cpp_tests/src/tests.hpp"
 #include "../../src/style/lexer.hpp"
+#include "../test_config.hpp"
 
 namespace testsLexer {
     test::Result testLexer(bool equal, const std::string &expression, const style::DeserializationNode *expected);
