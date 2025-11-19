@@ -8,6 +8,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace style::config {
     class InvalidStyleConfigException : public std::exception {
