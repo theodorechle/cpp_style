@@ -44,6 +44,8 @@ namespace style::config {
     struct Config {
         std::unordered_map<std::string, std::vector<const ConfigRuleNode *>> rules;
         std::vector<std::string> units;
+
+        ~Config();
     };
 
     extern std::array<Token, 2> NESTABLE_TOKENS;

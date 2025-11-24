@@ -149,7 +149,8 @@ namespace style {
     }
 
     bool NodesToStyleComponents::ruleNodesValid(const DeserializationNode *ruleNode, const config::ConfigRuleNode *configNode) {
-        if ((ruleNode == nullptr && configNode != nullptr) || (ruleNode != nullptr && configNode == nullptr)) return false;
+        if (ruleNode == nullptr && configNode == nullptr) return true;
+        if (ruleNode == nullptr || configNode == nullptr) return false;
         if (ruleNode->token() != configNode->token()) return false;
         if (configNode->token() == Token::EnumValue) {
             const std::set<std::string> &allowedValues = static_cast<const config::ConfigRuleNodeEnum *>(configNode)->allowedValues();
@@ -161,7 +162,8 @@ namespace style {
     bool NodesToStyleComponents::ruleValid(const DeserializationNode *rule) {
         const DeserializationNode *ruleName = rule->child();
         const DeserializationNode *ruleValue = ruleName->next();
-        std::unordered_map<std::string, std::vector<const config::ConfigRuleNode *>>::const_iterator configRules = _config->rules.find(ruleName->value());
+        std::unordered_map<std::string, std::vector<const config::ConfigRuleNode *>>::const_iterator configRules =
+            _config->rules.find(ruleName->value());
         if (configRules == _config->rules.cend()) return false;
         for (const config::ConfigRuleNode *configRule : configRules->second) {
             if (ruleNodesValid(ruleValue, configRule)) return true;
@@ -179,6 +181,10 @@ namespace style {
 
         while (block) {
             declaration = block->getLastChild();
+            if (!declaration) {
+                block = block->next();
+                continue;
+            }
             rule = declaration->child();
             while (rule) {
                 nextRule = rule->next();

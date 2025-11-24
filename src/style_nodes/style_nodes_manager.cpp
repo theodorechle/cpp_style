@@ -32,8 +32,8 @@ namespace style {
                 }
             }
 
-            void StyleNodesManager::applySpecificStyleToElement(std::list<StyleBlock *> specificStyle,
-                                                                elementStyle::StyleNode *elementStyle, bool recursive) {
+            void StyleNodesManager::applySpecificStyleToElement(std::list<StyleBlock *> specificStyle, elementStyle::StyleNode *elementStyle,
+                                                                bool recursive) {
                 if (elementStyle == nullptr) return;
                 elementStyle::StyleNode *actualElementStyle = elementStyle;
                 const StyleValuesMap *styleMap;
@@ -147,8 +147,7 @@ namespace style {
                 }
             }
 
-            bool StyleNodesManager::elementSelectorsCompatibles(elementStyle::StyleNode *elementStyle,
-                                                                const StyleComponentDataList *componentsList) {
+            bool StyleNodesManager::elementSelectorsCompatibles(elementStyle::StyleNode *elementStyle, const StyleComponentDataList *componentsList) {
                 if (elementStyle == nullptr || componentsList == nullptr) return false;
                 StyleComponentDataList::const_reverse_iterator componentDataIt = componentsList->crbegin();
                 if (componentDataIt->first.second == StyleComponentType::Modifier)

@@ -37,4 +37,12 @@ namespace style::config {
         value += ")";
         return value;
     }
+
+    Config::~Config() {
+        for (std::pair<std::string, std::vector<const ConfigRuleNode *>> rule : rules) {
+            for (const ConfigRuleNode *value : rule.second) {
+                delete value;
+            }
+        }
+    }
 } // namespace style::config

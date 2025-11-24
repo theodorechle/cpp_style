@@ -790,7 +790,7 @@ namespace testsParser {
         tests->beginTestBlock("Tests parser");
         tests->addTest(testParsingEmpty, "Empty");
 
-        tests->beginTestBlock("Data types", false);
+        tests->beginTestBlock("Data types");
         tests->addTest(testParsingHexRule, "Hex rule");
         tests->addTest(testParsingHexRuleMultipleChars, "Hex rule multiple chars");
         tests->addTest(testParsingHexRuleOnlyInts, "Hex rule only ints");
