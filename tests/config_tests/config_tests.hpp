@@ -2,7 +2,7 @@
 #define CONFIG_TESTS_HPP
 
 #include "../../cpp_tests/src/tests.hpp"
-#include "../../src/style/abstract_configuration.hpp"
+#include "../../src/abstract_configuration.hpp"
 
 namespace configTests {
     template <typename T>

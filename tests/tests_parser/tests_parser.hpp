@@ -9,9 +9,9 @@
 #include <string>
 
 #include "../../cpp_tests/src/tests.hpp"
-#include "../../src/style/lexer.hpp"
-#include "../../src/style/deserialization_node.hpp"
-#include "../../src/style/parser.hpp"
+#include "../../src/lexer.hpp"
+#include "../../src/deserialization_node.hpp"
+#include "../../src/parser.hpp"
 #include "../test_config.hpp"
 
 namespace testsParser {

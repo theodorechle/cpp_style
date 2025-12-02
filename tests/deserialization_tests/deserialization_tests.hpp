@@ -2,7 +2,7 @@
 #define DESERIALIZATION_TESTS_HPP
 
 #include "../../cpp_tests/src/tests.hpp"
-#include "../../src/style/style_deserializer.hpp"
+#include "../../src/style_deserializer.hpp"
 #include "../test_config.hpp"
 
 namespace deserializationTests {

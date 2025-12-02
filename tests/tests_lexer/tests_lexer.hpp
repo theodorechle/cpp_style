@@ -2,7 +2,7 @@
 #define TESTS_LEXER_HPP
 
 #include "../../cpp_tests/src/tests.hpp"
-#include "../../src/style/lexer.hpp"
+#include "../../src/lexer.hpp"
 #include "../test_config.hpp"
 
 namespace testsLexer {

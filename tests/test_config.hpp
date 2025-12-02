@@ -1,7 +1,7 @@
 #ifndef STYLE_CONFIG_HPP
 #define STYLE_CONFIG_HPP
 
-#include "../../cpp_style/src/style/abstract_configuration.hpp"
+#include "../../cpp_style/src/abstract_configuration.hpp"
 
 // const style::Config guiStyleConfig = style::Config{{{"margin-left", {false, true, true, true, false, {}}},
 //                                                     {"margin-right", {false, true, true, true, false, {}}},
