@@ -1,7 +1,7 @@
 #ifndef ABSTRACT_CONFIGURATION_HPP
 #define ABSTRACT_CONFIGURATION_HPP
 
-#include "../../cpp_commons/src/node.hpp"
+#include "../cpp_commons/src/node.hpp"
 #include "tokens.hpp"
 #include <algorithm>
 #include <exception>

@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../../cpp_commons/src/node.hpp"
+#include "../cpp_commons/src/node.hpp"
 #include "tokens.hpp"
 
 namespace style {
