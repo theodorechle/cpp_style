@@ -90,6 +90,8 @@ namespace style {
         StyleValuesMap *getStyleMap() { return &styleDef->second; }
     };
 
+    typedef std::unordered_map<std::string, StyleRule> RulesMap;
+
 } // namespace style
 
 #endif // STYLE_COMPONENT_HPP

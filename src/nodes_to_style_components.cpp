@@ -136,7 +136,7 @@ namespace style {
         while (style != nullptr) {
             if (style->token() == Token::StyleBlock) moveNestedBlocksToRoot(style);
             else if (style->token() == Token::Import) {
-                DeserializationNode *importedStyle = importStyle(style->value()); // refactor with StyleNodesManager
+                DeserializationNode *importedStyle = importStyle(style->value()); // refactor with StyleManager
                 if (importedStyle != nullptr) {
                     importedStyle->addChild(style->next());
                     style->next(importedStyle->child());

@@ -1,5 +1,5 @@
 - register where errors occurs to be able to signal them (without raising errors and killing the app)
-- check for multiple same identifiers (in style_nodes_manager, not when parsing)
+- check for multiple same identifiers (in style_manager, not when parsing)
 - nested tuples?
 
 ## Tests
