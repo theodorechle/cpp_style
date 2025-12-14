@@ -283,17 +283,17 @@ namespace style {
         if (type == StyleValueType::Null) return nullptr;
 
         styleValue = new StyleValue();
-        styleValue->setValue(node->value());
-        styleValue->setType(type);
+        styleValue->value(node->value());
+        styleValue->type(type);
 
-        styleValue->setChild(convertStyleNodeToStyleValue(node->child()));
+        styleValue->addChild(convertStyleNodeToStyleValue(node->child()));
 
         next = node->next();
         tmpStyleValue = styleValue;
         while (next != nullptr) {
             styleNext = convertStyleNodeToStyleValue(next);
             if (styleNext == nullptr) break;
-            tmpStyleValue->setNext(styleNext);
+            tmpStyleValue->next(styleNext);
             tmpStyleValue = styleNext;
             next = next->next();
         }
@@ -333,7 +333,7 @@ namespace style {
             else if (token == Token::StyleBlock) {
                 oldTree = tree;
                 tree = rule;
-                convertStyleBlock(fileNumber, ruleNumber);
+                convertStyleDefinition(fileNumber, ruleNumber);
                 tree = oldTree;
             }
             // if other token type, just don't use it
@@ -343,12 +343,12 @@ namespace style {
         return appliedStyleMap;
     }
 
-    std::list<StyleBlock *> *
+    std::list<StyleDefinition *> *
     NodesToStyleComponents::createStyleComponents(std::list<std::list<StyleComponentDataList *> *>::const_iterator componentsListIt,
                                                   StyleComponentDataList *components, StyleValuesMap *appliedStyleMap) {
         if (components == nullptr) return nullptr;
-        std::list<StyleBlock *> *styleComponentList = new std::list<StyleBlock *>();
-        std::list<StyleBlock *> *tmpStyleComponentList;
+        std::list<StyleDefinition *> *styleComponentList = new std::list<StyleDefinition *>();
+        std::list<StyleDefinition *> *tmpStyleComponentList;
         StyleComponentDataList::const_iterator componentsIt;
         if (std::next(componentsListIt) == requiredStyleComponentsLists.cend()) { // if at end of the declaration list
             for (StyleComponentDataList *componentsDataList : **componentsListIt) {
@@ -358,7 +358,7 @@ namespace style {
                 for (std::pair<const std::string, StyleRule> &rule : *appliedStyleMap) {
                     rule.second.specificity = specificity;
                 }
-                styleComponentList->push_back(new StyleBlock(*components, *appliedStyleMap));
+                styleComponentList->push_back(new StyleDefinition(*components, *appliedStyleMap));
                 if (componentsIt == components->end()) components->clear();
                 else components->erase(componentsIt, components->end());
             }
@@ -399,7 +399,7 @@ namespace style {
         return specificity;
     }
 
-    void NodesToStyleComponents::convertStyleBlock(int fileNumber, int *ruleNumber) {
+    void NodesToStyleComponents::convertStyleDefinition(int fileNumber, int *ruleNumber) {
         std::list<StyleComponentDataList *> *styleComponentsLists;
         if (tree == nullptr || tree->token() != Token::StyleBlock) return;
         tree = tree->child();
@@ -421,7 +421,7 @@ namespace style {
 
         requiredStyleComponentsLists.push_back(styleComponentsLists); // TODO: I think there is one list who is useless
         StyleComponentDataList components = StyleComponentDataList();
-        std::list<StyleBlock *> *finalStyleComponents = createStyleComponents(requiredStyleComponentsLists.cbegin(), &components, appliedStyleMap);
+        std::list<StyleDefinition *> *finalStyleComponents = createStyleComponents(requiredStyleComponentsLists.cbegin(), &components, appliedStyleMap);
 
         delete appliedStyleMap;
         for (StyleComponentDataList *componentDataList : *(requiredStyleComponentsLists.back())) {
@@ -435,7 +435,7 @@ namespace style {
         }
     }
 
-    std::list<StyleBlock *> *NodesToStyleComponents::convert(DeserializationNode *styleTree, int fileNumber, int *ruleNumber) {
+    std::list<StyleDefinition *> *NodesToStyleComponents::convert(DeserializationNode *styleTree, int fileNumber, int *ruleNumber) {
         *ruleNumber = 0;
         if (styleTree->token() != Token::NullRoot) return nullptr;
 
@@ -451,10 +451,10 @@ namespace style {
 #endif
         tree = styleTree->child();
 
-        styleDefinitions = new std::list<StyleBlock *>();
+        styleDefinitions = new std::list<StyleDefinition *>();
 
         while (tree != nullptr) {
-            convertStyleBlock(fileNumber, ruleNumber);
+            convertStyleDefinition(fileNumber, ruleNumber);
             tree = tree->next();
         }
 

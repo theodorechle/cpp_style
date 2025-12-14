@@ -15,9 +15,9 @@ namespace style {
 
     class StyleDeserializer {
     public:
-        static std::list<StyleBlock *> *deserializeFromFile(const std::string &fileName, int fileNumber, int *ruleNumber,
+        static std::list<StyleDefinition *> *deserializeFromFile(const std::string &fileName, int fileNumber, int *ruleNumber,
                                                             const config::Config *config);
-        static std::list<StyleBlock *> *deserialize(const std::string &style, int fileNumber, int *ruleNumber, const config::Config *config);
+        static std::list<StyleDefinition *> *deserialize(const std::string &style, int fileNumber, int *ruleNumber, const config::Config *config);
     };
 
 } // namespace Style

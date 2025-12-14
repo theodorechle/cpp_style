@@ -63,27 +63,14 @@ namespace style {
         }
     }
 
-    int StyleValue::nbChilds() const {
-        int nb = 0;
-        StyleValue *currentChild = this->child;
-        while (currentChild != nullptr) {
-            nb++;
-            currentChild = currentChild->next;
-        }
-        return nb;
-    }
-
-    StyleValue::~StyleValue() {
-        delete child;
-        delete next;
-    }
-
     StyleValue *StyleValue::copy() const {
-        StyleValue *newValue = new StyleValue(value, type);
-        if (child != nullptr) newValue->setChild(child->copy());
-        if (next != nullptr) newValue->setNext(next->copy());
+        StyleValue *newValue = new StyleValue(_value, _type);
+        if (child() != nullptr) newValue->addChild(child()->copy());
+        if (next() != nullptr) newValue->next(next()->copy());
         return newValue;
     }
+
+    std::string StyleValue::debugValue() const { return _value + " (" + styleValueTypeToString(_type) + ")"; }
 
     StyleRule::StyleRule(StyleValue *value, bool enabled, int specificity, int fileNumber, int ruleNumber)
         : value{value}, enabled{enabled}, specificity{specificity}, fileNumber{fileNumber}, ruleNumber{ruleNumber} {}
@@ -94,16 +81,5 @@ namespace style {
         specificity = rule.specificity;
         fileNumber = rule.fileNumber;
         ruleNumber = rule.ruleNumber;
-    }
-
-    StyleBlock::StyleBlock(const StyleComponentDataList &componentsList, const StyleValuesMap &styleMap) {
-        styleDef = new StyleDefinition(componentsList, styleMap);
-    }
-
-    StyleBlock::~StyleBlock() {
-        for (std::pair<std::string, StyleRule> rule : styleDef->second) {
-            delete rule.second.value;
-        }
-        delete styleDef;
     }
 } // namespace Style

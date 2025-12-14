@@ -534,7 +534,7 @@ namespace testsParser {
 
     test::Result testParsingLineBreakBeforeSemiColon() { return testLexerAndParserException<style::MalformedExpressionException>("a\n{b:2\n;}"); }
 
-    test::Result testTwoStyleBlocks() {
+    test::Result testTwoStyleDefinitions() {
         std::string fileContent;
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
@@ -656,7 +656,7 @@ namespace testsParser {
         return result;
     }
 
-    test::Result testApplyingStyleBlockUsingAnyParentRelation() {
+    test::Result testApplyingStyleDefinitionUsingAnyParentRelation() {
         std::string fileContent;
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
@@ -701,7 +701,7 @@ namespace testsParser {
         return result;
     }
 
-    test::Result testApplyingStyleBlockUsingAnyChildComponentWithNestedElementName() {
+    test::Result testApplyingStyleDefinitionUsingAnyChildComponentWithNestedElementName() {
         std::string fileContent;
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
@@ -845,11 +845,11 @@ namespace testsParser {
         tests->endTestBlock();
 
         tests->beginTestBlock("Tests style lexer and parser");
-        tests->addTest(testTwoStyleBlocks, "Two style blocks");
+        tests->addTest(testTwoStyleDefinitions, "Two style blocks");
         tests->addTest(testNestedModifierBlock, "Nested modifier block");
         tests->addTest(testNestedElementNameBlock, "Nested element name block");
-        tests->addTest(testApplyingStyleBlockUsingAnyParentRelation, "Apply style block using the any parent relation");
-        tests->addTest(testApplyingStyleBlockUsingAnyChildComponentWithNestedElementName,
+        tests->addTest(testApplyingStyleDefinitionUsingAnyParentRelation, "Apply style block using the any parent relation");
+        tests->addTest(testApplyingStyleDefinitionUsingAnyChildComponentWithNestedElementName,
                        "Apply style block to any child component with nested element name");
         tests->addTest(testValuesUnits, "Values units");
         tests->addTest(testMultilineCommentNotClosed, "Multiline comment not closed");

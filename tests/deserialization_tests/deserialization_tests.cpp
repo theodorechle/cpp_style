@@ -47,24 +47,24 @@ namespace deserializationTests {
             std::cerr << "One of the rule is null\n";
             return test::Result::FAILURE;
         }
-        if (testedValue->getValue() != expectedValue->getValue()) {
-            std::cerr << "The name is different (have '" << testedValue->getValue() << "', expected '" << expectedValue->getValue() << "')\n";
+        if (testedValue->value() != expectedValue->value()) {
+            std::cerr << "The name is different (have '" << testedValue->value() << "', expected '" << expectedValue->value() << "')\n";
             return test::Result::FAILURE;
         }
-        if (testedValue->getType() != expectedValue->getType()) {
+        if (testedValue->type() != expectedValue->type()) {
             std::cerr
                 << "The type is different (have '"
-                << styleValueTypeToString(testedValue->getType())
+                << styleValueTypeToString(testedValue->type())
                 << "', expected '"
-                << styleValueTypeToString(expectedValue->getType())
+                << styleValueTypeToString(expectedValue->type())
                 << "')\n";
             return test::Result::FAILURE;
         }
 
-        result = checkStyleValue(testedValue->getChild(), expectedValue->getChild());
+        result = checkStyleValue(testedValue->child(), expectedValue->child());
         if (result != test::Result::SUCCESS) return result;
 
-        result = checkStyleValue(testedValue->getNext(), expectedValue->getNext());
+        result = checkStyleValue(testedValue->next(), expectedValue->next());
         if (result != test::Result::SUCCESS) return result;
         return test::Result::SUCCESS;
     }
@@ -117,68 +117,68 @@ namespace deserializationTests {
         return test::Result::SUCCESS;
     }
 
-    test::Result checkStyleBlocks(const std::list<style::StyleBlock *> *testedStyleBlocks,
-                                  const std::list<style::StyleBlock *> *expectedStyleBlocks) {
+    test::Result checkStyleDefinitions(const std::list<style::StyleDefinition *> *testedStyleDefinitions,
+                                       const std::list<style::StyleDefinition *> *expectedStyleDefinitions) {
         test::Result result;
-        std::list<style::StyleBlock *>::const_iterator testedStyleBlocksIt;
-        std::list<style::StyleBlock *>::const_iterator expectedStyleBlocksIt;
+        std::list<style::StyleDefinition *>::const_iterator testedStyleDefinitionsIt;
+        std::list<style::StyleDefinition *>::const_iterator expectedStyleDefinitionsIt;
 
-        if (testedStyleBlocks == nullptr || expectedStyleBlocks == nullptr) {
+        if (testedStyleDefinitions == nullptr || expectedStyleDefinitions == nullptr) {
             std::cerr << "One of the two style blocks is nullptr\n";
             return test::Result::FAILURE;
         }
 
-        else if (testedStyleBlocks == nullptr || testedStyleBlocks->size() != expectedStyleBlocks->size()) {
-            std::cerr << testedStyleBlocks->size() << " styleBlocks instead of " << expectedStyleBlocks->size() << " expected\n";
+        else if (testedStyleDefinitions == nullptr || testedStyleDefinitions->size() != expectedStyleDefinitions->size()) {
+            std::cerr << testedStyleDefinitions->size() << " StyleDefinitions instead of " << expectedStyleDefinitions->size() << " expected\n";
             return test::Result::FAILURE;
         }
         else {
-            testedStyleBlocksIt = testedStyleBlocks->cbegin();
-            expectedStyleBlocksIt = expectedStyleBlocks->cbegin();
-            while (testedStyleBlocksIt != testedStyleBlocks->cend()) {
-                result = checkStyleComponentDataList((*testedStyleBlocksIt)->getComponentsList(), (*expectedStyleBlocksIt)->getComponentsList());
+            testedStyleDefinitionsIt = testedStyleDefinitions->cbegin();
+            expectedStyleDefinitionsIt = expectedStyleDefinitions->cbegin();
+            while (testedStyleDefinitionsIt != testedStyleDefinitions->cend()) {
+                result = checkStyleComponentDataList(&(*testedStyleDefinitionsIt)->first, &(*expectedStyleDefinitionsIt)->first);
                 if (result != test::Result::SUCCESS) return result;
-                result = checkStyleMap((*testedStyleBlocksIt)->getStyleMap(), (*expectedStyleBlocksIt)->getStyleMap());
+                result = checkStyleMap(&(*testedStyleDefinitionsIt)->second, &(*expectedStyleDefinitionsIt)->second);
                 if (result != test::Result::SUCCESS) return result;
-                testedStyleBlocksIt++;
-                expectedStyleBlocksIt++;
+                testedStyleDefinitionsIt++;
+                expectedStyleDefinitionsIt++;
             }
         }
         return test::Result::SUCCESS;
     }
 
-    test::Result testDeserializationFromFile(const std::string &fileName, const std::list<style::StyleBlock *> *expectedStyleBlocks) {
+    test::Result testDeserializationFromFile(const std::string &fileName, const std::list<style::StyleDefinition *> *expectedStyleDefinitions) {
         int fileNumber = 0;
         int ruleNumber;
         style::config::Config *config = testConfig();
-        std::list<style::StyleBlock *> *styleBlocks;
+        std::list<style::StyleDefinition *> *StyleDefinitions;
         test::Result result;
         std::cout << "Tested style file:\n" << fileName << "\n";
-        styleBlocks = style::StyleDeserializer::deserializeFromFile(fileName, fileNumber, &ruleNumber, config);
-        result = checkStyleBlocks(styleBlocks, expectedStyleBlocks);
+        StyleDefinitions = style::StyleDeserializer::deserializeFromFile(fileName, fileNumber, &ruleNumber, config);
+        result = checkStyleDefinitions(StyleDefinitions, expectedStyleDefinitions);
 
-        for (style::StyleBlock *component : *styleBlocks) {
+        for (style::StyleDefinition *component : *StyleDefinitions) {
             delete component;
         }
-        delete styleBlocks;
+        delete StyleDefinitions;
         delete config;
         return result;
     }
 
-    test::Result testDeserialization(const std::string &style, const std::list<style::StyleBlock *> *expectedStyleBlocks) {
+    test::Result testDeserialization(const std::string &style, const std::list<style::StyleDefinition *> *expectedStyleDefinitions) {
         int fileNumber = 0;
         int ruleNumber;
         style::config::Config *config = testConfig();
-        std::list<style::StyleBlock *> *styleBlocks;
+        std::list<style::StyleDefinition *> *StyleDefinitions;
         test::Result result;
         std::cout << "Tested style:\n" << style << "\n";
-        styleBlocks = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber, config);
-        result = checkStyleBlocks(styleBlocks, expectedStyleBlocks);
+        StyleDefinitions = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber, config);
+        result = checkStyleDefinitions(StyleDefinitions, expectedStyleDefinitions);
 
-        for (style::StyleBlock *component : *styleBlocks) {
+        for (style::StyleDefinition *component : *StyleDefinitions) {
             delete component;
         }
-        delete styleBlocks;
+        delete StyleDefinitions;
         delete config;
         return result;
     }
@@ -189,16 +189,16 @@ namespace deserializationTests {
         int ruleNumber;
         style::config::Config *config = testConfig();
         test::Result result;
-        std::list<style::StyleBlock *> *styleBlocks;
+        std::list<style::StyleDefinition *> *StyleDefinitions;
         std::cout << "Tested style:\n" << style << "\n";
         try {
-            styleBlocks = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber, config);
+            StyleDefinitions = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber, config);
             result = test::Result::FAILURE;
 
-            for (style::StyleBlock *component : *styleBlocks) {
+            for (style::StyleDefinition *component : *StyleDefinitions) {
                 delete component;
             }
-            delete styleBlocks;
+            delete StyleDefinitions;
             delete config;
         }
         catch (std::exception &exception) {
@@ -219,9 +219,9 @@ namespace deserializationTests {
         style::StyleComponentDataList expectedData = style::StyleComponentDataList();
         style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
         style::StyleValue *styleValue;
-        style::StyleBlock *styleBlock;
+        style::StyleDefinition *StyleDefinition;
         style::config::Config *config = testConfig();
-        std::list<style::StyleBlock *> expectedStyleBlocks;
+        std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
         expectedData.push_back(std::pair(std::pair("container", style::StyleComponentType::Class), style::StyleRelation::AnyParent));
@@ -229,10 +229,10 @@ namespace deserializationTests {
         expectedData.push_back(std::pair(std::pair("red", style::StyleComponentType::Identifier), style::StyleRelation::SameElement));
         styleValue = new style::StyleValue("ff0000", style::StyleValueType::Hex);
         expectedStyleMap["text-color"] = style::StyleRule{styleValue, true, 111, 0, 0};
-        styleBlock = new style::StyleBlock(expectedData, expectedStyleMap);
-        expectedStyleBlocks = {styleBlock};
-        result = testDeserialization(".container      label#red{text-color : #ff0000;}", &expectedStyleBlocks);
-        delete styleBlock;
+        StyleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
+        expectedStyleDefinitions = {StyleDefinition};
+        result = testDeserialization(".container      label#red{text-color : #ff0000;}", &expectedStyleDefinitions);
+        delete StyleDefinition;
         delete config;
         expectedStyleMap.clear();
         expectedData.clear();
@@ -243,8 +243,8 @@ namespace deserializationTests {
         style::StyleComponentDataList expectedData = style::StyleComponentDataList();
         style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
         style::StyleValue *styleValue;
-        style::StyleBlock *styleBlock;
-        std::list<style::StyleBlock *> expectedStyleBlocks;
+        style::StyleDefinition *StyleDefinition;
+        std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
         expectedData.push_back(std::pair(std::pair("container", style::StyleComponentType::Class), style::StyleRelation::DirectParent));
@@ -252,10 +252,10 @@ namespace deserializationTests {
         expectedData.push_back(std::pair(std::pair("red", style::StyleComponentType::Identifier), style::StyleRelation::SameElement));
         styleValue = new style::StyleValue("ff0000", style::StyleValueType::Hex);
         expectedStyleMap["text-color"] = style::StyleRule{styleValue, true, 111, 0, 0};
-        styleBlock = new style::StyleBlock(expectedData, expectedStyleMap);
-        expectedStyleBlocks = {styleBlock};
-        result = testDeserialization(".container > label#red{text-color : #ff0000;}", &expectedStyleBlocks);
-        delete styleBlock;
+        StyleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
+        expectedStyleDefinitions = {StyleDefinition};
+        result = testDeserialization(".container > label#red{text-color : #ff0000;}", &expectedStyleDefinitions);
+        delete StyleDefinition;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -265,8 +265,8 @@ namespace deserializationTests {
         style::StyleComponentDataList expectedData = style::StyleComponentDataList();
         style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
         style::StyleValue *styleValue;
-        style::StyleBlock *styleBlock;
-        std::list<style::StyleBlock *> expectedStyleBlocks;
+        style::StyleDefinition *StyleDefinition;
+        std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
         expectedData.push_back(std::pair(std::pair("container", style::StyleComponentType::Class), style::StyleRelation::DirectParent));
@@ -274,10 +274,10 @@ namespace deserializationTests {
         expectedData.push_back(std::pair(std::pair("red", style::StyleComponentType::Identifier), style::StyleRelation::SameElement));
         styleValue = new style::StyleValue("ff0000", style::StyleValueType::Hex);
         expectedStyleMap["text-color"] = style::StyleRule{styleValue, true, 111, 0, 0};
-        styleBlock = new style::StyleBlock(expectedData, expectedStyleMap);
-        expectedStyleBlocks = {styleBlock};
-        result = testDeserialization(".container>label#red{text-color : #ff0000;}", &expectedStyleBlocks);
-        delete styleBlock;
+        StyleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
+        expectedStyleDefinitions = {StyleDefinition};
+        result = testDeserialization(".container>label#red{text-color : #ff0000;}", &expectedStyleDefinitions);
+        delete StyleDefinition;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -287,19 +287,19 @@ namespace deserializationTests {
         style::StyleComponentDataList expectedData = style::StyleComponentDataList();
         style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
         style::StyleValue *styleValue;
-        style::StyleBlock *styleBlock;
-        std::list<style::StyleBlock *> expectedStyleBlocks;
+        style::StyleDefinition *StyleDefinition;
+        std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
         expectedData.push_back(std::pair(std::pair("label", style::StyleComponentType::ElementName), style::StyleRelation::SameElement));
         styleValue = new style::StyleValue("px", style::StyleValueType::Unit);
         style::StyleValue *styleValue2 = new style::StyleValue("100", style::StyleValueType::Int);
-        styleValue->setChild(styleValue2);
+        styleValue->addChild(styleValue2);
         expectedStyleMap["padding"] = style::StyleRule{styleValue, true, 1, 0, 0};
-        styleBlock = new style::StyleBlock(expectedData, expectedStyleMap);
-        expectedStyleBlocks = {styleBlock};
-        result = testDeserialization("label {padding:100px;}", &expectedStyleBlocks);
-        delete styleBlock;
+        StyleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
+        expectedStyleDefinitions = {StyleDefinition};
+        result = testDeserialization("label {padding:100px;}", &expectedStyleDefinitions);
+        delete StyleDefinition;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -309,27 +309,27 @@ namespace deserializationTests {
         style::StyleComponentDataList expectedData = style::StyleComponentDataList();
         style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
         style::StyleValue *styleValue;
-        style::StyleBlock *styleBlock;
-        std::list<style::StyleBlock *> expectedStyleBlocks;
+        style::StyleDefinition *StyleDefinition;
+        std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
         expectedData.push_back(std::pair(std::pair("hovered", style::StyleComponentType::Modifier), style::StyleRelation::SameElement));
         styleValue = new style::StyleValue("px", style::StyleValueType::Unit);
         style::StyleValue *styleValue2 = new style::StyleValue("100", style::StyleValueType::Int);
-        styleValue->setChild(styleValue2);
+        styleValue->addChild(styleValue2);
         expectedStyleMap["padding"] = style::StyleRule{styleValue, true, 10, 0, 0};
-        styleBlock = new style::StyleBlock(expectedData, expectedStyleMap);
-        expectedStyleBlocks = {styleBlock};
-        result = testDeserialization(":hovered {padding:100px;}", &expectedStyleBlocks);
-        delete styleBlock;
+        StyleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
+        expectedStyleDefinitions = {StyleDefinition};
+        result = testDeserialization(":hovered {padding:100px;}", &expectedStyleDefinitions);
+        delete StyleDefinition;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
     }
 
     test::Result testEmptyBlock() {
-        std::list<style::StyleBlock *> expectedStyleBlocks = {};
-        test::Result result = testDeserialization("a {}", &expectedStyleBlocks);
+        std::list<style::StyleDefinition *> expectedStyleDefinitions = {};
+        test::Result result = testDeserialization("a {}", &expectedStyleDefinitions);
         return result;
     }
 

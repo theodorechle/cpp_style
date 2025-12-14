@@ -8,6 +8,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace style::config {
@@ -44,6 +45,7 @@ namespace style::config {
     struct Config {
         std::unordered_map<std::string, std::vector<const ConfigRuleNode *>> rules;
         std::vector<std::string> units;
+        std::unordered_set<std::string> inheritableRules;
 
         ~Config();
     };

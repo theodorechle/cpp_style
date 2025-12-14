@@ -1,6 +1,7 @@
 #ifndef STYLE_COMPONENT_HPP
 #define STYLE_COMPONENT_HPP
 
+#include "../cpp_commons/src/node.hpp"
 #include "tokens.hpp"
 
 #include <list>
@@ -30,26 +31,18 @@ namespace style {
      * Some data types are containing others, for example a tuple contains multiple elements.
      * This class allows representing such elements.
      */
-    class StyleValue {
-        std::string value;
-        StyleValueType type;
-        StyleValue *child = nullptr;
-        StyleValue *next = nullptr;
+    class StyleValue : public commons::Node<StyleValue> {
+        std::string _value;
+        StyleValueType _type;
 
     public:
-        StyleValue(const std::string &value = "", const StyleValueType type = StyleValueType::Null) : value{value}, type{type} {};
-        void setValue(const std::string &value) { this->value = value; }
-        void setType(StyleValueType type) { this->type = type; }
-        void setChild(StyleValue *child) { this->child = child; }
-        void setNext(StyleValue *next) { this->next = next; }
-        std::string getValue() const { return value; }
-        StyleValueType getType() const { return type; }
-        StyleValue *getChild() { return child; }
-        StyleValue *getNext() { return next; }
-        int nbChilds() const;
-        ~StyleValue();
-
+        StyleValue(const std::string &value = "", const StyleValueType type = StyleValueType::Null) : _value{value}, _type{type} {};
+        void value(const std::string &value) { this->_value = value; }
+        void type(StyleValueType type) { this->_type = type; }
+        std::string value() const { return _value; }
+        StyleValueType type() const { return _type; }
         StyleValue *copy() const;
+        std::string debugValue() const override;
     };
 
     /**
@@ -75,20 +68,6 @@ namespace style {
     typedef std::list<std::pair<StyleComponentData, StyleRelation>> StyleComponentDataList;
     typedef std::unordered_map<std::string, StyleRule> StyleValuesMap;
     typedef std::pair<StyleComponentDataList, StyleValuesMap> StyleDefinition;
-
-    /**
-     * A block composed of a list of required components (parent classes, special identifier, ...) and the corresponding style
-     */
-    class StyleBlock { // TODO: why does this exists? It's just a wrapper around a StyleDefinition
-        StyleDefinition *styleDef;
-
-    public:
-        StyleBlock(const StyleComponentDataList &componentsList, const StyleValuesMap &styleMap);
-        ~StyleBlock();
-        StyleDefinition *getStyleDefinition() const { return styleDef; }
-        StyleComponentDataList *getComponentsList() { return &styleDef->first; }
-        StyleValuesMap *getStyleMap() { return &styleDef->second; }
-    };
 
     typedef std::unordered_map<std::string, StyleRule> RulesMap;
 

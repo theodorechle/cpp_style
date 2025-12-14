@@ -23,7 +23,7 @@ namespace style {
         DeserializationNode *tree = nullptr;
         // for each inner style block, multiple components list definitions (separated by commas in the style files)
         std::list<std::list<StyleComponentDataList *> *> requiredStyleComponentsLists = std::list<std::list<StyleComponentDataList *> *>();
-        std::list<StyleBlock *> *styleDefinitions = nullptr;
+        std::list<StyleDefinition *> *styleDefinitions = nullptr;
 
         DeserializationNode *importStyle(const std::string &fileName);
 
@@ -44,16 +44,16 @@ namespace style {
         /**
          * Does not accept a null pointer for "components" parameter
          */
-        std::list<StyleBlock *> *createStyleComponents(std::list<std::list<StyleComponentDataList *> *>::const_iterator componentsListIt,
+        std::list<StyleDefinition *> *createStyleComponents(std::list<std::list<StyleComponentDataList *> *>::const_iterator componentsListIt,
                                                        StyleComponentDataList *components, StyleValuesMap *appliedStyle);
 
         int computeRuleSpecifity(StyleComponentDataList *ruleComponents);
 
-        void convertStyleBlock(int fileNumber, int *ruleNumber);
+        void convertStyleDefinition(int fileNumber, int *ruleNumber);
 
     public:
         NodesToStyleComponents(const config::Config *config) : _config{config} {}
-        std::list<StyleBlock *> *convert(DeserializationNode *tree, int fileNumber, int *ruleNumber);
+        std::list<StyleDefinition *> *convert(DeserializationNode *tree, int fileNumber, int *ruleNumber);
     };
 
 } // namespace style
