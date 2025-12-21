@@ -11,10 +11,15 @@ namespace style {
     class DeserializationNode : public commons::Node<DeserializationNode> {
         Token _token;
         std::string _value;
+
     protected:
         std::string debugValue() const override;
+
     public:
-        DeserializationNode(Token token = Token::Empty, std::string value = "", DeserializationNode *parentNode = nullptr) : _token{token}, _value{value} { parent(parentNode); };
+        DeserializationNode(Token token = Token::Empty, std::string value = "", DeserializationNode *parentNode = nullptr)
+            : _token{token}, _value{value} {
+            parent(parentNode);
+        };
         void value(const std::string &value) { _value = value; };
         const std::string &value() const { return _value; };
         void token(const Token &token) { _token = token; };
@@ -23,8 +28,6 @@ namespace style {
          *Set parent for the node and the nexts nodes
          */
         void setParent(DeserializationNode *parent);
-        DeserializationNode *getLastChild();
-        DeserializationNode *getSpecificChild(int childNumber);
         /*Set the child pointer*/
         void setChild(DeserializationNode *childNode);
         void removeFirstChild() { setChild(nullptr); };

@@ -47,28 +47,6 @@ namespace style {
         }
     }
 
-    DeserializationNode *DeserializationNode::getLastChild() {
-        DeserializationNode *childNode = child();
-        DeserializationNode *nextChild = childNode;
-        while (nextChild != nullptr) {
-            childNode = nextChild;
-            nextChild = nextChild->next();
-        }
-        return childNode;
-    }
-
-    DeserializationNode *DeserializationNode::getSpecificChild(int childNumber) {
-        DeserializationNode *childNode = child();
-        childNumber--;
-
-        while (childNumber > 0) {
-            if (childNode == nullptr) return nullptr;
-            childNode = childNode->next();
-            childNumber--;
-        }
-        return childNode;
-    }
-
     void DeserializationNode::setChild(DeserializationNode *childNode) {
         removeChilds();
         addChild(childNode);

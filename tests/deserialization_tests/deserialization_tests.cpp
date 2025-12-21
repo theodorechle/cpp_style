@@ -351,6 +351,86 @@ namespace deserializationTests {
         return checkDeserializationError<style::MissingTokenException>(">label#red{text-color: #ffffff;}");
     }
 
+    test::Result testElementNameSpecificity() {
+        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
+        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::StyleValue *styleValue;
+        style::StyleDefinition *StyleDefinition;
+        std::list<style::StyleDefinition *> expectedStyleDefinitions;
+        test::Result result;
+
+        expectedData.push_back(std::pair(std::pair("a", style::StyleComponentType::ElementName), style::StyleRelation::SameElement));
+        styleValue = new style::StyleValue("aaaaaa", style::StyleValueType::Hex);
+        expectedStyleMap["text-color"] = style::StyleRule{styleValue, true, 1, 0, 0};
+        StyleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
+        expectedStyleDefinitions = {StyleDefinition};
+        result = testDeserialization("a {text-color: #aaaaaa;}", &expectedStyleDefinitions);
+        delete StyleDefinition;
+        expectedStyleMap.clear();
+        expectedData.clear();
+        return result;
+    }
+
+    test::Result testClassSpecificity() {
+        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
+        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::StyleValue *styleValue;
+        style::StyleDefinition *StyleDefinition;
+        std::list<style::StyleDefinition *> expectedStyleDefinitions;
+        test::Result result;
+
+        expectedData.push_back(std::pair(std::pair("a", style::StyleComponentType::Class), style::StyleRelation::SameElement));
+        styleValue = new style::StyleValue("aaaaaa", style::StyleValueType::Hex);
+        expectedStyleMap["text-color"] = style::StyleRule{styleValue, true, 10, 0, 0};
+        StyleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
+        expectedStyleDefinitions = {StyleDefinition};
+        result = testDeserialization(".a {text-color: #aaaaaa;}", &expectedStyleDefinitions);
+        delete StyleDefinition;
+        expectedStyleMap.clear();
+        expectedData.clear();
+        return result;
+    }
+
+    test::Result testModifierSpecificity() {
+        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
+        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::StyleValue *styleValue;
+        style::StyleDefinition *StyleDefinition;
+        std::list<style::StyleDefinition *> expectedStyleDefinitions;
+        test::Result result;
+
+        expectedData.push_back(std::pair(std::pair("a", style::StyleComponentType::Modifier), style::StyleRelation::SameElement));
+        styleValue = new style::StyleValue("aaaaaa", style::StyleValueType::Hex);
+        expectedStyleMap["text-color"] = style::StyleRule{styleValue, true, 10, 0, 0};
+        StyleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
+        expectedStyleDefinitions = {StyleDefinition};
+        result = testDeserialization(":a {text-color: #aaaaaa;}", &expectedStyleDefinitions);
+        delete StyleDefinition;
+        expectedStyleMap.clear();
+        expectedData.clear();
+        return result;
+    }
+
+    test::Result testIdentifierSpecificity() {
+        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
+        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::StyleValue *styleValue;
+        style::StyleDefinition *StyleDefinition;
+        std::list<style::StyleDefinition *> expectedStyleDefinitions;
+        test::Result result;
+
+        expectedData.push_back(std::pair(std::pair("a", style::StyleComponentType::Identifier), style::StyleRelation::SameElement));
+        styleValue = new style::StyleValue("aaaaaa", style::StyleValueType::Hex);
+        expectedStyleMap["text-color"] = style::StyleRule{styleValue, true, 100, 0, 0};
+        StyleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
+        expectedStyleDefinitions = {StyleDefinition};
+        result = testDeserialization("#a {text-color: #aaaaaa;}", &expectedStyleDefinitions);
+        delete StyleDefinition;
+        expectedStyleMap.clear();
+        expectedData.clear();
+        return result;
+    }
+
     void testsDeserialization(test::Tests *tests) {
         tests->beginTestBlock("Deserialization tests");
         tests->addTest(testSingleRule, "Deserializing a single rule");
@@ -366,6 +446,13 @@ namespace deserializationTests {
         tests->addTest(testMissingBlockDeclaration, "Missing block declaration");
         tests->addTest(testMissingBlockDeclarationComponentBeforeDirectParentRelation,
                        "Missing block declaration component before direct parent relation");
+        tests->beginTestBlock("specificities");
+        tests->addTest(testElementNameSpecificity, "Element name specificity");
+        tests->addTest(testClassSpecificity, "Class specificity");
+        tests->addTest(testModifierSpecificity, "Modifier specificity");
+        tests->addTest(testIdentifierSpecificity, "Identifier specificity");
+        // TODO: add tests ensuring biggest specificity is taken
+        tests->endTestBlock();
         tests->endTestBlock();
     }
 
