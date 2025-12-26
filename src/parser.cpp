@@ -4,7 +4,6 @@ namespace style {
 
     bool Parser::isValidName(const std::string &str, size_t start, size_t end) {
         size_t i;
-        end = std::min(end, str.size());
         for (i = start; i < end - 1; i++) {
             if (!isalpha(str[i]) && str[i] != '_' && str[i] != '-') return false;
         }
