@@ -25,7 +25,9 @@ namespace style {
         std::list<std::list<StyleComponentDataList *> *> requiredStyleComponentsLists = std::list<std::list<StyleComponentDataList *> *>();
         std::list<StyleDefinition *> *styleDefinitions = nullptr;
 
-        DeserializationNode *importStyle(const std::string &fileName);
+        DeserializationNode *deserializeStyle(const std::string &style);
+        
+        DeserializationNode *deserializeStyleFromFile(const std::string &fileName);
 
         static DeserializationNode *joinStyleDeclarations(DeserializationNode *firstDeclarations, DeserializationNode *secondDeclarations);
         static void moveNestedBlocksToRoot(DeserializationNode *style);
@@ -53,7 +55,7 @@ namespace style {
 
     public:
         NodesToStyleComponents(const config::Config *config) : _config{config} {}
-        std::list<StyleDefinition *> *convert(DeserializationNode *tree, int fileNumber, int *ruleNumber);
+        std::list<StyleDefinition *> *convert(const std::string &style, int fileNumber, int *ruleNumber);
     };
 
 } // namespace style

@@ -3,7 +3,7 @@
 namespace style {
 
     std::list<StyleDefinition *> *StyleDeserializer::deserializeFromFile(const std::string &fileName, int fileNumber, int *ruleNumber,
-                                                                    const config::Config *config) {
+                                                                         const config::Config *config) {
         std::ifstream file(fileName);
         std::stringstream buffer;
         if (!file.is_open()) {
@@ -15,27 +15,14 @@ namespace style {
         return deserialize(buffer.str(), fileNumber, ruleNumber, config);
     }
 
-    std::list<StyleDefinition *> *StyleDeserializer::deserialize(const std::string &style, int fileNumber, int *ruleNumber, const config::Config *config) {
+    std::list<StyleDefinition *> *StyleDeserializer::deserialize(const std::string &style, int fileNumber, int *ruleNumber,
+                                                                 const config::Config *config) {
 
         std::list<StyleDefinition *> *deserializedStyle = nullptr;
         DeserializationNode *tokens = nullptr;
         DeserializationNode *result = nullptr;
-        try {
-            config::configChecker(config);
-            tokens = Lexer().lexe(style, config);
-            result = Parser().parse(tokens);
-            deserializedStyle = NodesToStyleComponents(config).convert(result, fileNumber, ruleNumber);
-        }
-        catch (const ParserException &) {
-            delete tokens;
-            delete result;
-            throw;
-        }
-        catch (const LexerException &) {
-            delete tokens;
-            delete result;
-            throw;
-        }
+        deserializedStyle = NodesToStyleComponents(config).convert(style, fileNumber, ruleNumber);
+
         delete tokens;
         delete result;
         return deserializedStyle;

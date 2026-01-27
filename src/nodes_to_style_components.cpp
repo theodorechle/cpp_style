@@ -58,19 +58,12 @@ namespace style {
         }
     }
 
-    DeserializationNode *NodesToStyleComponents::importStyle(const std::string &fileName) {
-        // FIXME: duplicate with style_deserializer
+    DeserializationNode *NodesToStyleComponents::deserializeStyle(const std::string &style) {
         DeserializationNode *tokens = nullptr;
         DeserializationNode *result = nullptr;
-        std::ifstream file(fileName);
-        std::stringstream buffer;
-        if (!file.is_open()) {
-            std::cerr << "File '" << fileName << "' couldn't be opened\n";
-            return nullptr;
-        }
-        buffer << file.rdbuf();
         try {
-            tokens = Lexer().lexe(buffer.str(), _config);
+            config::configChecker(_config);
+            tokens = Lexer().lexe(style, _config);
             result = Parser().parse(tokens);
             delete tokens;
             return result;
@@ -79,6 +72,21 @@ namespace style {
             delete tokens;
             throw;
         }
+        catch (const LexerException &) {
+            delete tokens;
+            throw;
+        }
+    }
+
+    DeserializationNode *NodesToStyleComponents::deserializeStyleFromFile(const std::string &fileName) {
+        std::ifstream file(fileName);
+        std::stringstream buffer;
+        if (!file.is_open()) {
+            std::cerr << "File '" << fileName << "' couldn't be opened\n";
+            return nullptr;
+        }
+        buffer << file.rdbuf();
+        return deserializeStyle(buffer.str());
     }
 
     DeserializationNode *NodesToStyleComponents::joinStyleDeclarations(DeserializationNode *firstDeclarations,
@@ -136,7 +144,7 @@ namespace style {
         while (style != nullptr) {
             if (style->token() == Token::StyleBlock) moveNestedBlocksToRoot(style);
             else if (style->token() == Token::Import) {
-                DeserializationNode *importedStyle = importStyle(style->value()); // refactor with StyleManager
+                DeserializationNode *importedStyle = deserializeStyleFromFile(style->value()); // refactor with StyleManager
                 if (importedStyle != nullptr) {
                     importedStyle->addChild(style->next());
                     style->next(importedStyle->child());
@@ -421,7 +429,8 @@ namespace style {
 
         requiredStyleComponentsLists.push_back(styleComponentsLists); // TODO: I think there is one list who is useless
         StyleComponentDataList components = StyleComponentDataList();
-        std::list<StyleDefinition *> *finalStyleComponents = createStyleComponents(requiredStyleComponentsLists.cbegin(), &components, appliedStyleMap);
+        std::list<StyleDefinition *> *finalStyleComponents =
+            createStyleComponents(requiredStyleComponentsLists.cbegin(), &components, appliedStyleMap);
 
         delete appliedStyleMap;
         for (StyleComponentDataList *componentDataList : *(requiredStyleComponentsLists.back())) {
@@ -435,9 +444,10 @@ namespace style {
         }
     }
 
-    std::list<StyleDefinition *> *NodesToStyleComponents::convert(DeserializationNode *styleTree, int fileNumber, int *ruleNumber) {
+    std::list<StyleDefinition *> *NodesToStyleComponents::convert(const std::string &style, int fileNumber, int *ruleNumber) {
         *ruleNumber = 0;
-        if (styleTree->token() != Token::NullRoot) return nullptr;
+
+        DeserializationNode *styleTree = deserializeStyle(style);
 
         flattenStyle(styleTree);
 #ifdef DEBUG
