@@ -209,6 +209,28 @@ namespace testsParser {
         return result;
     }
 
+    test::Result testParsingEnumTuple() {
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
+        test::Result result;
+
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::BlockSelectors))
+            ->addChild(new style::DeserializationNode(style::Token::Selector))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclarations))
+                       ->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::Tuple));
+        expected->addChild(new style::DeserializationNode(style::Token::EnumValue, "aaa"));
+        expected->addChild(new style::DeserializationNode(style::Token::EnumValue, "bbb"));
+        expected->addChild(new style::DeserializationNode(style::Token::EnumValue, "ccc"));
+        result = testLexerAndParser(true, "a {b: (aaa, bbb,ccc);}", rootExpected);
+        delete rootExpected;
+        return result;
+    }
+
     // TODO: add tests for other data types
 
     test::Result testParsingRuleNoSemiColon() { return testLexerAndParserException<style::MissingTokenException>("a {b: #aaaaaa}"); }
@@ -798,6 +820,7 @@ namespace testsParser {
         tests->addTest(testParsingIntRuleMultipleChars, "Int rule multiple chars");
         tests->addTest(testParsingEmptyTuple, "Empty tuple");
         tests->addTest(testParsingIntTuple, "Int tuple");
+        tests->addTest(testParsingEnumTuple, "Enum tuple");
         tests->endTestBlock();
 
         tests->beginTestBlock("Invalid blocks structures");

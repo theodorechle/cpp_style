@@ -44,7 +44,7 @@ namespace style {
         _parsedTree = _expressionTreeRoot;
         try {
             while (_currentNode != nullptr) {
-#ifdef DEBUG
+#ifdef DEBUG_DEBUG
                 std::cerr << "\nActual token : " << tokenToString(_currentNode->token()) << ": '" << _currentNode->value() << "'" << "\n";
 #endif
                 switch (_currentNode->token()) {
@@ -116,7 +116,7 @@ namespace style {
                 default:
                     throw UnknownTokenException(*_currentNode);
                 }
-#ifdef DEBUG
+#ifdef DEBUG_DEBUG
                 std::cerr << "Root :\n";
                 _expressionTreeRoot->debugDisplay(std::cerr);
                 std::cerr << "\n";
@@ -293,8 +293,9 @@ namespace style {
             _parsedTree->addChild(new DeserializationNode(Token::SameElement));
         }
         else
-            throw MalformedExpressionException("A same element relation ('&') must be before a style block opening and at the root level of the style file or "
-                                      "inside an other style block");
+            throw MalformedExpressionException(
+                "A same element relation ('&') must be before a style block opening and at the root level of the style file or "
+                "inside an other style block");
     }
 
     void Parser::parseAt() {
@@ -425,7 +426,8 @@ namespace style {
         if (_parsedTree->token() != Token::Selector) {
             lastChild = _parsedTree->getLastChild();
             if (lastChild == nullptr)
-                throw MalformedExpressionException("A style block must start with at list an element name|class|identifier before the opening curly bracket");
+                throw MalformedExpressionException(
+                    "A style block must start with at list an element name|class|identifier before the opening curly bracket");
             lastChildCopy = lastChild->copyNodeWithChilds();
             if (lastChildCopy->token() == Token::Name) lastChildCopy->token(Token::ElementName);
             _parsedTree->deleteSpecificChild(lastChild);
@@ -443,7 +445,8 @@ namespace style {
         DeserializationNode *lastChild = _parsedTree->getLastChild();
         if (lastChild != nullptr && lastChild->token() != Token::Assignment && lastChild->token() != Token::StyleBlock)
             throw MalformedExpressionException("A block content must only contains assignments and other blocks");
-        else if (_parsedTree->token() != Token::BlockDeclarations) throw MissingTokenException("A closing curly bracket '}' needs an opening curly bracket '{'");
+        else if (_parsedTree->token() != Token::BlockDeclarations)
+            throw MissingTokenException("A closing curly bracket '}' needs an opening curly bracket '{'");
         _parsedTree = _parsedTree->parent()->parent();
     }
 
@@ -458,14 +461,11 @@ namespace style {
         else if (_parsedTree->token() == Token::Tuple || _parsedTree->token() == Token::Function) {
             removeSpace();
 
-            // FIXME: wtf? With that, `test-rule: (aaa, bbb, ccc);` doesn't work.
-            //  But, can tuples have enums inside?
-            if (_parsedTree->nbChilds() != 1) throw MalformedExpressionException("Can only have one rvalue in an assignment");
             lastChild = _parsedTree->getLastChild();
             if (lastChild != nullptr && lastChild->token() != Token::ArgSeparator)
                 throw MalformedExpressionException("The elements in a tuple or the parameters of a function must be comma separated");
             _parsedTree->deleteSpecificChild(lastChild);
-            _parsedTree->addChild(new DeserializationNode{Token::RawName, _parsedTree->value()});
+            _parsedTree->addChild(new DeserializationNode{Token::EnumValue, _currentNode->value()});
         }
         else {
             if (isValidElementOrRuleName(_currentNode->value())) parseName();
