@@ -1,3 +1,4 @@
+#include "../cpp_tests/src/tests.hpp"
 #include "config_tests/config_tests.hpp"
 #include "deserialization_tests/deserialization_tests.hpp"
 #include "tests_lexer/tests_lexer.hpp"
