@@ -58,7 +58,7 @@ $(OBJ_TEST_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CPP_C) $(CPP_FLAGS) -c $< -o $@
 
 $(TESTS_LIB).a:
-	$(MAKE) -C cpp_tests -j lib BASH_COLORS=$(BASH_COLORS) DEBUG=$(DEBUG)
+	$(MAKE) -C cpp_tests -j lib DEBUG=$(DEBUG)
 
 $(COMMONS_LIB).a:
 	$(MAKE) -C cpp_commons -j lib DEBUG=$(DEBUG)

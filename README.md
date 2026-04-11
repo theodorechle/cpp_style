@@ -77,6 +77,4 @@ Run tests
 
 `bin/tests`
 
-You can add BASH_COLORS=1 in the make command to add colors in bash shells for tests
-
-`make tests BASH_COLORS=1`
+You can add debug logs with `DEBUG=1`.
