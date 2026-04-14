@@ -451,13 +451,13 @@ namespace style {
 
         flattenStyle(styleTree);
 #ifdef DEBUG
-        std::cerr << "flattened style\n";
-        styleTree->debugDisplay(std::cerr);
+        std::clog << "flattened style\n";
+        styleTree->debugDisplay(std::clog);
 #endif
         filterRulesWithConfiguration(styleTree);
 #ifdef DEBUG
-        std::cerr << "filtered style\n";
-        styleTree->debugDisplay(std::cerr);
+        std::clog << "filtered style\n";
+        styleTree->debugDisplay(std::clog);
 #endif
         tree = styleTree->child();
 

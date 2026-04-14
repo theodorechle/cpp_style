@@ -45,7 +45,7 @@ namespace style {
         try {
             while (_currentNode != nullptr) {
 #ifdef DEBUG_DEBUG
-                std::cerr << "\nActual token : " << tokenToString(_currentNode->token()) << ": '" << _currentNode->value() << "'" << "\n";
+                std::clog << "\nActual token : " << tokenToString(_currentNode->token()) << ": '" << _currentNode->value() << "'" << "\n";
 #endif
                 switch (_currentNode->token()) {
                 case Token::Space:
@@ -117,17 +117,17 @@ namespace style {
                     throw UnknownTokenException(*_currentNode);
                 }
 #ifdef DEBUG_DEBUG
-                std::cerr << "Root :\n";
-                _expressionTreeRoot->debugDisplay(std::cerr);
-                std::cerr << "\n";
+                std::clog << "Root :\n";
+                _expressionTreeRoot->debugDisplay(std::clog);
+                std::clog << "\n";
 #endif
                 _currentNode = _currentNode->next();
             }
             removeWhiteSpaces();
 #ifdef DEBUG
-            std::cerr << "Final parsed tree :\n";
-            _expressionTreeRoot->debugDisplay(std::cerr);
-            std::cerr << "\n";
+            std::clog << "Final parsed tree :\n";
+            _expressionTreeRoot->debugDisplay(std::clog);
+            std::clog << "\n";
 #endif
             if (_parsedTree != _expressionTreeRoot) throw MalformedExpressionException("Block not properly closed\n");
         }

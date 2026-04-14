@@ -211,7 +211,7 @@ namespace style {
             }
             _index += increment;
 #ifdef DEBUG
-            std::cerr << tokenToString(_parsedTree->token()) << ": '" << _parsedTree->value() << "'\n";
+            std::clog << tokenToString(_parsedTree->token()) << ": '" << _parsedTree->value() << "'\n";
 #endif
             _parsedTree = _parsedTree->next();
         }
