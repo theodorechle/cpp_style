@@ -101,7 +101,8 @@ The child and next parameters allows creating a tree, where child is obviously a
 
 If we want to specify a rule for padding for example, where the value would be an integer with a unit, we would write
 ```cpp
-{"padding",
+{
+    "padding",
     {new ConfigRuleNode(style::Token::Unit,
         new ConfigRuleNode(style::Token::Int))
     }
@@ -113,7 +114,8 @@ Note that `Unit` is specified as the parent of `Int`. It's because the most impo
 
 We can use some more complex configuration, like this:
 ```cpp
-{"text-color",
+{
+    "text-color",
     {
         new ConfigRuleNode(style::Token::Hex),
         new ConfigRuleNode(style::Token::Tuple,
