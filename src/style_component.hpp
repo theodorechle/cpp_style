@@ -69,7 +69,7 @@ namespace style {
     typedef std::unordered_map<std::string, StyleRule> StyleValuesMap;
     typedef std::pair<StyleComponentDataList, StyleValuesMap> StyleDefinition;
 
-    typedef std::unordered_map<std::string, StyleRule> RulesMap;
+    typedef std::unordered_map<std::string, StyleRule> RulesMap; // XXX: same as StyleValuesMap
 
 } // namespace style
 

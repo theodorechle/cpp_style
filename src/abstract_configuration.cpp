@@ -1,6 +1,7 @@
 #include "abstract_configuration.hpp"
 
 #include "parser.hpp"
+#include <algorithm>
 
 namespace style::config {
     std::array<Token, 2> NESTABLE_TOKENS = {Token::Function, Token::Tuple};

@@ -1,14 +1,9 @@
 #ifndef STYLE_DESERIALIZER_HPP
 #define STYLE_DESERIALIZER_HPP
 
-#include "lexer.hpp"
-#include "nodes_to_style_components.hpp"
-#include "parser.hpp"
+#include "abstract_configuration.hpp"
 #include "style_component.hpp"
-#include <fstream>
-#include <iostream>
 #include <list>
-#include <sstream>
 #include <string>
 
 namespace style {

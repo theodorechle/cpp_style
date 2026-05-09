@@ -3,7 +3,6 @@
 
 #include "../cpp_commons/src/node.hpp"
 #include "tokens.hpp"
-#include <algorithm>
 #include <exception>
 #include <set>
 #include <string>

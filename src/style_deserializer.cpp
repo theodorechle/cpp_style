@@ -1,4 +1,8 @@
 #include "style_deserializer.hpp"
+#include "deserialization_node.hpp"
+#include "nodes_to_style_components.hpp"
+#include <fstream>
+#include <sstream>
 
 namespace style {
 

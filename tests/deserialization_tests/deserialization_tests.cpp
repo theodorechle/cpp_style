@@ -1,4 +1,5 @@
 #include "deserialization_tests.hpp"
+#include "../../../cpp_style/src/parser.hpp"
 
 namespace deserializationTests {
 

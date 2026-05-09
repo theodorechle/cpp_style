@@ -2,10 +2,8 @@
 #define PARSER_HPP
 
 #include "deserialization_node.hpp"
-#include <algorithm>
 #include <exception>
 #include <string>
-#include <unordered_map>
 
 namespace style {
 
