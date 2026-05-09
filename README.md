@@ -168,3 +168,6 @@ For example, if `font-name` and `text-color` should be inheritable, we simply ne
 For now, we cannot specify only some units should be usable for a rule. Any unit can be picked, even if some of them are not meaningful for the use cases.
 
 No range can be specified, for example, only allowing positive integers for a size rule or integers between 0 and 255 for rgb colors.
+
+## Actually using the library
+🚧
