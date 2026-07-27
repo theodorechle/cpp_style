@@ -291,7 +291,7 @@ namespace style {
         StyleValueType type;
         DeserializationNode *next;
         StyleValue *styleValue;
-        StyleValue *tmpStyleValue;
+        StyleValue *currentValue;
         StyleValue *styleNext;
 
         type = tokenTypeToStyleValueType(node->token());
@@ -304,12 +304,12 @@ namespace style {
         styleValue->addChild(convertStyleNodeToStyleValue(node->child()));
 
         next = node->next();
-        tmpStyleValue = styleValue;
+        currentValue = styleValue;
         while (next != nullptr) {
             styleNext = convertStyleNodeToStyleValue(next);
             if (styleNext == nullptr) break;
-            tmpStyleValue->next(styleNext);
-            tmpStyleValue = styleNext;
+            currentValue->next(styleNext);
+            currentValue = styleNext;
             next = next->next();
         }
         return styleValue;
