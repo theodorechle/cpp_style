@@ -1,5 +1,4 @@
 #include "style_deserializer.hpp"
-#include "deserialization_node.hpp"
 #include "nodes_to_style_components.hpp"
 #include <fstream>
 #include <sstream>
@@ -21,15 +20,7 @@ namespace style {
 
     std::list<StyleDefinition *> *StyleDeserializer::deserialize(const std::string &style, int fileNumber, int *ruleNumber,
                                                                  const config::Config *config) {
-
-        std::list<StyleDefinition *> *deserializedStyle = nullptr;
-        DeserializationNode *tokens = nullptr;
-        DeserializationNode *result = nullptr;
-        deserializedStyle = NodesToStyleComponents(config).convert(style, fileNumber, ruleNumber);
-
-        delete tokens;
-        delete result;
-        return deserializedStyle;
+        return NodesToStyleComponents(config).convert(style, fileNumber, ruleNumber);
     }
 
 } // namespace style

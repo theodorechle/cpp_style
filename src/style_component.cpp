@@ -78,6 +78,18 @@ namespace style {
     StyleRule::StyleRule(const StyleRule &rule)
         : value{rule.value->copy()}, enabled{rule.enabled}, specificity{rule.specificity}, fileNumber{rule.fileNumber}, ruleNumber{rule.ruleNumber} {}
 
+    StyleRule &StyleRule::operator=(const StyleRule &rule) {
+        if (this != &rule) {
+            value = rule.value->copy();
+            enabled = rule.enabled;
+            specificity = rule.specificity;
+            fileNumber = rule.fileNumber;
+            ruleNumber = rule.ruleNumber;
+        }
+
+        return *this;
+    }
+
     StyleRule::StyleRule(StyleRule &&rule)
         : value{rule.value}, enabled{rule.enabled}, specificity{rule.specificity}, fileNumber{rule.fileNumber}, ruleNumber{rule.ruleNumber} {
         rule.value = nullptr;

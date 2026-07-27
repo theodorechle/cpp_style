@@ -59,7 +59,10 @@ namespace style {
 
         StyleRule() : value{nullptr}, enabled{false}, specificity{0}, fileNumber{-1}, ruleNumber{-1} {}
         StyleRule(StyleValue *value, bool enabled, int specificity, int fileNumber, int ruleNumber);
+        // copy constructor
         StyleRule(const StyleRule &rule);
+        // copy assignment operator (same as copy constructor, except it's used when using explicitly the assignment operator ('='))
+        StyleRule &operator=(const StyleRule &rule);
         // move constructor
         StyleRule(StyleRule &&rule);
         // move assignment operator (same as move constructor, except it's used when using explicitly the assignment operator ('='))
