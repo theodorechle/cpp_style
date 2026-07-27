@@ -73,13 +73,36 @@ namespace style {
     std::string StyleValue::debugValue() const { return _value + " (" + styleValueTypeToString(_type) + ")"; }
 
     StyleRule::StyleRule(StyleValue *value, bool enabled, int specificity, int fileNumber, int ruleNumber)
-        : value{value}, enabled{enabled}, specificity{specificity}, fileNumber{fileNumber}, ruleNumber{ruleNumber} {}
+        : value{value->copy()}, enabled{enabled}, specificity{specificity}, fileNumber{fileNumber}, ruleNumber{ruleNumber} {}
 
-    StyleRule::StyleRule(const StyleRule &rule) {
-        if (rule.value != nullptr) value = rule.value->copy();
-        enabled = rule.enabled;
-        specificity = rule.specificity;
-        fileNumber = rule.fileNumber;
-        ruleNumber = rule.ruleNumber;
+    StyleRule::StyleRule(const StyleRule &rule)
+        : value{rule.value->copy()}, enabled{rule.enabled}, specificity{rule.specificity}, fileNumber{rule.fileNumber}, ruleNumber{rule.ruleNumber} {}
+
+    StyleRule::StyleRule(StyleRule &&rule)
+        : value{rule.value}, enabled{rule.enabled}, specificity{rule.specificity}, fileNumber{rule.fileNumber}, ruleNumber{rule.ruleNumber} {
+        rule.value = nullptr;
+        rule.fileNumber = -1;
+        rule.ruleNumber = -1;
     }
+
+    StyleRule &StyleRule::operator=(StyleRule &&rule) {
+        if (this != &rule) {
+            value = rule.value;
+            enabled = rule.enabled;
+            specificity = rule.specificity;
+            fileNumber = rule.fileNumber;
+            ruleNumber = rule.ruleNumber;
+            rule.value = nullptr;
+            rule.fileNumber = -1;
+            rule.ruleNumber = -1;
+        }
+
+        return *this;
+    }
+
+    // XXX: By adding this, it crashes
+    // The only way I see to get this behavior is if there is some use-after-free
+    // Is there another way?
+    // Yes, if a pointer to value is first created and then used somewhere else
+    StyleRule::~StyleRule() { delete value; }
 } // namespace Style

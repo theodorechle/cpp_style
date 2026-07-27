@@ -3,18 +3,10 @@
 
 #include "abstract_configuration.hpp"
 #include "deserialization_node.hpp"
-#include "lexer.hpp"
-#include "parser.hpp"
 #include "style_component.hpp"
 
-#include <algorithm>
-#include <fstream>
-#include <iostream>
-#include <iterator>
 #include <list>
-#include <sstream>
 #include <string>
-#include <tuple>
 
 namespace style {
 
@@ -26,7 +18,7 @@ namespace style {
         std::list<StyleDefinition *> *styleDefinitions = nullptr;
 
         DeserializationNode *deserializeStyle(const std::string &style);
-        
+
         DeserializationNode *deserializeStyleFromFile(const std::string &fileName);
 
         static DeserializationNode *joinStyleDeclarations(DeserializationNode *firstDeclarations, DeserializationNode *secondDeclarations);
@@ -47,7 +39,7 @@ namespace style {
          * Does not accept a null pointer for "components" parameter
          */
         std::list<StyleDefinition *> *createStyleComponents(std::list<std::list<StyleComponentDataList *> *>::const_iterator componentsListIt,
-                                                       StyleComponentDataList *components, StyleValuesMap *appliedStyle);
+                                                            StyleComponentDataList *components, StyleValuesMap *appliedStyle);
 
         int computeRuleSpecifity(StyleComponentDataList *ruleComponents);
 

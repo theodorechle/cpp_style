@@ -60,6 +60,11 @@ namespace style {
         StyleRule() : value{nullptr}, enabled{false}, specificity{0}, fileNumber{-1}, ruleNumber{-1} {}
         StyleRule(StyleValue *value, bool enabled, int specificity, int fileNumber, int ruleNumber);
         StyleRule(const StyleRule &rule);
+        // move constructor
+        StyleRule(StyleRule &&rule);
+        // move assignment operator (same as move constructor, except it's used when using explicitly the assignment operator ('='))
+        StyleRule &operator=(StyleRule &&rule);
+        ~StyleRule();
     };
 
     typedef std::pair<std::string, StyleComponentType> StyleComponentData;

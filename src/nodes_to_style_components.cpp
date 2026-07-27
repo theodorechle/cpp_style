@@ -1,5 +1,12 @@
 #include "nodes_to_style_components.hpp"
+#include "lexer.hpp"
+#include "parser.hpp"
 #include "style_component.hpp"
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <iterator>
+#include <sstream>
 
 namespace style {
 
@@ -333,7 +340,8 @@ namespace style {
                 if (!isNodeNull(ruleNameNode)) {
                     styleValue = convertStyleNodeToStyleValue(ruleNameNode);
                     if (styleValue != nullptr) {
-                        (*appliedStyleMap)[ruleName] = StyleRule(styleValue->copy(), true, 0, fileNumber, *ruleNumber);
+                        (*appliedStyleMap).insert_or_assign(ruleName, StyleRule(styleValue, true, 0, fileNumber, *ruleNumber));
+                        delete styleValue;
                         (*ruleNumber)++;
                     }
                 }
@@ -361,6 +369,9 @@ namespace style {
         if (std::next(componentsListIt) == requiredStyleComponentsLists.cend()) { // if at end of the declaration list
             for (StyleComponentDataList *componentsDataList : **componentsListIt) {
                 componentsIt = std::prev(components->end());
+                // appliedStyleMap[0]->second.value._value is modified on the next line
+                // is it because the memory was freed (but still used because of an invalid pointer) and this line is when this memory is reused
+                // elsewhere? or a memory overflow?
                 std::copy(componentsDataList->begin(), componentsDataList->end(), std::back_inserter(*components));
                 int specificity = computeRuleSpecifity(components);
                 for (std::pair<const std::string, StyleRule> &rule : *appliedStyleMap) {
@@ -469,6 +480,8 @@ namespace style {
         }
 
         requiredStyleComponentsLists.clear();
+
+        delete styleTree;
 
         return styleDefinitions;
     }

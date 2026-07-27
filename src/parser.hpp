@@ -35,13 +35,13 @@ namespace style {
      * Transform a chain of trees (no childs) like the one the lexer function returns into a tree containing the entire expression
      */
     class Parser {
+        DeserializationNode *_currentNode = nullptr;
+
         /**
          * The expressionTreeRoot should never contains a pointer pointing to _currentNode in any way,
          * because it could be used and freed in the calling program after the parser call.
          * Consider currentNode as const
          */
-        DeserializationNode *_currentNode;
-
         // only used to avoid recalculating many times the root
         DeserializationNode *_expressionTreeRoot = nullptr;
         DeserializationNode *_parsedTree = nullptr;
@@ -49,6 +49,7 @@ namespace style {
 
     public:
         static bool isValidElementOrRuleName(const std::string &str);
+        DeserializationNode *parse(DeserializationNode *currentNode);
 
     private:
         static bool isWhiteSpace(Token token);
@@ -88,9 +89,6 @@ namespace style {
         void parseClass();
         void parseIdentifier();
         void parseModifier();
-
-    public:
-        DeserializationNode *parse(DeserializationNode *currentNode);
     };
 
 } // namespace style

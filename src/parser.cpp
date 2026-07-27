@@ -16,28 +16,6 @@ namespace style {
         return str.size() == 1 || isValidName(str, 1, str.size());
     }
 
-    bool Parser::isWhiteSpace(Token token) { return (token == Token::Space || token == Token::LineBreak); }
-
-    bool Parser::isComponentRelation(Token token) { return (token == Token::AnyParent || token == Token::DirectParent); }
-
-    void Parser::removeSpace() {
-        DeserializationNode *lastChild = _parsedTree->getLastChild();
-        if (lastChild != nullptr && lastChild->token() == Token::Space) _parsedTree->deleteSpecificChild(lastChild);
-    }
-
-    void Parser::removeLineReturn() {
-        DeserializationNode *lastChild = _parsedTree->getLastChild();
-        if (lastChild != nullptr && lastChild->token() == Token::LineBreak) _parsedTree->deleteSpecificChild(lastChild);
-    }
-
-    void Parser::removeWhiteSpaces() {
-        DeserializationNode *lastChild = _parsedTree->getLastChild();
-        while (lastChild != nullptr && (lastChild->token() == Token::Space || lastChild->token() == Token::LineBreak)) {
-            _parsedTree->deleteSpecificChild(lastChild);
-            lastChild = _parsedTree->getLastChild();
-        }
-    }
-
     DeserializationNode *Parser::parse(DeserializationNode *currentNode) {
         _currentNode = currentNode;
         _expressionTreeRoot = new DeserializationNode(Token::NullRoot);
@@ -138,6 +116,28 @@ namespace style {
             throw;
         }
         return _expressionTreeRoot;
+    }
+
+    bool Parser::isWhiteSpace(Token token) { return (token == Token::Space || token == Token::LineBreak); }
+
+    bool Parser::isComponentRelation(Token token) { return (token == Token::AnyParent || token == Token::DirectParent); }
+
+    void Parser::removeSpace() {
+        DeserializationNode *lastChild = _parsedTree->getLastChild();
+        if (lastChild != nullptr && lastChild->token() == Token::Space) _parsedTree->deleteSpecificChild(lastChild);
+    }
+
+    void Parser::removeLineReturn() {
+        DeserializationNode *lastChild = _parsedTree->getLastChild();
+        if (lastChild != nullptr && lastChild->token() == Token::LineBreak) _parsedTree->deleteSpecificChild(lastChild);
+    }
+
+    void Parser::removeWhiteSpaces() {
+        DeserializationNode *lastChild = _parsedTree->getLastChild();
+        while (lastChild != nullptr && (lastChild->token() == Token::Space || lastChild->token() == Token::LineBreak)) {
+            _parsedTree->deleteSpecificChild(lastChild);
+            lastChild = _parsedTree->getLastChild();
+        }
     }
 
     void Parser::parseSpace() {
