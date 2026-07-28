@@ -73,14 +73,14 @@ namespace style {
     std::string StyleValue::debugValue() const { return _value + " (" + styleValueTypeToString(_type) + ")"; }
 
     StyleRule::StyleRule(StyleValue *value, bool enabled, int specificity, int fileNumber, int ruleNumber)
-        : value{value->copy()}, enabled{enabled}, specificity{specificity}, fileNumber{fileNumber}, ruleNumber{ruleNumber} {}
+        : value{value ? value->copy() : nullptr}, enabled{enabled}, specificity{specificity}, fileNumber{fileNumber}, ruleNumber{ruleNumber} {}
 
     StyleRule::StyleRule(const StyleRule &rule)
-        : value{rule.value->copy()}, enabled{rule.enabled}, specificity{rule.specificity}, fileNumber{rule.fileNumber}, ruleNumber{rule.ruleNumber} {}
+        : value{rule.value ? rule.value->copy() : nullptr}, enabled{rule.enabled}, specificity{rule.specificity}, fileNumber{rule.fileNumber}, ruleNumber{rule.ruleNumber} {}
 
     StyleRule &StyleRule::operator=(const StyleRule &rule) {
         if (this != &rule) {
-            value = rule.value->copy();
+            if (rule.value) value = rule.value->copy();
             enabled = rule.enabled;
             specificity = rule.specificity;
             fileNumber = rule.fileNumber;
