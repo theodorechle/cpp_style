@@ -427,7 +427,7 @@ namespace style {
             return;
         }
 
-        requiredStyleComponentsLists.push_back(styleComponentsLists); // TODO: I think there is one list who is useless
+        requiredStyleComponentsLists.push_back(styleComponentsLists); // TODO: I think there is one useless list
         StyleComponentDataList components = StyleComponentDataList();
         std::list<StyleDefinition *> *finalStyleComponents =
             createStyleComponents(requiredStyleComponentsLists.cbegin(), &components, appliedStyleMap);

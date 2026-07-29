@@ -112,9 +112,5 @@ namespace style {
         return *this;
     }
 
-    // XXX: By adding this, it crashes
-    // The only way I see to get this behavior is if there is some use-after-free
-    // Is there another way?
-    // Yes, if a pointer to value is first created and then used somewhere else
     StyleRule::~StyleRule() { delete value; }
 } // namespace Style
