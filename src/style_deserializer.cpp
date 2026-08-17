@@ -5,6 +5,7 @@
 
 namespace style {
 
+    // same as NodesToStyleComponents deseerializeStyleFromFile function
     std::list<StyleDefinition *> *StyleDeserializer::deserializeFromFile(const std::string &fileName, int fileNumber, int *ruleNumber,
                                                                          const config::Config *config) {
         std::ifstream file(fileName);
@@ -21,6 +22,10 @@ namespace style {
     std::list<StyleDefinition *> *StyleDeserializer::deserialize(const std::string &style, int fileNumber, int *ruleNumber,
                                                                  const config::Config *config) {
         return NodesToStyleComponents(config).convert(style, fileNumber, ruleNumber);
+    }
+
+    StyleComponentDataList *StyleDeserializer::deserializeSelectors(const std::string &selectors, const config::Config *config) {
+        return NodesToStyleComponents(config).convertSelectors(selectors);
     }
 
 } // namespace style

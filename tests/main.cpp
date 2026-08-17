@@ -2,13 +2,17 @@
 #include "config_tests/config_tests.hpp"
 #include "deserialization_tests/deserialization_tests.hpp"
 #include "tests_lexer/tests_lexer.hpp"
-#include "tests_parser/tests_parser.hpp"
+#include "tests_parser//tests_parser_selectors_block.hpp"
+#include "tests_parser/tests_parser_file_block.hpp"
 
 int main() {
-    test::Tests tests = test::Tests();
+    test::Tests tests = test::Tests(0, true);
     configTests::configTests(&tests);
     testsLexer::testsLexer(&tests);
-    testsParser::testsParser(&tests);
+    tests.beginTestBlock("Tests parser");
+    testsParserFileBlock::testsParsingFileBlock(&tests);
+    testsParserSelectorsBlock::testsParsingSelectorsBlock(&tests);
+    tests.endTestBlock();
     deserializationTests::testsDeserialization(&tests);
     tests.runTests();
     tests.displaySummary();

@@ -42,10 +42,10 @@ namespace style {
         // Used only by the parser
         case Token::StyleBlock:
             return "StyleBlock";
-        case Token::BlockSelectors:
-            return "BlockSelectors";
-        case Token::Selector:
-            return "Selector";
+        case Token::SelectorsBlock:
+            return "SelectorsBlock";
+        case Token::SelectorsList:
+            return "SelectorsList";
         case Token::BlockDeclarations:
             return "BlockDeclarations";
         case Token::DirectParent:

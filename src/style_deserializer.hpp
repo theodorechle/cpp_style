@@ -11,8 +11,10 @@ namespace style {
     class StyleDeserializer {
     public:
         static std::list<StyleDefinition *> *deserializeFromFile(const std::string &fileName, int fileNumber, int *ruleNumber,
-                                                            const config::Config *config);
+                                                                 const config::Config *config);
         static std::list<StyleDefinition *> *deserialize(const std::string &style, int fileNumber, int *ruleNumber, const config::Config *config);
+
+        static StyleComponentDataList *deserializeSelectors(const std::string &selectors, const config::Config *config);
     };
 
 } // namespace Style

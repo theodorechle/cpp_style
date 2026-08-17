@@ -1,4 +1,5 @@
 #include "nodes_to_style_components.hpp"
+#include "deserialization_node.hpp"
 #include "lexer.hpp"
 #include "parser.hpp"
 #include "style_component.hpp"
@@ -151,7 +152,7 @@ namespace style {
         while (style != nullptr) {
             if (style->token() == Token::StyleBlock) moveNestedBlocksToRoot(style);
             else if (style->token() == Token::Import) {
-                DeserializationNode *importedStyle = deserializeStyleFromFile(style->value()); // refactor with StyleManager
+                DeserializationNode *importedStyle = deserializeStyleFromFile(style->value());
                 if (importedStyle != nullptr) {
                     importedStyle->addChild(style->next());
                     style->next(importedStyle->child());
@@ -242,14 +243,14 @@ namespace style {
         StyleRelation styleRelationToken;
         std::string currentValue;
 
-        if (tree == nullptr || tree->token() != Token::BlockSelectors)
+        if (tree == nullptr || tree->token() != Token::SelectorsBlock)
             return nullptr; // TODO: it can't happen if previous steps passed (I think there is a lot of checks who are useless)
 
         styleComponentsLists = new std::list<StyleComponentDataList *>();
         declaration = tree->child();
         // loop through declarations
         while (declaration != nullptr) {
-            if (declaration->token() != Token::Selector) { // invalid block declaration
+            if (declaration->token() != Token::SelectorsList) { // invalid block declaration
                 delete styleComponentsLists;               // TODO: how could this even happen?
                 return nullptr;
             }
@@ -473,6 +474,12 @@ namespace style {
         delete styleTree;
 
         return styleDefinitions;
+    }
+
+    StyleComponentDataList *NodesToStyleComponents::convertSelectors(const std::string &selectors) {
+        DeserializationNode *nodes = deserializeStyle(selectors);
+        delete nodes;
+        return new StyleComponentDataList();
     }
 
 } // namespace style

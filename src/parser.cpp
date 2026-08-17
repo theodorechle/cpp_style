@@ -1,4 +1,6 @@
 #include "parser.hpp"
+#include "deserialization_node.hpp"
+#include "tokens.hpp"
 
 namespace style {
 
@@ -16,570 +18,184 @@ namespace style {
         return str.size() == 1 || isValidName(str, 1, str.size());
     }
 
-    DeserializationNode *Parser::parse(DeserializationNode *currentNode) {
-        _currentNode = currentNode;
-        _expressionTreeRoot = new DeserializationNode(Token::NullRoot);
-        _parsedTree = _expressionTreeRoot;
-        try {
-            while (_currentNode != nullptr) {
-#ifdef DEBUG_DEBUG
-                std::clog << "\nActual token : " << tokenToString(_currentNode->token()) << ": '" << _currentNode->value() << "'" << "\n";
-#endif
-                switch (_currentNode->token()) {
-                case Token::Space:
-                    parseSpace();
-                    break;
-                case Token::LineBreak:
-                    parseLineBreak();
-                    break;
-                case Token::OneLineComment:
-                    parseOneLineComment();
-                    break;
-                case Token::MultiLineComment:
-                    parseMultiLineComment();
-                    break;
-                case Token::String:
-                    parseString();
-                    break;
-                case Token::Int:
-                case Token::Float:
-                case Token::Bool:
-                    parseValue();
-                    break;
-                case Token::RawName:
-                    parseRawName();
-                    break;
-                case Token::Comma:
-                    parseComma();
-                    break;
-                case Token::Colon:
-                    parseColon();
-                    break;
-                case Token::SemiColon:
-                    parseSemiColon();
-                    break;
-                case Token::Sharp:
-                    parseSharp();
-                    break;
-                case Token::Dot:
-                    parseDot();
-                    break;
-                case Token::Ampersand:
-                    parseAmpersand();
-                    break;
-                case Token::At:
-                    parseAt();
-                    break;
-                case Token::Star:
-                    parseStar();
-                    break;
-                case Token::GreaterThan:
-                    parseGreatherThan();
-                    break;
-                case Token::Unit:
-                    parseUnit();
-                    break;
-                case Token::OpeningParenthesis:
-                    parseOpeningParenthesis();
-                    break;
-                case Token::ClosingParenthesis:
-                    parseClosingParenthesis();
-                    break;
-                case Token::OpeningCurlyBracket:
-                    parseOpeningCurlyBracket();
-                    break;
-                case Token::ClosingCurlyBracket:
-                    parseClosingCurlyBracket();
-                    break;
-                default:
-                    throw UnknownTokenException(*_currentNode);
-                }
-#ifdef DEBUG_DEBUG
-                std::clog << "Root :\n";
-                _expressionTreeRoot->debugDisplay(std::clog);
-                std::clog << "\n";
-#endif
-                _currentNode = _currentNode->next();
-            }
-            removeWhiteSpaces();
+    DeserializationNode *Parser::parse(DeserializationNode *currentNode, ParsingBlock block) {
+        ParsingState finalState;
+        switch (block) {
+        case ParsingBlock::FILE:
+            finalState = tryParseFile(currentNode);
+            break;
+        case ParsingBlock::SELECTORS:
+            finalState = tryParseSelectorsBlock(currentNode);
+            break;
+        }
+
+        DeserializationNode *rootNode = new DeserializationNode(Token::NullRoot);
+        rootNode->addChild(finalState.currentParsedNode);
+
 #ifdef DEBUG
-            std::clog << "Final parsed tree :\n";
-            _expressionTreeRoot->debugDisplay(std::clog);
-            std::clog << "\n";
+        std::clog << "Final parsed tree :\n";
+        rootNode->debugDisplay(std::clog);
+        std::clog << "\n";
 #endif
-            if (_parsedTree != _expressionTreeRoot) throw MalformedExpressionException("Block not properly closed\n");
+
+        return rootNode;
+    }
+
+    ParsingState Parser::emptyParsingState(const DeserializationNode *currentLexedNode) { return ParsingState{currentLexedNode, nullptr}; }
+
+    ParsingState Parser::removeSpaces(const DeserializationNode *currentLexedNode) {
+        const DeserializationNode *startNode = currentLexedNode;
+        const DeserializationNode *currentNode = startNode;
+        while (currentNode && currentNode->token() == Token::Space) {
+            currentNode = currentNode->next();
         }
-        catch (const ParserException &) {
-            _parsedTree = nullptr;
-            delete _expressionTreeRoot;
-            _expressionTreeRoot = nullptr;
-            throw;
+        if (startNode == currentNode) return ParsingState{currentLexedNode, nullptr};
+        return ParsingState{currentNode, nullptr};
+    }
+
+    ParsingState Parser::tryParseElementName(const DeserializationNode *currentLexedNode) {
+        if (currentLexedNode->token() == Token::RawName && isValidElementOrRuleName(currentLexedNode->value())) {
+            return ParsingState{currentLexedNode->next(), new DeserializationNode(Token::ElementName, currentLexedNode->value())};
         }
-        return _expressionTreeRoot;
+        return ParsingState{currentLexedNode, nullptr};
     }
 
-    bool Parser::isWhiteSpace(Token token) { return (token == Token::Space || token == Token::LineBreak); }
-
-    bool Parser::isComponentRelation(Token token) { return (token == Token::AnyParent || token == Token::DirectParent); }
-
-    void Parser::removeSpace() {
-        DeserializationNode *lastChild = _parsedTree->getLastChild();
-        if (lastChild != nullptr && lastChild->token() == Token::Space) _parsedTree->deleteSpecificChild(lastChild);
-    }
-
-    void Parser::removeLineReturn() {
-        DeserializationNode *lastChild = _parsedTree->getLastChild();
-        if (lastChild != nullptr && lastChild->token() == Token::LineBreak) _parsedTree->deleteSpecificChild(lastChild);
-    }
-
-    void Parser::removeWhiteSpaces() {
-        DeserializationNode *lastChild = _parsedTree->getLastChild();
-        while (lastChild != nullptr && (lastChild->token() == Token::Space || lastChild->token() == Token::LineBreak)) {
-            _parsedTree->deleteSpecificChild(lastChild);
-            lastChild = _parsedTree->getLastChild();
-        }
-    }
-
-    void Parser::parseSpace() {
-        DeserializationNode *lastChild;
-        if (_parsedTree->token() == Token::Selector) {
-            if (_parsedTree->nbChilds() > 0) {
-                lastChild = _parsedTree->getLastChild();
-                if (lastChild == nullptr || !isComponentRelation(lastChild->token()))
-                    _parsedTree->addChild(new DeserializationNode(Token::AnyParent));
+    ParsingState Parser::tryParseClass(const DeserializationNode *currentLexedNode) {
+        if (currentLexedNode->token() == Token::Dot) {
+            const DeserializationNode *nextNode = currentLexedNode->next();
+            if (nextNode && nextNode->token() == Token::RawName && isValidElementOrRuleName(nextNode->value())) {
+                return ParsingState{nextNode->next(), new DeserializationNode(Token::Class, nextNode->value())};
             }
         }
-        else _parsedTree->addChild(_currentNode->copyNode());
+        return ParsingState{currentLexedNode, nullptr};
     }
 
-    void Parser::parseLineBreak() {
-        Token token = _parsedTree->token();
-        if (token != Token::NullRoot && token != Token::BlockDeclarations) {
-            throw MalformedExpressionException("A line break can only be between blocks declarations or assignments");
-        }
-        _parsedTree->addChild(_currentNode->copyNode());
-    }
-
-    void Parser::parseOneLineComment() {}
-
-    void Parser::parseMultiLineComment() {}
-
-    void Parser::parseValue() {
-        removeSpace();
-
-        DeserializationNode *lastChild;
-        if (_parsedTree->token() != Token::Assignment) {
-            if (_parsedTree->token() != Token::Tuple && _parsedTree->token() != Token::Function)
-                throw MalformedExpressionException(
-                    "An int|float|bool|string must follow an assignment symbol or be inside of a tuple or a function parameter");
-            lastChild = _parsedTree->getLastChild();
-            if (lastChild != nullptr && lastChild->token() != Token::ArgSeparator)
-                throw MalformedExpressionException("The elements in a tuple or the parameters of a function must be comma separated");
-            _parsedTree->deleteSpecificChild(lastChild);
-            _parsedTree->addChild(_currentNode->copyNode());
-        }
-        else {
-            if (_parsedTree->nbChilds() > 1) throw MalformedExpressionException("Can only have one rvalue in an assignment");
-            _parsedTree->addChild(_currentNode->copyNode());
-        }
-    }
-
-    void Parser::parseComma() {
-        removeSpace();
-        switch (_parsedTree->token()) {
-        case Token::Tuple:
-            _parsedTree->addChild(new DeserializationNode(Token::ArgSeparator));
-            break;
-        case Token::Selector:
-            _parsedTree = _parsedTree->parent()->addChild(new DeserializationNode(Token::Selector));
-            break;
-        default:
-            throw MalformedExpressionException("A comma must separate blocks definitions or be inside of a tuple");
-        }
-    }
-
-    void Parser::parseColon() {
-        removeSpace();
-
-        DeserializationNode *lastChild = _parsedTree->getLastChild();
-        DeserializationNode *newChild;
-        if (_parsedTree->token() == Token::BlockDeclarations && lastChild != nullptr && lastChild->token() == Token::Name) {
-            lastChild->token(Token::RuleName);
-            newChild = new DeserializationNode(Token::Assignment);
-            newChild->addChild(lastChild->copyNodeWithChilds());
-            _parsedTree->replaceChild(lastChild, newChild);
-            _parsedTree = newChild;
-        }
-        else if (_currentNode->next()->token() == Token::RawName) {
-            _currentNode = _currentNode->next();
-            parseModifier();
-        }
-        else throw MalformedExpressionException("A colon must be inside of a style block");
-    }
-
-    void Parser::parseSemiColon() {
-        removeSpace();
-        if ((_parsedTree->token() == Token::Assignment && _parsedTree->nbChilds() > 1) || _parsedTree->token() == Token::Import)
-            _parsedTree = _parsedTree->parent();
-        else throw MalformedExpressionException("A semi-colon must be at the end of an assignment");
-    }
-
-    void Parser::parseSharp() {
-        DeserializationNode *lastChild;
-        removeSpace();
-        _currentNode = _currentNode->next();
-        if (_parsedTree->token() != Token::Assignment) {
-            if (_parsedTree->token() != Token::Tuple && _parsedTree->token() != Token::Function) {
-                parseIdentifier();
-                return;
+    ParsingState Parser::tryParseIdentifier(const DeserializationNode *currentLexedNode) {
+        if (currentLexedNode->token() == Token::Sharp) {
+            const DeserializationNode *nextNode = currentLexedNode->next();
+            if (nextNode && nextNode->token() == Token::RawName && isValidElementOrRuleName(nextNode->value())) {
+                return ParsingState{nextNode->next(), new DeserializationNode(Token::Identifier, nextNode->value())};
             }
-            lastChild = _parsedTree->getLastChild();
-            if (lastChild != nullptr && lastChild->token() != Token::ArgSeparator) {
-                parseIdentifier();
-                return;
+        }
+        return ParsingState{currentLexedNode, nullptr};
+    }
+
+    ParsingState Parser::tryParseModifier(const DeserializationNode *currentLexedNode) {
+        if (currentLexedNode->token() == Token::Colon) {
+            const DeserializationNode *nextNode = currentLexedNode->next();
+            if (nextNode && nextNode->token() == Token::RawName && isValidElementOrRuleName(nextNode->value())) {
+                return ParsingState{nextNode->next(), new DeserializationNode(Token::Modifier, nextNode->value())};
             }
-            if (_currentNode->token() != Token::RawName && _currentNode->token() != Token::Int) return;
-            _parsedTree->deleteSpecificChild(lastChild);
-            _parsedTree->addChild(new DeserializationNode{Token::Hex, _currentNode->value()});
         }
-        else {
-            if (_currentNode->token() != Token::RawName && _currentNode->token() != Token::Int) return;
-            if (_parsedTree->nbChilds() > 1) throw MalformedExpressionException("Can only have one rvalue in an assignment");
-            _parsedTree->addChild(new DeserializationNode{Token::Hex, _currentNode->value()});
-        }
+        return ParsingState{currentLexedNode, nullptr};
     }
 
-    void Parser::parseDot() {
-        removeSpace();
-        if (_currentNode->next()->token() == Token::RawName) {
-            _currentNode = _currentNode->next();
-            parseClass();
-        }
-        else throw MalformedExpressionException("Illegal '.' placement");
+    ParsingState Parser::tryParseSelector(const DeserializationNode *currentLexedNode) {
+        ParsingState selectorParsingState = tryParseElementName(currentLexedNode);
+        if (!selectorParsingState.currentParsedNode) selectorParsingState = tryParseClass(currentLexedNode);
+        if (!selectorParsingState.currentParsedNode) selectorParsingState = tryParseIdentifier(currentLexedNode);
+        if (!selectorParsingState.currentParsedNode) selectorParsingState = tryParseModifier(currentLexedNode);
+        return selectorParsingState;
     }
 
-    void Parser::parseAmpersand() {
-        DeserializationNode *lastChild;
-        DeserializationNode *lastChildCopy = nullptr;
-        Token token = _parsedTree->token();
-        if (token == Token::NullRoot || token == Token::BlockDeclarations) {
-            lastChild = _parsedTree->getLastChild();
-            if (lastChild != nullptr) {
-                if (isWhiteSpace(lastChild->token())) {
-                    removeWhiteSpaces();
-                    lastChild = nullptr;
-                }
-                else if (lastChild->token() == Token::Name) lastChildCopy = new DeserializationNode{Token::ElementName, lastChild->value()};
-                else if (lastChild->token() == Token::AnyParent)
-                    ; // do nothing, just ensure the node is being removed without being copied before
-                else lastChildCopy = lastChild->copyNodeWithChilds();
-                _parsedTree->deleteSpecificChild(lastChild);
+    ParsingState Parser::tryParseDirectParentRelation(const DeserializationNode *currentLexedNode) {
+        ParsingState state = removeSpaces(currentLexedNode);
+        if (state.currentLexedNode->token() != Token::GreaterThan) return ParsingState{};
+        state.currentLexedNode = state.currentLexedNode->next();
+        state.currentParsedNode = new DeserializationNode(Token::DirectParent);
+        ParsingState stateAfterFinalSpacesRemoval = removeSpaces(state.currentLexedNode);
+        if (stateAfterFinalSpacesRemoval.currentLexedNode != state.currentLexedNode) {
+            state.currentLexedNode = stateAfterFinalSpacesRemoval.currentLexedNode;
+        }
+        return state;
+    }
+
+    ParsingState Parser::tryParseAnyParentRelation(const DeserializationNode *currentLexedNode) {
+        ParsingState state = removeSpaces(currentLexedNode);
+        if (state.currentLexedNode != currentLexedNode) return {state.currentLexedNode, new DeserializationNode(Token::AnyParent)};
+        return ParsingState{nullptr, nullptr};
+    }
+
+    ParsingState Parser::tryParseSelectorsRelation(const DeserializationNode *currentLexedNode) {
+        ParsingState state = tryParseDirectParentRelation(currentLexedNode);
+        if (!state.currentParsedNode) state = tryParseAnyParentRelation(currentLexedNode);
+        return state;
+    }
+
+    ParsingState Parser::tryParseSelectorsList(const DeserializationNode *currentLexedNodeStart) {
+        const DeserializationNode *currentLexedNode = currentLexedNodeStart;
+        ParsingState state;
+        ParsingState selectorsRelationState;
+
+        state = removeSpaces(currentLexedNode);
+        if (!state.currentLexedNode) return ParsingState{nullptr, nullptr};
+        currentLexedNode = state.currentLexedNode;
+
+        DeserializationNode *currentParsedNodeRoot = new DeserializationNode{Token::SelectorsList};
+        DeserializationNode *currentParsedNode = currentParsedNodeRoot;
+
+        do {
+            // parse selectors with no separator between
+            state = tryParseSelector(selectorsRelationState.currentParsedNode ? selectorsRelationState.currentLexedNode : currentLexedNode);
+            if (!state.currentParsedNode) return ParsingState{currentLexedNode, currentParsedNode};
+            if (selectorsRelationState.currentParsedNode) currentParsedNode->addChild(selectorsRelationState.currentParsedNode);
+            if (!state.currentLexedNode) return ParsingState{currentLexedNode, currentParsedNodeRoot};
+
+            currentLexedNode = state.currentLexedNode;
+            currentParsedNode->addChild(state.currentParsedNode);
+
+            state = tryParseSelector(currentLexedNode);
+            while (state.currentParsedNode && currentLexedNode) {
+                currentParsedNode->addChild(new DeserializationNode{Token::SameElement});
+                currentLexedNode = state.currentLexedNode;
+                currentParsedNode->addChild(state.currentParsedNode);
+                state = tryParseSelector(currentLexedNode);
             }
-            else {
-                if (token == Token::NullRoot)
-                    throw MissingTokenException("A '&' token must not be the first token of a block declaration if not a nested block");
+
+            // end of lexed list reached
+            if (!currentLexedNode) break;
+
+            selectorsRelationState = tryParseSelectorsRelation(currentLexedNode);
+        } while (selectorsRelationState.currentLexedNode && selectorsRelationState.currentParsedNode);
+
+        if (!currentParsedNode) {
+            delete currentParsedNodeRoot;
+            return ParsingState{currentLexedNodeStart, nullptr};
+        }
+        return ParsingState{currentLexedNode, currentParsedNodeRoot};
+    }
+
+    ParsingState Parser::tryParseSelectorsBlock(const DeserializationNode *currentLexedNodeStart) {
+        const DeserializationNode *currentLexedNode = currentLexedNodeStart;
+        ParsingState removedSpacesState;
+        DeserializationNode *currentParsedNodeRoot = new DeserializationNode{Token::SelectorsBlock};
+        DeserializationNode *currentParsedNode = currentParsedNodeRoot;
+        while (true) {
+            removedSpacesState = removeSpaces(currentLexedNode);
+            if (!removedSpacesState.currentLexedNode) return ParsingState{currentLexedNode, currentParsedNodeRoot};
+            ParsingState state = tryParseSelectorsList(removedSpacesState.currentLexedNode);
+            if (!state.currentLexedNode) {
+                delete currentParsedNodeRoot;
+                return ParsingState{currentLexedNodeStart, nullptr};
             }
-            _parsedTree = _parsedTree->addChild(new DeserializationNode(Token::StyleBlock))
-                              ->addChild(new DeserializationNode(Token::BlockSelectors))
-                              ->addChild(new DeserializationNode(Token::Selector));
-            _parsedTree->addChild(lastChildCopy);
-            _parsedTree->addChild(new DeserializationNode(Token::SameElement));
-        }
-        else if (token == Token::Selector) {
-            lastChild = _parsedTree->getLastChild();
-            if (lastChild->token() == Token::AnyParent) {
-                _parsedTree->deleteSpecificChild(lastChild);
-            }
-            _parsedTree->addChild(new DeserializationNode(Token::SameElement));
-        }
-        else
-            throw MalformedExpressionException(
-                "A same element relation ('&') must be before a style block opening and at the root level of the style file or "
-                "inside an other style block");
-    }
-
-    void Parser::parseAt() {
-        if (_parsedTree->token() != Token::NullRoot) throw MalformedExpressionException("A '@' (at) token must be on the root level");
-        _currentNode = _currentNode->next();
-        if (_currentNode == nullptr) throw MalformedExpressionException("A '@' (at) token must not be alone");
-        if (_currentNode->token() == Token::RawName && _currentNode->value() == "import") {
-            removeWhiteSpaces();
-            _parsedTree = _parsedTree->addChild(new DeserializationNode{Token::Import});
-        }
-        else throw MalformedExpressionException("Invalid '@' (at) placement");
-    }
-
-    void Parser::parseStar() {
-        Token token = _parsedTree->token();
-        if (token == Token::NullRoot || token == Token::BlockDeclarations) {
-            removeWhiteSpaces();
-            _parsedTree = _parsedTree->addChild(new DeserializationNode(Token::StyleBlock))
-                              ->addChild(new DeserializationNode(Token::BlockSelectors))
-                              ->addChild(new DeserializationNode(Token::Selector));
-        }
-        else if (token == Token::Selector) {
-            removeSpace();
-        }
-        else return;
-        _parsedTree->addChild(new DeserializationNode(Token::StarWildcard));
-    }
-
-    void Parser::parseString() {
-        if (_parsedTree->token() == Token::Import) {
-            if (_parsedTree->getLastChild()->token() != Token::Space)
-                throw MalformedExpressionException("A space is needed between '@import' and the file name");
-            removeSpace();
-            _parsedTree->value(_currentNode->value());
-        }
-        else parseValue();
-    }
-
-    void Parser::parseGreatherThan() {
-        DeserializationNode *lastChild;
-        DeserializationNode *lastChildCopy = nullptr;
-        Token token = _parsedTree->token();
-        if (token == Token::NullRoot || token == Token::BlockDeclarations) {
-            lastChild = _parsedTree->getLastChild();
-            if (lastChild != nullptr) {
-                if (isWhiteSpace(lastChild->token())) {
-                    removeWhiteSpaces();
-                    lastChild = nullptr;
-                }
-                else if (lastChild->token() == Token::Name) lastChildCopy = new DeserializationNode{Token::ElementName, lastChild->value()};
-                else if (lastChild->token() == Token::AnyParent)
-                    ; // do nothing, just ensure the node is being removed without being copied before
-                else lastChildCopy = lastChild->copyNodeWithChilds();
-                _parsedTree->deleteSpecificChild(lastChild);
-            }
-            else {
-                if (token == Token::NullRoot)
-                    throw MissingTokenException("A '>' token must not be the first token of a block declaration if not a nested block");
-            }
-            _parsedTree = _parsedTree->addChild(new DeserializationNode(Token::StyleBlock))
-                              ->addChild(new DeserializationNode(Token::BlockSelectors))
-                              ->addChild(new DeserializationNode(Token::Selector));
-            _parsedTree->addChild(lastChildCopy);
-            _parsedTree->addChild(new DeserializationNode(Token::DirectParent));
-        }
-        else if (token == Token::Selector) {
-            lastChild = _parsedTree->getLastChild();
-            if (lastChild->token() == Token::AnyParent) {
-                _parsedTree->deleteSpecificChild(lastChild);
-            }
-            _parsedTree->addChild(new DeserializationNode(Token::DirectParent));
-        }
-        else
-            throw MalformedExpressionException(
-                "A direct parent relation ('>') must be before a style block opening and at the root level of the style file or "
-                "inside an other style block");
-    }
-
-    void Parser::parseOpeningParenthesis() {
-        removeSpace();
-
-        DeserializationNode *lastChild;
-        if (_parsedTree->token() == Token::Assignment) {
-            if (_parsedTree->nbChilds() > 1) {
-                lastChild = _parsedTree->getLastChild();
-                if (lastChild != nullptr && lastChild->token() == Token::Name) {
-                    _parsedTree->replaceChild(lastChild, new DeserializationNode{Token::Function, lastChild->value()});
-                }
-                else throw MalformedExpressionException("A tuple must be the only right value of an assignment");
-            }
-            else _parsedTree = _parsedTree->addChild(new DeserializationNode(Token::Tuple));
-            return;
-        }
-        if (_parsedTree->token() != Token::Tuple && _parsedTree->token() != Token::Function)
-            throw MalformedExpressionException("A tuple|function must follow an assignment symbol or be a function parameter or inside of a tuple");
-        lastChild = _parsedTree->getLastChild();
-        if (lastChild != nullptr) {
-            if (lastChild->token() == Token::Name) {
-                lastChild->token(Token::Function);
-                _parsedTree = lastChild;
-                return;
-            }
-            else if (lastChild->token() != Token::ArgSeparator)
-                throw MalformedExpressionException("The elements in a tuple or the parameters of a function must be comma separated");
-        }
-        _parsedTree->deleteSpecificChild(lastChild);
-        _parsedTree = _parsedTree->addChild(new DeserializationNode(Token::Tuple));
-    }
-
-    void Parser::parseClosingParenthesis() {
-        removeSpace();
-
-        if (_parsedTree->token() != Token::Function && _parsedTree->token() != Token::Tuple)
-            throw MissingTokenException("A closing parenthesis ')' needs an opening parenthesis '('");
-        _parsedTree = _parsedTree->parent();
-    }
-
-    void Parser::parseOpeningCurlyBracket() {
-        DeserializationNode *lastChild;
-        DeserializationNode *lastChildCopy;
-        removeSpace();
-        lastChild = _parsedTree->getLastChild();
-        if (lastChild != nullptr && lastChild->token() == Token::AnyParent) {
-            _parsedTree->deleteSpecificChild(lastChild);
-        }
-        if (_parsedTree->token() != Token::NullRoot && _parsedTree->token() != Token::BlockDeclarations && _parsedTree->token() != Token::Selector)
-            throw MalformedExpressionException("A style block must be defined in an other style block or at the root level of the file");
-        if (_parsedTree->token() != Token::Selector) {
-            lastChild = _parsedTree->getLastChild();
-            if (lastChild == nullptr)
-                throw MalformedExpressionException(
-                    "A style block must start with at list an element name|class|identifier before the opening curly bracket");
-            lastChildCopy = lastChild->copyNodeWithChilds();
-            if (lastChildCopy->token() == Token::Name) lastChildCopy->token(Token::ElementName);
-            _parsedTree->deleteSpecificChild(lastChild);
-            _parsedTree = _parsedTree->addChild(new DeserializationNode(Token::StyleBlock))
-                              ->addChild(new DeserializationNode(Token::BlockSelectors))
-                              ->addChild(new DeserializationNode(Token::Selector));
-            _parsedTree->addChild(lastChildCopy);
-        }
-        _parsedTree = _parsedTree->parent()->parent()->addChild(new DeserializationNode(Token::BlockDeclarations));
-    }
-
-    void Parser::parseClosingCurlyBracket() {
-        removeWhiteSpaces();
-        if (_parsedTree->token() == Token::Assignment) throw MissingTokenException("Missing semi-colon after assignment");
-        DeserializationNode *lastChild = _parsedTree->getLastChild();
-        if (lastChild != nullptr && lastChild->token() != Token::Assignment && lastChild->token() != Token::StyleBlock)
-            throw MalformedExpressionException("A block content must only contains assignments and other blocks");
-        else if (_parsedTree->token() != Token::BlockDeclarations)
-            throw MissingTokenException("A closing curly bracket '}' needs an opening curly bracket '{'");
-        _parsedTree = _parsedTree->parent()->parent();
-    }
-
-    void Parser::parseRawName() {
-        DeserializationNode *lastChild;
-        if (_parsedTree->token() == Token::Assignment) {
-            removeSpace();
-
-            if (_parsedTree->nbChilds() != 1) throw MalformedExpressionException("Can only have one rvalue in an assignment");
-            _parsedTree->addChild(new DeserializationNode{Token::EnumValue, _currentNode->value()});
-        }
-        else if (_parsedTree->token() == Token::Tuple || _parsedTree->token() == Token::Function) {
-            removeSpace();
-
-            lastChild = _parsedTree->getLastChild();
-            if (lastChild != nullptr && lastChild->token() != Token::ArgSeparator)
-                throw MalformedExpressionException("The elements in a tuple or the parameters of a function must be comma separated");
-            _parsedTree->deleteSpecificChild(lastChild);
-            _parsedTree->addChild(new DeserializationNode{Token::EnumValue, _currentNode->value()});
-        }
-        else {
-            if (isValidElementOrRuleName(_currentNode->value())) parseName();
-            else throw MalformedExpressionException("Illegal raw name placement");
+            if (!state.currentParsedNode) return ParsingState{currentLexedNode, currentParsedNodeRoot};
+            currentLexedNode = state.currentLexedNode;
+            currentParsedNode->addChild(state.currentParsedNode);
+            removedSpacesState = removeSpaces(state.currentLexedNode);
+            if (!removedSpacesState.currentLexedNode) return ParsingState{currentLexedNode, currentParsedNodeRoot};
+            currentLexedNode = removedSpacesState.currentLexedNode;
+            if (currentLexedNode->token() != Token::Comma) return ParsingState{currentLexedNode, currentParsedNodeRoot};
+            currentLexedNode = currentLexedNode->next(); // skipping comma
         }
     }
 
-    void Parser::parseName() {
-        Token token = _parsedTree->token();
-        DeserializationNode *lastChild;
-        DeserializationNode *lastChildCopy;
-        if (token == Token::NullRoot) {
-            removeWhiteSpaces();
+    ParsingState Parser::tryParseRuleAssignment(const DeserializationNode *currentLexedNode) { return ParsingState{nullptr, nullptr}; }
 
-            _parsedTree = _parsedTree->addChild(new DeserializationNode(Token::StyleBlock))
-                              ->addChild(new DeserializationNode(Token::BlockSelectors))
-                              ->addChild(new DeserializationNode(Token::Selector));
-            _parsedTree->addChild(new DeserializationNode{Token::ElementName, _currentNode->value()});
-            return;
-        }
-        if (token == Token::BlockDeclarations) {
-            removeWhiteSpaces();
-            lastChild = _parsedTree->getLastChild();
+    ParsingState Parser::tryParseRulesBlock(const DeserializationNode *currentLexedNode) { return ParsingState{nullptr, nullptr}; }
 
-            if (lastChild != nullptr && lastChild->token() == Token::RawName) {
-                lastChildCopy = lastChild->copyNodeWithChilds();
-                _parsedTree->deleteSpecificChild(lastChild);
-                _parsedTree = _parsedTree->addChild(new DeserializationNode(Token::StyleBlock))
-                                  ->addChild(new DeserializationNode(Token::BlockSelectors))
-                                  ->addChild(new DeserializationNode(Token::Selector));
-                _parsedTree->addChild(lastChildCopy);
-                _parsedTree->addChild(new DeserializationNode{Token::ElementName, _currentNode->value()});
-            }
-            else _parsedTree->addChild(new DeserializationNode{Token::Name, _currentNode->value()});
-            return;
-        }
+    ParsingState Parser::tryParseImport(const DeserializationNode *currentLexedNode) { return ParsingState{nullptr, nullptr}; }
 
-        if (token == Token::Assignment) {
-            removeSpace();
+    ParsingState Parser::tryParseAtRule(const DeserializationNode *currentLexedNode) { return ParsingState{nullptr, nullptr}; }
 
-            if (_parsedTree->nbChilds() > 1) throw MalformedExpressionException("A string|function must be the only right value of an assignment");
-            _parsedTree->addChild(new DeserializationNode{Token::Name, _currentNode->value()});
-            return;
-        }
-        if (token == Token::Selector) {
-            _parsedTree->addChild(new DeserializationNode{Token::ElementName, _currentNode->value()});
-            return;
-        }
-        removeSpace();
-
-        if (token != Token::Tuple && token != Token::Function)
-            throw MalformedExpressionException("A string|function must follow an assignment symbol or be inside of a tuple or a function parameter");
-        lastChild = _parsedTree->getLastChild();
-        if (lastChild != nullptr && lastChild->token() != Token::ArgSeparator)
-            throw MalformedExpressionException("The elements in a tuple or the parameters of a function must be comma separated");
-        _parsedTree->deleteSpecificChild(lastChild);
-        _parsedTree->addChild(_currentNode->copyNode());
-    }
-
-    void Parser::parseUnit() {
-        DeserializationNode *lastChild;
-        DeserializationNode *newChild;
-        if (_parsedTree->token() != Token::Assignment && _parsedTree->token() != Token::Function && _parsedTree->token() != Token::Tuple)
-            throw MalformedExpressionException("An unit must be inside an assignment, a function or a tuple");
-
-        lastChild = _parsedTree->getLastChild();
-        if (lastChild == nullptr || (lastChild->token() != Token::Int && lastChild->token() != Token::Float))
-            throw MissingTokenException("A unit must have an int or a float before");
-        newChild = new DeserializationNode{_currentNode->token(), _currentNode->value()};
-        newChild->addChild(lastChild->copyNodeWithChilds());
-        _parsedTree->replaceChild(lastChild, newChild);
-    }
-
-    DeserializationNode *Parser::updateLastDeclarationComponentBeforeNewOne(DeserializationNode *lastChild) {
-        DeserializationNode *finalChild = nullptr;
-        if (lastChild != nullptr) {
-            if (isWhiteSpace(lastChild->token())) {
-                removeWhiteSpaces();
-                lastChild = nullptr;
-            }
-            else if (lastChild->token() == Token::Name) finalChild = new DeserializationNode{Token::ElementName, lastChild->value()};
-            else finalChild = lastChild->copyNodeWithChilds();
-            _parsedTree->deleteSpecificChild(lastChild);
-        }
-        return finalChild;
-    }
-
-    void Parser::parseDeclarationComponent(Token outputTokenType) {
-        DeserializationNode *lastChild;
-        DeserializationNode *lastChildCopy = nullptr;
-        Token token = _parsedTree->token();
-        if (token == Token::NullRoot || token == Token::BlockDeclarations) {
-            lastChild = _parsedTree->getLastChild();
-            lastChildCopy = updateLastDeclarationComponentBeforeNewOne(lastChild);
-            _parsedTree = _parsedTree->addChild(new DeserializationNode(Token::StyleBlock))
-                              ->addChild(new DeserializationNode(Token::BlockSelectors))
-                              ->addChild(new DeserializationNode(Token::Selector));
-            _parsedTree->addChild(lastChildCopy);
-            _parsedTree->addChild(new DeserializationNode{outputTokenType, _currentNode->value()});
-        }
-        else if (token == Token::Selector) {
-            _parsedTree->addChild(new DeserializationNode{outputTokenType, _currentNode->value()});
-        }
-        else
-            throw MalformedExpressionException(
-                "A "
-                + tokenToString(outputTokenType)
-                + " must be before a style block opening and at the root level of the style file or inside an other style block");
-    }
-
-    void Parser::parseClass() { parseDeclarationComponent(Token::Class); }
-
-    void Parser::parseIdentifier() { parseDeclarationComponent(Token::Identifier); }
-
-    void Parser::parseModifier() { parseDeclarationComponent(Token::Modifier); }
-
+    ParsingState Parser::tryParseFile(const DeserializationNode *currentLexedNode) { return ParsingState{nullptr, nullptr}; }
 } // namespace style

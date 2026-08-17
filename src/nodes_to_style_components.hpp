@@ -48,6 +48,8 @@ namespace style {
     public:
         NodesToStyleComponents(const config::Config *config) : _config{config} {}
         std::list<StyleDefinition *> *convert(const std::string &style, int fileNumber, int *ruleNumber);
+
+        StyleComponentDataList *convertSelectors(const std::string &selectors);
     };
 
 } // namespace style

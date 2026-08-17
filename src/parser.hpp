@@ -31,64 +31,57 @@ namespace style {
         MalformedExpressionException(const std::string &expression) : ParserException{"Malformed expression: \"" + expression + "\""} {};
     };
 
+    enum class ParsingBlock { SELECTORS, FILE };
+
+    /*
+     * methods in the parser returning an instance of this structure should always set currentLexedNode.
+     * If currentLexedNode is null, it should mean the parsing method has read all nodes.
+     */
+    struct ParsingState {
+        const DeserializationNode *currentLexedNode = nullptr;
+        DeserializationNode *currentParsedNode = nullptr;
+    };
+
     /**
      * Transform a chain of trees (no childs) like the one the lexer function returns into a tree containing the entire expression
      */
     class Parser {
-        DeserializationNode *_currentNode = nullptr;
-
-        /**
-         * The expressionTreeRoot should never contains a pointer pointing to _currentNode in any way,
-         * because it could be used and freed in the calling program after the parser call.
-         * Consider currentNode as const
-         */
-        // only used to avoid recalculating many times the root
-        DeserializationNode *_expressionTreeRoot = nullptr;
-        DeserializationNode *_parsedTree = nullptr;
         static bool isValidName(const std::string &str, size_t start, size_t end);
 
     public:
         static bool isValidElementOrRuleName(const std::string &str);
-        DeserializationNode *parse(DeserializationNode *currentNode);
+
+        /*
+            Tries to deserialize a DeserializationNode tree in the given block.
+            Stop immediatly when this block is done.
+            Returns nullptr if no matching block can be parsed.
+        */
+        DeserializationNode *parse(DeserializationNode *currentNode, ParsingBlock block = ParsingBlock::FILE);
 
     private:
-        static bool isWhiteSpace(Token token);
-        // relations are direct parent, any parent, same element, ...
-        static bool isComponentRelation(Token token);
-        void removeSpace();
-        void removeLineReturn();
-        // removes all spaces and line returns childs
-        void removeWhiteSpaces();
+        static ParsingState emptyParsingState(const DeserializationNode *currentLexedNode);
+        // to check if spaces where removed
+        static ParsingState removeSpaces(const DeserializationNode *currentLexedNode);
 
-        void parseSpace();
-        void parseLineBreak();
-        void parseOneLineComment();
-        void parseMultiLineComment();
-        void parseValue();
-        void parseComma();
-        void parseColon();
-        void parseSemiColon();
-        void parseSharp();
-        void parseDot();
-        void parseAmpersand();
-        void parseAt();
-        void parseStar();
-        void parseString();
-        void parseGreatherThan();
-        void parseOpeningParenthesis();
-        void parseClosingParenthesis();
-        void parseOpeningCurlyBracket();
-        void parseClosingCurlyBracket();
-        void parseRawName();
-        void parseName();
-        void parseUnit();
+        static ParsingState tryParseElementName(const DeserializationNode *currentLexedNode);
+        static ParsingState tryParseClass(const DeserializationNode *currentLexedNode);
+        static ParsingState tryParseIdentifier(const DeserializationNode *currentLexedNode);
+        static ParsingState tryParseModifier(const DeserializationNode *currentLexedNode);
+        static ParsingState tryParseSelector(const DeserializationNode *currentLexedNode);
 
-        // if you don't know how to use it, don't use it
-        DeserializationNode *updateLastDeclarationComponentBeforeNewOne(DeserializationNode *lastChild);
-        void parseDeclarationComponent(Token outputTokenType);
-        void parseClass();
-        void parseIdentifier();
-        void parseModifier();
+        static ParsingState tryParseDirectParentRelation(const DeserializationNode *currentLexedNode);
+        static ParsingState tryParseAnyParentRelation(const DeserializationNode *currentLexedNode);
+        static ParsingState tryParseSelectorsRelation(const DeserializationNode *currentLexedNode);
+
+        static ParsingState tryParseSelectorsList(const DeserializationNode *currentLexedNode);
+        static ParsingState tryParseSelectorsBlock(const DeserializationNode *currentLexedNode);
+        static ParsingState tryParseRuleAssignment(const DeserializationNode *currentLexedNode);
+        static ParsingState tryParseRulesBlock(const DeserializationNode *currentLexedNode);
+
+        static ParsingState tryParseImport(const DeserializationNode *currentLexedNode);
+        static ParsingState tryParseAtRule(const DeserializationNode *currentLexedNode);
+
+        static ParsingState tryParseFile(const DeserializationNode *currentLexedNode);
     };
 
 } // namespace style

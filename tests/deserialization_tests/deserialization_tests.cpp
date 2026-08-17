@@ -430,6 +430,13 @@ namespace deserializationTests {
         return result;
     }
 
+    test::Result testDeserializingIdentifierSelector() {
+        style::config::Config *config = testConfig();
+        style::StyleComponentDataList *selectors = style::StyleDeserializer::deserializeSelectors("#a", config);
+        delete selectors;
+        return test::Result::SUCCESS;
+    }
+
     void testsDeserialization(test::Tests *tests) {
         tests->beginTestBlock("Deserialization tests");
         tests->addTest(testSingleRule, "Deserializing a single rule");
@@ -451,6 +458,9 @@ namespace deserializationTests {
         tests->addTest(testModifierSpecificity, "Modifier specificity");
         tests->addTest(testIdentifierSpecificity, "Identifier specificity");
         // TODO: add tests ensuring biggest specificity is taken
+        tests->endTestBlock();
+        tests->beginTestBlock("selectors deserialization");
+        tests->addTest(testDeserializingIdentifierSelector, "Deserializing identifier selector");
         tests->endTestBlock();
         tests->endTestBlock();
     }

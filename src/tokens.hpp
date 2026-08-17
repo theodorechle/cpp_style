@@ -3,7 +3,6 @@
 
 #include <array>
 #include <iostream>
-#include <map>
 #include <string>
 
 namespace style {
@@ -28,8 +27,8 @@ namespace style {
         Star,
         // Used only by the parser
         StyleBlock,
-        BlockSelectors,
-        Selector,
+        SelectorsBlock,
+        SelectorsList,
         BlockDeclarations,
         DirectParent,
         AnyParent,

@@ -141,6 +141,7 @@ namespace style {
     }
 
     bool areSameNodes(const DeserializationNode *node1, const DeserializationNode *node2) {
+        if (!node1 || !node2) return false;
         if (*node1 != *node2) return false; // works because != is overriden
         if (node1->nbChilds() != node2->nbChilds()) return false;
         const DeserializationNode *child1 = node1->child();
