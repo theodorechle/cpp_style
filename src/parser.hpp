@@ -2,8 +2,10 @@
 #define PARSER_HPP
 
 #include "deserialization_node.hpp"
+#include "tokens.hpp"
 #include <exception>
 #include <string>
+#include <vector>
 
 namespace style {
 
@@ -59,9 +61,18 @@ namespace style {
         DeserializationNode *parse(DeserializationNode *currentNode, ParsingBlock block = ParsingBlock::FILE);
 
     private:
-        static ParsingState emptyParsingState(const DeserializationNode *currentLexedNode);
-        // to check if spaces where removed
+        // return true if node is not null and node's token is equal to given token
+        static bool isTokenIn(const DeserializationNode *node, std::vector<Token> tokens);
+
+        // return true if both lexer and parser nodes are null
+        static bool isNull(const ParsingState &parsingState);
+
+        // TODO: add tab support
+        // remove spaces
         static ParsingState removeSpaces(const DeserializationNode *currentLexedNode);
+
+        // remove spaces line breaks
+        static ParsingState removeWhiteSpaces(const DeserializationNode *currentLexedNode);
 
         static ParsingState tryParseElementName(const DeserializationNode *currentLexedNode);
         static ParsingState tryParseClass(const DeserializationNode *currentLexedNode);
@@ -75,6 +86,9 @@ namespace style {
 
         static ParsingState tryParseSelectorsList(const DeserializationNode *currentLexedNode);
         static ParsingState tryParseSelectorsBlock(const DeserializationNode *currentLexedNode);
+
+        static ParsingState tryParseRuleName(const DeserializationNode *currentLexedNode);
+        static ParsingState tryParseRuleValue(const DeserializationNode *currentLexedNode);
         static ParsingState tryParseRuleAssignment(const DeserializationNode *currentLexedNode);
         static ParsingState tryParseRulesBlock(const DeserializationNode *currentLexedNode);
 
