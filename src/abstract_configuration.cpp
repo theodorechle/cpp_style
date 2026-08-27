@@ -22,7 +22,7 @@ namespace style::config {
 
     void configChecker(const Config *config) {
         for (std::pair<std::string, std::vector<const ConfigRuleNode *>> rule : config->rules) {
-            if (!Parser::isValidElementOrRuleName(rule.first)) throw InvalidStyleConfigException("'" + rule.first + "' is not a valid rule name");
+            if (!parser::isValidElementOrRuleName(rule.first)) throw InvalidStyleConfigException("'" + rule.first + "' is not a valid rule name");
             for (const ConfigRuleNode *configRule : rule.second) {
                 configNodeChecker(configRule);
             }

@@ -1,6 +1,4 @@
 #include "tests_parser.hpp"
-#include "../../src/lexer.hpp"
-#include "../../src/parser.hpp"
 
 namespace testsParserFileBlock {
     test::Result testParsingEmpty() {
@@ -13,7 +11,7 @@ namespace testsParserFileBlock {
         return result;
     }
 
-    test::Result testParsingHexRule() {
+    test::Result testParsingHexRuleSingleChar() {
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
         test::Result result;
@@ -27,7 +25,7 @@ namespace testsParserFileBlock {
                        ->addChild(new style::DeserializationNode(style::Token::Assignment));
         expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
         expected->addChild(new style::DeserializationNode(style::Token::Hex, "a"));
-        result = testsParser::testLexerAndParser(true, "a {b: #a;}", rootExpected);
+        result = testsParser::testLexerAndParser(false, "a {b: #a;}", rootExpected);
         delete rootExpected;
         return result;
     }
@@ -173,41 +171,29 @@ namespace testsParserFileBlock {
 
     // TODO: add tests for other data types
 
-    test::Result testParsingRuleNoSemiColon() { return testsParser::testLexerAndParserException<style::MissingTokenException>("a {b: #aaaaaa}"); }
+    test::Result testParsingRuleNoSemiColon() { return testsParser::testParserError("a {b: #aaaaaa}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a semi colon"}); }
 
-    test::Result testParsingRuleWithoutValue() { return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a {b:;}"); }
+    test::Result testParsingRuleWithoutValue() { return testsParser::testParserError("a {b:;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule value"}); }
 
-    test::Result testParsingRuleWithoutValueAndSemiColon() {
-        return testsParser::testLexerAndParserException<style::MissingTokenException>("a {b:}");
-    }
+    test::Result testParsingRuleWithoutValueAndSemiColon() { return testsParser::testParserError("a {b:}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule name"}); }
 
-    test::Result testParsingRuleWithoutColonAndValueAndSemiColon() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a {b}");
-    }
+    test::Result testParsingRuleWithoutColonAndValueAndSemiColon() { return testsParser::testParserError("a {b}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a colon"}); }
 
-    test::Result testParsingRuleWithoutColonAndValue() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a {b;}");
-    }
+    test::Result testParsingRuleWithoutColonAndValue() { return testsParser::testParserError("a {b;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a colon"}); }
 
-    test::Result testParsingRuleWithoutName() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a {: #aaaaaa;}");
-    }
+    test::Result testParsingRuleWithoutName() { return testsParser::testParserError("a {: #aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule name"}); }
 
-    test::Result testParsingRuleWithoutNameAndColon() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a {#aaaaaa;}");
-    }
+    test::Result testParsingRuleWithoutNameAndColon() { return testsParser::testParserError("a {#aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule name"}); }
 
-    test::Result testParsingBlockWithoutDeclaration() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("{b: #aaaaaa;}");
-    }
+    test::Result testParsingBlockWithoutDeclaration() { return testsParser::testParserError("{b: #aaaaaa;}", {}); }
 
-    test::Result testParsingBlockWithoutOpeningCurlyBracket() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a b: #aaaaaa;}");
-    }
+    test::Result testParsingBlockWithoutOpeningCurlyBracket() { return testsParser::testParserError("a b: #aaaaaa;}", {}); }
 
-    test::Result testParsingBlockWithoutClosingCurlyBracket() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a {b: #aaaaaa;");
-    }
+    test::Result testParsingBlockWithoutClosingCurlyBracket() { return testsParser::testParserError("a {b: #aaaaaa;", {}); }
+
+    test::Result testParsingBlockWithoutRuleNameAndValue() { return testsParser::testParserError("a {:;}", {}); }
+
+    test::Result testParsingBlockWithoutSelectors() { return testsParser::testParserError("{b: #aaaaaa;", {}); }
 
     test::Result testParsingElementNameSingleChar() {
         style::DeserializationNode *rootExpected;
@@ -492,27 +478,17 @@ namespace testsParserFileBlock {
         return result;
     }
 
-    test::Result testParsingLineBreakInBlockDeclaration() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a\nb {}");
-    }
+    test::Result testParsingLineBreakInBlockDeclaration() { return testsParser::testParserError("a\nb {}", {}); }
 
-    test::Result testParsingLineBreakAfterBlockDeclaration() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a\n{}");
-    }
+    test::Result testParsingLineBreakAfterBlockDeclaration() { return testsParser::testParserError("a\n{}", {}); }
 
-    test::Result testParsingLineBreakAfterAssignmentColon() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a\n{b:\n2;}");
-    }
+    test::Result testParsingLineBreakAfterAssignmentColon() { return testsParser::testParserError("a\n{b:\n2;}", {}); }
 
-    test::Result testParsingLineBreakBeforeAssignmentColon() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a\n{b\n:2;}");
-    }
+    test::Result testParsingLineBreakBeforeAssignmentColon() { return testsParser::testParserError("a\n{b\n:2;}", {}); }
 
-    test::Result testParsingLineBreakBeforeSemiColon() {
-        return testsParser::testLexerAndParserException<style::MalformedExpressionException>("a\n{b:2\n;}");
-    }
+    test::Result testParsingLineBreakBeforeSemiColon() { return testsParser::testParserError("a\n{b:2\n;}", {}); }
 
-    test::Result testTwoStyleDefinitions() {
+    test::Result testTwoStyleBlocks() {
         std::string fileContent;
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
@@ -760,7 +736,7 @@ namespace testsParserFileBlock {
         std::string fileContent;
 
         fileContent = testsParser::getFileContent(testsParser::TESTS_FILES_DIR + "/test-9.txt");
-        return testsParser::testLexerAndParserException<style::UnknownValue>(fileContent);
+        return testsParser::testLexerException<style::UnknownValue>(fileContent);
     }
 
     void testsParsingFileBlock(test::Tests *tests) {
@@ -768,7 +744,7 @@ namespace testsParserFileBlock {
         tests->addTest(testParsingEmpty, "Empty");
 
         tests->beginTestBlock("Data types");
-        tests->addTest(testParsingHexRule, "Hex rule");
+        tests->addTest(testParsingHexRuleSingleChar, "Hex rule");
         tests->addTest(testParsingHexRuleMultipleChars, "Hex rule multiple chars");
         tests->addTest(testParsingHexRuleOnlyInts, "Hex rule only ints");
         tests->addTest(testParsingIntRule, "Int rule");
@@ -789,6 +765,8 @@ namespace testsParserFileBlock {
         tests->addTest(testParsingBlockWithoutDeclaration, "Block without declaration");
         tests->addTest(testParsingBlockWithoutOpeningCurlyBracket, "Block without opening curly bracket");
         tests->addTest(testParsingBlockWithoutClosingCurlyBracket, "Block without closing curly bracket");
+        tests->addTest(testParsingBlockWithoutRuleNameAndValue, "Block without rule name and value");
+        tests->addTest(testParsingBlockWithoutSelectors, "Block without selectors");
         tests->endTestBlock();
 
         tests->beginTestBlock("Selectors");
@@ -806,8 +784,10 @@ namespace testsParserFileBlock {
         tests->addTest(testParsingAnyParentRelationElementName, "Any parent relation with element name");
         tests->addTest(testParsingAnyParentRelationIdentifier, "Any parent relation with identifier");
         tests->addTest(testParsingAnyParentRelationClass, "Any parent relation with class");
-        tests->addTest(testParsingAnyParentRelationIdentifierStickedToFirstDeclarationPart, "Any parent relation identifier sticked to first declaration part");
-        tests->addTest(testParsingAnyParentRelationClassStickedToFirstDeclarationPart, "Any parent relation with class sticked to first declaration part");
+        tests->addTest(testParsingAnyParentRelationIdentifierStickedToFirstDeclarationPart,
+                       "Any parent relation identifier sticked to first declaration part");
+        tests->addTest(testParsingAnyParentRelationClassStickedToFirstDeclarationPart,
+                       "Any parent relation with class sticked to first declaration part");
         tests->endTestBlock();
         tests->endTestBlock();
 
@@ -822,7 +802,7 @@ namespace testsParserFileBlock {
         tests->endTestBlock();
 
         tests->beginTestBlock("Tests style lexer and parser");
-        tests->addTest(testTwoStyleDefinitions, "Two style blocks");
+        tests->addTest(testTwoStyleBlocks, "Two style blocks");
         tests->addTest(testNestedModifierBlock, "Nested modifier block");
         tests->addTest(testNestedElementNameBlock, "Nested element name block");
         tests->addTest(testApplyingStyleDefinitionUsingAnyParentRelation, "Apply style block using the any parent relation");

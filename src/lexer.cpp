@@ -1,4 +1,5 @@
 #include "lexer.hpp"
+#include <algorithm>
 
 namespace style {
 

@@ -1,7 +1,6 @@
 #ifndef TOKENIZER_HPP
 #define TOKENIZER_HPP
 
-#include <algorithm>
 #include <map>
 #include <string>
 #include <vector>

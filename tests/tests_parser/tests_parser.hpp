@@ -16,13 +16,19 @@ namespace testsParser {
     std::string getFileContent(std::string fileName);
 
     test::Result testLexerAndParser(bool equal, const std::string &expr, const style::DeserializationNode *expected,
-                                    style::ParsingBlock block = style::ParsingBlock::FILE);
+                                    style::parser::ParsingBlock block = style::parser::ParsingBlock::FILE);
+
+    /**
+     * This method will try to find a matching ErrorMessage in the errors of the parser
+     */
+    test::Result testParserError(const std::string &style, style::parser::ErrorMessage expectedError,
+                                     style::parser::ParsingBlock block = style::parser::ParsingBlock::FILE);
 
     template <typename T>
-    test::Result testLexerAndParserException(const std::string &expression, style::ParsingBlock block = style::ParsingBlock::FILE) {
+    test::Result testLexerException(const std::string &expression) {
         style::config::Config *config = testConfig();
         test::Result testResult;
-        std::cout << "Test if lexing and parsing\n'\n" << expression << "\n'\n raises an exception : ";
+        std::cout << "Test if lexing \n'\n" << expression << "\n'\n raises an exception : ";
 #ifdef DEBUG
         std::cout << "\n";
 #endif
@@ -30,7 +36,6 @@ namespace testsParser {
         style::DeserializationNode *result = nullptr;
         try {
             tokens = style::Lexer().lexe(expression, config);
-            result = style::Parser().parse(tokens, block);
             testResult = test::Result::FAILURE;
         }
         catch (std::exception &exception) {

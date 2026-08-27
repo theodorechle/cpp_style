@@ -68,22 +68,17 @@ namespace style {
 
     DeserializationNode *NodesToStyleComponents::deserializeStyle(const std::string &style) {
         DeserializationNode *tokens = nullptr;
-        DeserializationNode *result = nullptr;
-        try {
-            config::configChecker(_config);
-            tokens = Lexer().lexe(style, _config);
-            result = Parser().parse(tokens);
-            delete tokens;
-            return result;
+        parser::ParseResult result;
+        config::configChecker(_config);
+        tokens = Lexer().lexe(style, _config);
+        result = parser::parse(tokens);
+        delete tokens;
+
+        for (parser::ErrorMessage error : *result.errors) {
+            std::cerr << "Parsing Error:" << parser::errorTypeToString(error.type) << ": " << error.message << "\n";
         }
-        catch (const ParserException &) {
-            delete tokens;
-            throw;
-        }
-        catch (const LexerException &) {
-            delete tokens;
-            throw;
-        }
+        delete result.errors;
+        return result.node;
     }
 
     DeserializationNode *NodesToStyleComponents::deserializeStyleFromFile(const std::string &fileName) {
@@ -251,7 +246,7 @@ namespace style {
         // loop through declarations
         while (declaration != nullptr) {
             if (declaration->token() != Token::SelectorsList) { // invalid block declaration
-                delete styleComponentsLists;               // TODO: how could this even happen?
+                delete styleComponentsLists;                    // TODO: how could this even happen?
                 return nullptr;
             }
             requiredStyleComponents = new StyleComponentDataList();

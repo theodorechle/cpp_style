@@ -1,5 +1,6 @@
 #include "deserialization_tests.hpp"
-#include "../../../cpp_style/src/parser.hpp"
+#include "../../../cpp_style/src/style_deserializer.hpp"
+#include "../test_config.hpp"
 
 namespace deserializationTests {
 
@@ -184,38 +185,6 @@ namespace deserializationTests {
         return result;
     }
 
-    template <typename T>
-    test::Result checkDeserializationError(const std::string &style) {
-        int fileNumber = 0;
-        int ruleNumber;
-        style::config::Config *config = testConfig();
-        test::Result result;
-        std::list<style::StyleDefinition *> *styleDefinitions;
-        std::cout << "Tested style:\n" << style << "\n";
-        try {
-            styleDefinitions = style::StyleDeserializer::deserialize(style, fileNumber, &ruleNumber, config);
-            result = test::Result::FAILURE;
-
-            for (style::StyleDefinition *component : *styleDefinitions) {
-                delete component;
-            }
-            delete styleDefinitions;
-            delete config;
-        }
-        catch (std::exception &exception) {
-            if (dynamic_cast<T *>(&exception)) result = test::Result::SUCCESS;
-            else {
-                std::cerr << "Throwed invalid exception '" << exception.what() << "\n";
-                result = test::Result::FAILURE;
-            }
-        }
-        catch (...) {
-            std::cerr << "Throwed invalid exception who were not a subclass of std::exception\n";
-            result = test::Result::FAILURE;
-        }
-        return result;
-    }
-
     test::Result testSingleRule() {
         style::StyleComponentDataList expectedData = style::StyleComponentDataList();
         style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
@@ -332,24 +301,6 @@ namespace deserializationTests {
         return result;
     }
 
-    test::Result testMissingSemiColonAfterAssignment() {
-        return checkDeserializationError<style::MissingTokenException>(".container      label#red{text-color : #ff0000}");
-    }
-
-    test::Result testMissingStyleValue() {
-        return checkDeserializationError<style::MalformedExpressionException>(".container>label#red{text-color;}");
-    }
-
-    test::Result testMissingRuleName() { return checkDeserializationError<style::MalformedExpressionException>(".container>label#red{: value}"); }
-
-    test::Result testMissingRuleNameAndValue() { return checkDeserializationError<style::MalformedExpressionException>(".container>label#red{:}"); }
-
-    test::Result testMissingBlockDeclaration() { return checkDeserializationError<style::MalformedExpressionException>("{text-color: #ffffff;}"); }
-
-    test::Result testMissingBlockDeclarationComponentBeforeDirectParentRelation() {
-        return checkDeserializationError<style::MissingTokenException>(">label#red{text-color: #ffffff;}");
-    }
-
     test::Result testElementNameSpecificity() {
         style::StyleComponentDataList expectedData = style::StyleComponentDataList();
         style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
@@ -445,13 +396,6 @@ namespace deserializationTests {
         tests->addTest(testRuleNameAndValueStickedToAssignmentColon, "Style name and value sticked to the assignment colon");
         tests->addTest(testGlobalModifier, "Global modifier");
         tests->addTest(testEmptyBlock, "Empty block");
-        tests->addTest(testMissingSemiColonAfterAssignment, "Missing semi-colon after assignment");
-        tests->addTest(testMissingStyleValue, "Missing style value");
-        tests->addTest(testMissingRuleName, "Missing style name");
-        tests->addTest(testMissingRuleNameAndValue, "Missing style name and value");
-        tests->addTest(testMissingBlockDeclaration, "Missing block declaration");
-        tests->addTest(testMissingBlockDeclarationComponentBeforeDirectParentRelation,
-                       "Missing block declaration component before direct parent relation");
         tests->beginTestBlock("specificities");
         tests->addTest(testElementNameSpecificity, "Element name specificity");
         tests->addTest(testClassSpecificity, "Class specificity");

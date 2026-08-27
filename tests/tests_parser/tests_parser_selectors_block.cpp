@@ -8,7 +8,7 @@ namespace testsParserSelectorsBlock {
         rootExpected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
             ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
             ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
-        result = testsParser::testLexerAndParser(true, "a {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "a {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -20,7 +20,7 @@ namespace testsParserSelectorsBlock {
         rootExpected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
             ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
             ->addChild(new style::DeserializationNode(style::Token::Identifier, "a"));
-        result = testsParser::testLexerAndParser(true, "#a {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "#a {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -33,7 +33,7 @@ namespace testsParserSelectorsBlock {
         rootExpected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
             ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
             ->addChild(new style::DeserializationNode(style::Token::Class, "a"));
-        result = testsParser::testLexerAndParser(true, ".a {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, ".a {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -49,7 +49,7 @@ namespace testsParserSelectorsBlock {
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
         expected->addChild(new style::DeserializationNode(style::Token::DirectParent));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "b"));
-        result = testsParser::testLexerAndParser(true, "a > b {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "a > b {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -65,7 +65,7 @@ namespace testsParserSelectorsBlock {
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
         expected->addChild(new style::DeserializationNode(style::Token::DirectParent));
         expected->addChild(new style::DeserializationNode(style::Token::Identifier, "b"));
-        result = testsParser::testLexerAndParser(true, "a > #b {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "a > #b {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -81,7 +81,7 @@ namespace testsParserSelectorsBlock {
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
         expected->addChild(new style::DeserializationNode(style::Token::DirectParent));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "b"));
-        result = testsParser::testLexerAndParser(true, "a > .b {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "a > .b {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -94,7 +94,7 @@ namespace testsParserSelectorsBlock {
         rootExpected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
             ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
             ->addChild(new style::DeserializationNode(style::Token::ElementName, "abc"));
-        result = testsParser::testLexerAndParser(true, "abc {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "abc {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -107,7 +107,7 @@ namespace testsParserSelectorsBlock {
         rootExpected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
             ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
             ->addChild(new style::DeserializationNode(style::Token::Identifier, "abc"));
-        result = testsParser::testLexerAndParser(true, "#abc {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "#abc {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -120,7 +120,7 @@ namespace testsParserSelectorsBlock {
         rootExpected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
             ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
             ->addChild(new style::DeserializationNode(style::Token::Class, "abc"));
-        result = testsParser::testLexerAndParser(true, ".abc {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, ".abc {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -132,11 +132,11 @@ namespace testsParserSelectorsBlock {
 
         rootExpected = new style::DeserializationNode(style::Token::NullRoot);
         expected = rootExpected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
-                           ->addChild(new style::DeserializationNode(style::Token::SelectorsList));
+                       ->addChild(new style::DeserializationNode(style::Token::SelectorsList));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
         expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "b"));
-        result = testsParser::testLexerAndParser(true, "a b {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "a b {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -152,7 +152,7 @@ namespace testsParserSelectorsBlock {
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
         expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
         expected->addChild(new style::DeserializationNode(style::Token::Identifier, "b"));
-        result = testsParser::testLexerAndParser(true, "a #b {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "a #b {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -168,7 +168,7 @@ namespace testsParserSelectorsBlock {
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
         expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "b"));
-        result = testsParser::testLexerAndParser(true, "a .b {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "a .b {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -184,7 +184,7 @@ namespace testsParserSelectorsBlock {
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
         expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Identifier, "b"));
-        result = testsParser::testLexerAndParser(true, "a#b {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "a#b {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }
@@ -200,7 +200,7 @@ namespace testsParserSelectorsBlock {
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
         expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "b"));
-        result = testsParser::testLexerAndParser(true, "a.b {}", rootExpected, style::ParsingBlock::SELECTORS);
+        result = testsParser::testLexerAndParser(true, "a.b {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
         delete rootExpected;
         return result;
     }

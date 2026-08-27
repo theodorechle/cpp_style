@@ -2,8 +2,7 @@
 #define DESERIALIZATION_TESTS_HPP
 
 #include "../../cpp_tests/src/tests.hpp"
-#include "../../src/style_deserializer.hpp"
-#include "../test_config.hpp"
+#include "../../src/style_component.hpp"
 
 namespace deserializationTests {
     test::Result checkStyleComponentDataList(const style::StyleComponentDataList *testedData, const style::StyleComponentDataList *expectedData);
@@ -13,13 +12,6 @@ namespace deserializationTests {
     test::Result checkStyleDefinitions(const std::list<style::StyleDefinition *> *testedStyleDefinitions, const std::list<style::StyleDefinition *> *expectedStyleDefinitions);
     test::Result testDeserializationFromFile(const std::string &fileName, const std::list<style::StyleDefinition *> *expectedStyleDefinitions);
     test::Result testDeserialization(const std::string &style, const std::list<style::StyleDefinition *> *expectedStyleDefinitions);
-
-    /**
-     * This method will catch exceptions who are not subclasses of std::exception but will not check if they are similar to T.
-     */
-    template <typename T>
-    test::Result checkDeserializationError(const std::string &style);
-
     void testsDeserialization(test::Tests *tests);
 
 } // namespace deserializationTests

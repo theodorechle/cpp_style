@@ -46,5 +46,9 @@ button         {color: blue;   font-size: 14px;      label       {}       }
            ^   ^              ^ ^          ^              ^
 special sel. import  file start file name file end  expression end
 
-## Lexer
-Should return an array, not a tree
+
+## Still TODO:
+- tuples
+- comments
+- list errors
+- import

@@ -1,7 +1,12 @@
 #include "tests_parser.hpp"
+#include "../../src/abstract_configuration.hpp"
+#include "../../src/lexer.hpp"
+#include "../test_config.hpp"
+
 namespace testsParser {
 
-    test::Result testLexerAndParser(bool equal, const std::string &expression, const style::DeserializationNode *expected, style::ParsingBlock block) {
+    test::Result testLexerAndParser(bool equal, const std::string &expression, const style::DeserializationNode *expected,
+                                    style::parser::ParsingBlock block) {
         style::config::Config *config = testConfig();
         test::Result testResult;
         std::cout << "Test if lexing and parsing\n'\n" << expression << "\n'\n";
@@ -11,10 +16,11 @@ namespace testsParser {
         std::cout << ":\n";
         try {
             style::DeserializationNode *tokens = style::Lexer().lexe(expression, config);
-            style::DeserializationNode *result = style::Parser().parse(tokens, block);
-            if (areSameNodes(result, expected) == equal) testResult = test::Result::SUCCESS;
+            style::parser::ParseResult result = style::parser::parse(tokens, block);
+            if (areSameNodes(result.node, expected) == equal) testResult = test::Result::SUCCESS;
             else testResult = test::Result::FAILURE;
-            delete result;
+            delete result.node;
+            delete result.errors;
             delete tokens;
             delete config;
         }
@@ -32,4 +38,32 @@ namespace testsParser {
         buffer << file.rdbuf();
         return buffer.str();
     }
+
+    test::Result testParserError(const std::string &expression, style::parser::ErrorMessage expectedError, style::parser::ParsingBlock block) {
+        style::config::Config *config = testConfig();
+        test::Result testResult = test::Result::FAILURE;
+        std::cout << "Test if lexing and parsing\n'\n" << expression << "\n'\n gives an error : ";
+#ifdef DEBUG
+        std::cout << "\n";
+#endif
+        style::DeserializationNode *tokens = nullptr;
+        style::parser::ParseResult result;
+        tokens = style::Lexer().lexe(expression, config);
+        result = style::parser::parse(tokens, block);
+
+        for (style::parser::ErrorMessage error : *result.errors) {
+            if (error.type == expectedError.type && error.message == expectedError.message) {
+                testResult = test::Result::SUCCESS;
+                break;
+            }
+        }
+
+        delete tokens;
+        delete result.node;
+        delete result.errors;
+        delete config;
+        std::cout << "\n";
+        return testResult;
+    }
+
 } // namespace testsParser
