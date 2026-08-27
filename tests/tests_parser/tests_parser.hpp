@@ -22,7 +22,7 @@ namespace testsParser {
      * This method will try to find a matching ErrorMessage in the errors of the parser
      */
     test::Result testParserError(const std::string &style, style::parser::ErrorMessage expectedError,
-                                     style::parser::ParsingBlock block = style::parser::ParsingBlock::FILE);
+                                 style::parser::ParsingBlock block = style::parser::ParsingBlock::FILE);
 
     template <typename T>
     test::Result testLexerException(const std::string &expression) {

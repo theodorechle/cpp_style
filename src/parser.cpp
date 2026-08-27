@@ -29,6 +29,9 @@ namespace style::parser {
     }
 
     namespace {
+        std::list<ErrorMessage> *createErrorList(ErrorType type, std::string functionName, std::string message) {
+            return new std::list<ErrorMessage>({{type, functionName + ": " + message}});
+        }
 
         /*
          * methods in the parser returning an instance of this structure should always set currentLexedNode.
@@ -38,8 +41,6 @@ namespace style::parser {
             const DeserializationNode *currentLexedNode = nullptr;
             DeserializationNode *currentParsedNode = nullptr;
             std::list<ErrorMessage> *errors = nullptr;
-
-            ~ParsingState() { delete errors; }
         };
 
         bool isValidName(const std::string &str, size_t start, size_t end) {
@@ -67,7 +68,9 @@ namespace style::parser {
             return true;
         }
 
-        // return true if node is not null and node's token is equal to given token
+        /* return true if node is not null and node's token is equal to given token
+         * Safe to call with null node
+         */
         bool isTokenIn(const DeserializationNode *node, std::vector<Token> tokens) {
             if (!node) return false;
             for (Token token : tokens) {
@@ -79,8 +82,13 @@ namespace style::parser {
         // return true if both lexer and parser nodes are null
         bool isNull(const ParsingState &parsingState) { return !parsingState.currentLexedNode && !parsingState.currentParsedNode; }
 
+        // return true if either lexer or parser node is null
+        bool isAnyNull(const ParsingState &parsingState) { return !parsingState.currentLexedNode || !parsingState.currentParsedNode; }
+
         // TODO: add tab support
-        // remove spaces
+        /* remove spaces
+         * Safe to call with null node
+         */
         ParsingState removeSpaces(const DeserializationNode *currentLexedNode) {
             const DeserializationNode *startNode = currentLexedNode;
             const DeserializationNode *currentNode = startNode;
@@ -91,7 +99,9 @@ namespace style::parser {
             return ParsingState{currentNode, nullptr};
         }
 
-        // remove spaces line breaks
+        /* remove spaces line breaks
+         * Safe to call with null node
+         */
         ParsingState removeWhiteSpaces(const DeserializationNode *currentLexedNode) {
             const DeserializationNode *startNode = currentLexedNode;
             const DeserializationNode *currentNode = startNode;
@@ -100,6 +110,26 @@ namespace style::parser {
             }
             if (startNode == currentNode) return ParsingState{currentLexedNode, nullptr};
             return ParsingState{currentNode, nullptr};
+        }
+
+        /* Safe to call with null node
+         */
+        ParsingState removeComments(const DeserializationNode *currentLexedNode) {
+            if (isTokenIn(currentLexedNode, {Token::OneLineComment, Token::MultiLineComment})) currentLexedNode = currentLexedNode->next();
+            return ParsingState{currentLexedNode, nullptr};
+        }
+
+        /* Safe to call with null node
+         */
+        ParsingState removeWhiteSpacesAndComment(const DeserializationNode *currentLexedNode) {
+            ParsingState state = {currentLexedNode};
+            const DeserializationNode *previousLexedNode;
+            do {
+                previousLexedNode = state.currentLexedNode;
+                state = removeWhiteSpaces(state.currentLexedNode);
+                state = removeComments(state.currentLexedNode);
+            } while (state.currentLexedNode && state.currentLexedNode != previousLexedNode);
+            return ParsingState{state.currentLexedNode, nullptr};
         }
 
         ParsingState tryParseElementName(const DeserializationNode *currentLexedNode) {
@@ -148,19 +178,15 @@ namespace style::parser {
         }
 
         ParsingState tryParseDirectParentRelation(const DeserializationNode *currentLexedNode) {
-            ParsingState state = removeSpaces(currentLexedNode);
-            if (state.currentLexedNode->token() != Token::GreaterThan) return ParsingState{};
+            ParsingState state = removeWhiteSpacesAndComment(currentLexedNode);
+            if (state.currentLexedNode->token() != Token::GreaterThan) return {};
             state.currentLexedNode = state.currentLexedNode->next();
             state.currentParsedNode = new DeserializationNode(Token::DirectParent);
-            ParsingState stateAfterFinalSpacesRemoval = removeSpaces(state.currentLexedNode);
-            if (stateAfterFinalSpacesRemoval.currentLexedNode != state.currentLexedNode) {
-                state.currentLexedNode = stateAfterFinalSpacesRemoval.currentLexedNode;
-            }
             return state;
         }
 
         ParsingState tryParseAnyParentRelation(const DeserializationNode *currentLexedNode) {
-            ParsingState state = removeSpaces(currentLexedNode);
+            ParsingState state = removeWhiteSpacesAndComment(currentLexedNode);
             if (state.currentLexedNode != currentLexedNode) return {state.currentLexedNode, new DeserializationNode(Token::AnyParent)};
             return ParsingState{currentLexedNode, nullptr};
         }
@@ -176,15 +202,14 @@ namespace style::parser {
             ParsingState state;
             ParsingState selectorsRelationState;
 
-            state = removeSpaces(currentLexedNode);
-            if (!state.currentLexedNode) return ParsingState{currentLexedNodeStart, nullptr};
-            currentLexedNode = state.currentLexedNode;
-
             DeserializationNode *currentParsedNode = new DeserializationNode{Token::SelectorsList};
 
             do {
+                state = removeSpaces(selectorsRelationState.currentParsedNode ? selectorsRelationState.currentLexedNode : currentLexedNode);
+                if (!state.currentLexedNode) return ParsingState{currentLexedNodeStart, nullptr};
+
                 // parse selectors with no separator between
-                state = tryParseSelector(selectorsRelationState.currentParsedNode ? selectorsRelationState.currentLexedNode : currentLexedNode);
+                state = tryParseSelector(state.currentLexedNode);
                 if (!state.currentParsedNode) break;
                 if (selectorsRelationState.currentParsedNode) currentParsedNode->addChild(selectorsRelationState.currentParsedNode);
                 if (!state.currentLexedNode) break;
@@ -219,8 +244,7 @@ namespace style::parser {
             ParsingState removedSpacesState;
             DeserializationNode *currentParsedNodeRoot = new DeserializationNode{Token::SelectorsBlock};
             while (true) {
-                removedSpacesState = removeSpaces(currentLexedNode);
-                ParsingState state = tryParseSelectorsList(removedSpacesState.currentLexedNode);
+                ParsingState state = tryParseSelectorsList(currentLexedNode);
                 if (!state.currentParsedNode) {
                     delete currentParsedNodeRoot;
                     return ParsingState{currentLexedNodeStart, nullptr};
@@ -243,15 +267,33 @@ namespace style::parser {
         }
 
         ParsingState tryParseRuleValue(const DeserializationNode *currentLexedNode) {
-            ParsingState removedSpacesState = removeWhiteSpaces(currentLexedNode->next());
+            DeserializationNode *node = nullptr;
+            DeserializationNode *unit = nullptr;
+            ParsingState removedSpacesState = removeWhiteSpaces(currentLexedNode);
             if (!removedSpacesState.currentLexedNode) return ParsingState{currentLexedNode, nullptr};
             const DeserializationNode *value = removedSpacesState.currentLexedNode;
 
             switch (value->token()) {
             case Token::Int:
-                return ParsingState{value->next(), new DeserializationNode{Token::Int, value->value()}};
+                node = new DeserializationNode{Token::Int, value->value()};
+                value = value->next();
+                if (value && value->token() == Token::Unit) {
+                    unit = new DeserializationNode{Token::Unit, value->value()};
+                    unit->addChild(node);
+                    node = unit;
+                    value = value->next();
+                }
+                return ParsingState{value, node};
             case Token::Float:
-                return ParsingState{value->next(), new DeserializationNode{Token::Float, value->value()}};
+                node = new DeserializationNode{Token::Float, value->value()};
+                value = value->next();
+                if (value && value->token() == Token::Unit) {
+                    unit = new DeserializationNode{Token::Unit, value->value()};
+                    unit->addChild(node);
+                    node = unit;
+                    value = value->next();
+                }
+                return ParsingState{value, node};
             case Token::Bool:
                 return ParsingState{value->next(), new DeserializationNode{Token::Bool, value->value()}};
             case Token::Sharp:
@@ -271,34 +313,35 @@ namespace style::parser {
             DeserializationNode *assignment = new DeserializationNode{Token::Assignment};
 
             state = tryParseRuleName(currentLexedNode);
-            if (isNull(state)) {
+            if (isAnyNull(state)) {
                 delete assignment;
                 return ParsingState{currentLexedNodeStart, nullptr,
-                                    new std::list<ErrorMessage>{{ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule name"}}};
+                                    createErrorList(ErrorType::ERROR, "tryParseRuleAssignment", "Missing a rule name")};
             }
             assignment->addChild(state.currentParsedNode);
 
-            removedSpacesState = removeWhiteSpaces(state.currentLexedNode);
+            removedSpacesState = removeWhiteSpacesAndComment(state.currentLexedNode);
             if (!isTokenIn(removedSpacesState.currentLexedNode, {Token::Colon})) {
                 delete assignment;
-                return ParsingState{currentLexedNodeStart, nullptr,
-                                    new std::list<ErrorMessage>{{ErrorType::ERROR, "tryParseRuleAssignment: Missing a colon"}}};
+                return ParsingState{currentLexedNodeStart, nullptr, createErrorList(ErrorType::ERROR, "tryParseRuleAssignment", "Missing a colon")};
             }
 
-            state = tryParseRuleValue(removedSpacesState.currentLexedNode->next());
-            if (isNull(state)) {
+            removedSpacesState = removeWhiteSpacesAndComment(removedSpacesState.currentLexedNode->next());
+            state = tryParseRuleValue(removedSpacesState.currentLexedNode);
+            if (isAnyNull(state)) {
                 delete assignment;
                 return ParsingState{currentLexedNodeStart, nullptr,
-                                    new std::list<ErrorMessage>{{ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule value"}}};
+                                    createErrorList(ErrorType::ERROR, "tryParseRuleAssignment", "Missing a rule value")};
             }
             assignment->addChild(state.currentParsedNode);
 
-            if (!isTokenIn(state.currentLexedNode, {Token::SemiColon})) {
+            removedSpacesState = removeWhiteSpacesAndComment(state.currentLexedNode);
+            if (!isTokenIn(removedSpacesState.currentLexedNode, {Token::SemiColon})) {
                 delete assignment;
                 return ParsingState{currentLexedNodeStart, nullptr,
-                                    new std::list<ErrorMessage>{{ErrorType::ERROR, "tryParseRuleAssignment: Missing a semi colon"}}};
+                                    createErrorList(ErrorType::ERROR, "tryParseRuleAssignment", "Missing a semi colon")};
             }
-            return ParsingState{state.currentLexedNode->next(), assignment};
+            return ParsingState{removedSpacesState.currentLexedNode->next(), assignment};
         }
 
         ParsingState tryParseRulesBlock(const DeserializationNode *currentLexedNodeStart) {
@@ -306,32 +349,35 @@ namespace style::parser {
             ParsingState removedSpacesState;
             ParsingState state;
 
-            removedSpacesState = removeSpaces(currentLexedNode);
+            removedSpacesState = removeWhiteSpacesAndComment(currentLexedNode);
             if (!isTokenIn(removedSpacesState.currentLexedNode, {Token::OpeningCurlyBracket})) return ParsingState{currentLexedNodeStart, nullptr};
             currentLexedNode = removedSpacesState.currentLexedNode->next();
 
-            DeserializationNode *currentParsedNodeRoot = new DeserializationNode{Token::BlockDeclarations};
-            removedSpacesState = removeWhiteSpaces(currentLexedNode);
+            removedSpacesState = removeWhiteSpacesAndComment(currentLexedNode);
             if (!removedSpacesState.currentLexedNode) return ParsingState{currentLexedNodeStart, nullptr};
+            currentLexedNode = removedSpacesState.currentLexedNode;
+
+            DeserializationNode *currentParsedNodeRoot = new DeserializationNode{Token::BlockDeclarations};
 
             while (true) {
                 state = tryParseRuleAssignment(currentLexedNode);
                 if (!state.currentParsedNode) break;
                 currentParsedNodeRoot->addChild(state.currentParsedNode);
                 currentLexedNode = state.currentLexedNode;
-                removedSpacesState = removeWhiteSpaces(currentLexedNode);
+                removedSpacesState = removeWhiteSpacesAndComment(currentLexedNode);
                 if (removedSpacesState.currentLexedNode) currentLexedNode = removedSpacesState.currentLexedNode;
             }
 
-            if (state.errors) {
-                delete currentParsedNodeRoot;
-                return ParsingState{currentLexedNodeStart, nullptr, state.errors};
-            }
-
-            removedSpacesState = removeWhiteSpaces(currentLexedNode);
+            removedSpacesState = removeWhiteSpacesAndComment(currentLexedNode);
             if (!isTokenIn(removedSpacesState.currentLexedNode, {Token::ClosingCurlyBracket})) {
                 delete currentParsedNodeRoot;
-                return ParsingState{currentLexedNodeStart, nullptr};
+
+                if (state.errors) { // if there was errors during the parsing of a rule assignment, and the current token does not mean end of rule
+                                    // block, then it's a malformed text
+                    return ParsingState{currentLexedNodeStart, nullptr, state.errors};
+                }
+                return ParsingState{currentLexedNodeStart, nullptr,
+                                    createErrorList(ErrorType::ERROR, "tryParseRulesBlock", "Missing a closing curly bracket")};
             }
             return ParsingState{removedSpacesState.currentLexedNode->next(), currentParsedNodeRoot};
         }
@@ -343,7 +389,7 @@ namespace style::parser {
         ParsingState tryParseFile(const DeserializationNode *currentLexedNodeStart) {
             ParsingState state;
 
-            state = removeWhiteSpaces(currentLexedNodeStart);
+            state = removeWhiteSpacesAndComment(currentLexedNodeStart);
             if (isNull(state)) return ParsingState{currentLexedNodeStart, nullptr};
 
             state = tryParseSelectorsBlock(state.currentLexedNode);
@@ -355,7 +401,7 @@ namespace style::parser {
             state = tryParseRulesBlock(state.currentLexedNode);
             if (!state.currentParsedNode) {
                 delete currentParsedNodeRoot;
-                return ParsingState{currentLexedNodeStart, nullptr};
+                return ParsingState{currentLexedNodeStart, nullptr, state.errors};
             }
 
             currentParsedNodeRoot->addChild(state.currentParsedNode);

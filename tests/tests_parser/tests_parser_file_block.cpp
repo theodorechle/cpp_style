@@ -171,19 +171,33 @@ namespace testsParserFileBlock {
 
     // TODO: add tests for other data types
 
-    test::Result testParsingRuleNoSemiColon() { return testsParser::testParserError("a {b: #aaaaaa}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a semi colon"}); }
+    test::Result testParsingRuleNoSemiColon() {
+        return testsParser::testParserError("a {b: #aaaaaa}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a semi colon"});
+    }
 
-    test::Result testParsingRuleWithoutValue() { return testsParser::testParserError("a {b:;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule value"}); }
+    test::Result testParsingRuleWithoutValue() {
+        return testsParser::testParserError("a {b:;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule value"});
+    }
 
-    test::Result testParsingRuleWithoutValueAndSemiColon() { return testsParser::testParserError("a {b:}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule name"}); }
+    test::Result testParsingRuleWithoutValueAndSemiColon() {
+        return testsParser::testParserError("a {b:}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule value"});
+    }
 
-    test::Result testParsingRuleWithoutColonAndValueAndSemiColon() { return testsParser::testParserError("a {b}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a colon"}); }
+    test::Result testParsingRuleWithoutColonAndValueAndSemiColon() {
+        return testsParser::testParserError("a {b}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a colon"});
+    }
 
-    test::Result testParsingRuleWithoutColonAndValue() { return testsParser::testParserError("a {b;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a colon"}); }
+    test::Result testParsingRuleWithoutColonAndValue() {
+        return testsParser::testParserError("a {b;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a colon"});
+    }
 
-    test::Result testParsingRuleWithoutName() { return testsParser::testParserError("a {: #aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule name"}); }
+    test::Result testParsingRuleWithoutName() {
+        return testsParser::testParserError("a {: #aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule name"});
+    }
 
-    test::Result testParsingRuleWithoutNameAndColon() { return testsParser::testParserError("a {#aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule name"}); }
+    test::Result testParsingRuleWithoutNameAndColon() {
+        return testsParser::testParserError("a {#aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule name"});
+    }
 
     test::Result testParsingBlockWithoutDeclaration() { return testsParser::testParserError("{b: #aaaaaa;}", {}); }
 
@@ -478,23 +492,113 @@ namespace testsParserFileBlock {
         return result;
     }
 
-    test::Result testParsingLineBreakInBlockDeclaration() { return testsParser::testParserError("a\nb {}", {}); }
-
-    test::Result testParsingLineBreakAfterBlockDeclaration() { return testsParser::testParserError("a\n{}", {}); }
-
-    test::Result testParsingLineBreakAfterAssignmentColon() { return testsParser::testParserError("a\n{b:\n2;}", {}); }
-
-    test::Result testParsingLineBreakBeforeAssignmentColon() { return testsParser::testParserError("a\n{b\n:2;}", {}); }
-
-    test::Result testParsingLineBreakBeforeSemiColon() { return testsParser::testParserError("a\n{b:2\n;}", {}); }
-
-    test::Result testTwoStyleBlocks() {
-        std::string fileContent;
+    test::Result testParsingLineBreakInBlockDeclaration() {
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
         test::Result result;
 
-        fileContent = testsParser::getFileContent(testsParser::TESTS_FILES_DIR + "/test-1.txt");
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
+                       ->addChild(new style::DeserializationNode(style::Token::SelectorsList));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected->addChild(new style::DeserializationNode(style::Token::AnyParent, ""));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "b"));
+        expected = expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockDeclarations));
+        result = testsParser::testLexerAndParser(true, "a\nb {}", rootExpected);
+        delete rootExpected;
+        return result;
+    }
+
+    test::Result testParsingLineBreakAfterBlockDeclaration() {
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
+        test::Result result;
+
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
+                       ->addChild(new style::DeserializationNode(style::Token::SelectorsList));
+        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockDeclarations));
+        result = testsParser::testLexerAndParser(true, "a\n{}", rootExpected);
+        delete rootExpected;
+        return result;
+    }
+
+    test::Result testParsingLineBreakAfterAssignmentColon() {
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
+        test::Result result;
+
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
+            ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclarations))
+                       ->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "2"));
+        result = testsParser::testLexerAndParser(true, "a\n{b:\n2;}", rootExpected);
+        delete rootExpected;
+        return result;
+    }
+
+    test::Result testParsingLineBreakBeforeAssignmentColon() {
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
+        test::Result result;
+
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
+            ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclarations))
+                       ->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "2"));
+        result = testsParser::testLexerAndParser(true, "a\n{b\n:2;}", rootExpected);
+        delete rootExpected;
+        return result;
+    }
+
+    test::Result testParsingLineBreakBeforeSemiColon() {
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
+        test::Result result;
+
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
+            ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclarations))
+                       ->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
+        expected->addChild(new style::DeserializationNode(style::Token::Int, "2"));
+        result = testsParser::testLexerAndParser(true, "a\n{b:2\n;}", rootExpected);
+        delete rootExpected;
+        return result;
+    }
+
+    test::Result testTwoStyleBlocks() {
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
+        test::Result result;
+
+        std::string text = R"(label.blue { // labels with the class 'blue' will have a text in blue
+    text-color: #0000ff;
+}
+
+label.blue:hovered {
+    /*
+    labels with the class 'blue' will have a text in gray
+    this override the previous declaration block of 'label.blue' when it's hovered
+    */
+    text-color: (150, 255, 112);
+})";
 
         rootExpected = new style::DeserializationNode(style::Token::NullRoot);
         expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
@@ -525,18 +629,23 @@ namespace testsParserFileBlock {
         expected->addChild(new style::DeserializationNode(style::Token::Int, "255"));
         expected->addChild(new style::DeserializationNode(style::Token::Int, "112"));
 
-        result = testsParser::testLexerAndParser(true, fileContent, rootExpected);
+        result = testsParser::testLexerAndParser(true, text, rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testNestedModifierBlock() {
-        std::string fileContent;
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
         test::Result result;
 
-        fileContent = testsParser::getFileContent(testsParser::TESTS_FILES_DIR + "/test-2.txt");
+        std::string text = R"(// equivalent of previous two blocks
+label.blue {
+    text-color: #0000ff;
+    :hovered {
+        text-color: (150,150,150);
+    }
+})";
 
         rootExpected = new style::DeserializationNode(style::Token::NullRoot);
         expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
@@ -565,18 +674,23 @@ namespace testsParserFileBlock {
         expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
         expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
 
-        result = testsParser::testLexerAndParser(true, fileContent, rootExpected);
+        result = testsParser::testLexerAndParser(true, text, rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testNestedElementNameBlock() {
-        std::string fileContent;
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
         test::Result result;
 
-        fileContent = testsParser::getFileContent(testsParser::TESTS_FILES_DIR + "/test-3.txt");
+        std::string text = R"(// same as test 2 but with an element instead of a modifier in the inner block
+label.blue {
+    text-color: #0000ff;
+    element {
+        text-color: (150,150,150);
+    }
+})";
 
         rootExpected = new style::DeserializationNode(style::Token::NullRoot);
         expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
@@ -605,18 +719,22 @@ namespace testsParserFileBlock {
         expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
         expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
 
-        result = testsParser::testLexerAndParser(true, fileContent, rootExpected);
+        result = testsParser::testLexerAndParser(true, text, rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testApplyingStyleDefinitionUsingAnyParentRelation() {
-        std::string fileContent;
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
         test::Result result;
 
-        fileContent = testsParser::getFileContent(testsParser::TESTS_FILES_DIR + "/test-4.txt");
+        std::string text = R"(label.blue:hovered element.red#root {
+    text-color: #0000ff;
+    element {
+        text-color: (150,150,150);
+    }
+})";
 
         rootExpected = new style::DeserializationNode(style::Token::NullRoot);
         expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
@@ -650,18 +768,22 @@ namespace testsParserFileBlock {
         expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
         expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
 
-        result = testsParser::testLexerAndParser(true, fileContent, rootExpected);
+        result = testsParser::testLexerAndParser(true, text, rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testApplyingStyleDefinitionUsingAnyChildComponentWithNestedElementName() {
-        std::string fileContent;
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
         test::Result result;
 
-        fileContent = testsParser::getFileContent(testsParser::TESTS_FILES_DIR + "/test-5.txt");
+        std::string text = R"(label.blue:hovered, element.red#root {
+    text-color: #0000ff;
+    element {
+        text-color: (150,150,150);
+    }
+})";
 
         rootExpected = new style::DeserializationNode(style::Token::NullRoot);
         expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
@@ -696,18 +818,20 @@ namespace testsParserFileBlock {
         expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
         expected->addChild(new style::DeserializationNode(style::Token::Int, "150"));
 
-        result = testsParser::testLexerAndParser(true, fileContent, rootExpected);
+        result = testsParser::testLexerAndParser(true, text, rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testValuesUnits() {
-        std::string fileContent;
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
         test::Result result;
 
-        fileContent = testsParser::getFileContent(testsParser::TESTS_FILES_DIR + "/test-7.txt");
+        std::string text = R"(element { /* test units */
+    width: 150px;
+    height: 40%;
+})";
 
         rootExpected = new style::DeserializationNode(style::Token::NullRoot);
         expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
@@ -727,17 +851,12 @@ namespace testsParserFileBlock {
         expected->addChild(new style::DeserializationNode(style::Token::Unit, "%"))
             ->addChild(new style::DeserializationNode(style::Token::Int, "40"));
 
-        result = testsParser::testLexerAndParser(true, fileContent, rootExpected);
+        result = testsParser::testLexerAndParser(true, text, rootExpected);
         delete rootExpected;
         return result;
     }
 
-    test::Result testMultilineCommentNotClosed() {
-        std::string fileContent;
-
-        fileContent = testsParser::getFileContent(testsParser::TESTS_FILES_DIR + "/test-9.txt");
-        return testsParser::testLexerException<style::UnknownValue>(fileContent);
-    }
+    test::Result testMultilineCommentNotClosed() { return testsParser::testLexerException<style::UnknownValue>("/* not closed comment"); }
 
     void testsParsingFileBlock(test::Tests *tests) {
         tests->beginTestBlock("Parsing file block");

@@ -49,6 +49,6 @@ special sel. import  file start file name file end  expression end
 
 ## Still TODO:
 - tuples
-- comments
-- list errors
 - import
+- nested blocks
+- multiple independant style blocks

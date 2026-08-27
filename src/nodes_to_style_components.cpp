@@ -75,7 +75,7 @@ namespace style {
         delete tokens;
 
         for (parser::ErrorMessage error : *result.errors) {
-            std::cerr << "Parsing Error:" << parser::errorTypeToString(error.type) << ": " << error.message << "\n";
+            std::cerr << "Parsing Error: " << parser::errorTypeToString(error.type) << ": " << error.message << "\n";
         }
         delete result.errors;
         return result.node;

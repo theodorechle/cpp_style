@@ -151,7 +151,6 @@ namespace style {
     std::string Lexer::getUnit(int expressionIndex, int *size) {
         size_t i;
         bool equal;
-        // TODO: either use config or parse all possible units (need a definition of what a unit can be)
 
         for (const std::string &unit : _config->units) {
             equal = true;
