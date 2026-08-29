@@ -42,7 +42,14 @@ namespace testsParser {
     test::Result testParserError(const std::string &expression, style::parser::ErrorMessage expectedError, style::parser::ParsingBlock block) {
         style::config::Config *config = testConfig();
         test::Result testResult = test::Result::FAILURE;
-        std::cout << "Test if lexing and parsing\n'\n" << expression << "\n'\n gives an error : ";
+        std::cout
+            << "Test if lexing and parsing\n'\n"
+            << expression
+            << "\n'\n gives the error \""
+            << expectedError.message
+            << "\" ("
+            << style::parser::errorTypeToString(expectedError.type)
+            << ") : ";
 #ifdef DEBUG
         std::cout << "\n";
 #endif

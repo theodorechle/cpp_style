@@ -107,22 +107,7 @@ namespace testsParserFileBlock {
     }
 
     test::Result testParsingEmptyTuple() {
-        style::DeserializationNode *rootExpected;
-        style::DeserializationNode *expected;
-        test::Result result;
-
-        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
-        expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
-            ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
-            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
-        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclarations))
-                       ->addChild(new style::DeserializationNode(style::Token::Assignment));
-        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "b"));
-        expected->addChild(new style::DeserializationNode(style::Token::Tuple));
-        result = testsParser::testLexerAndParser(true, "a {b: ();}", rootExpected);
-        delete rootExpected;
-        return result;
+        return testsParser::testParserError("a {b: ();}", {style::parser::ErrorType::ERROR, "tryParseRuleValue: Empty tuple"});
     }
 
     test::Result testParsingIntTuple() {
@@ -199,15 +184,25 @@ namespace testsParserFileBlock {
         return testsParser::testParserError("a {#aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule name"});
     }
 
-    test::Result testParsingBlockWithoutDeclaration() { return testsParser::testParserError("{b: #aaaaaa;}", {}); }
+    test::Result testParsingBlockWithoutDeclaration() {
+        return testsParser::testParserError("{b: #aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseFile: Invalid selectors block"});
+    }
 
-    test::Result testParsingBlockWithoutOpeningCurlyBracket() { return testsParser::testParserError("a b: #aaaaaa;}", {}); }
+    test::Result testParsingBlockWithoutOpeningCurlyBracket() {
+        return testsParser::testParserError("a b: #aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseFile: Invalid rules block"});
+    }
 
-    test::Result testParsingBlockWithoutClosingCurlyBracket() { return testsParser::testParserError("a {b: #aaaaaa;", {}); }
+    test::Result testParsingBlockWithoutClosingCurlyBracket() {
+        return testsParser::testParserError("a {b: #aaaaaa;", {style::parser::ErrorType::ERROR, "tryParseFile: Invalid rules block"});
+    }
 
-    test::Result testParsingBlockWithoutRuleNameAndValue() { return testsParser::testParserError("a {:;}", {}); }
+    test::Result testParsingBlockWithoutRuleNameAndValue() {
+        return testsParser::testParserError("a {:;}", {style::parser::ErrorType::ERROR, "tryParseRuleAssignment: Missing a rule name"});
+    }
 
-    test::Result testParsingBlockWithoutSelectors() { return testsParser::testParserError("{b: #aaaaaa;", {}); }
+    test::Result testParsingBlockWithoutSelectors() {
+        return testsParser::testParserError("{b: #aaaaaa;", {style::parser::ErrorType::ERROR, "tryParseFile: Invalid selectors block"});
+    }
 
     test::Result testParsingElementNameSingleChar() {
         style::DeserializationNode *rootExpected;
@@ -422,7 +417,7 @@ namespace testsParserFileBlock {
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
                        ->addChild(new style::DeserializationNode(style::Token::SelectorsList));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
-        expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Identifier, "b"));
         expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockDeclarations));
         result = testsParser::testLexerAndParser(true, "a#b {}", rootExpected);
@@ -440,7 +435,7 @@ namespace testsParserFileBlock {
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
                        ->addChild(new style::DeserializationNode(style::Token::SelectorsList));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
-        expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "b"));
         expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockDeclarations));
         result = testsParser::testLexerAndParser(true, "a.b {}", rootExpected);
