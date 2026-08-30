@@ -24,7 +24,7 @@ namespace style {
         return NodesToStyleComponents(config).convert(style, fileNumber, ruleNumber);
     }
 
-    StyleComponentDataList *StyleDeserializer::deserializeSelectors(const std::string &selectors, const config::Config *config) {
+    SelectorDataList *StyleDeserializer::deserializeSelectors(const std::string &selectors, const config::Config *config) {
         return NodesToStyleComponents(config).convertSelectors(selectors);
     }
 

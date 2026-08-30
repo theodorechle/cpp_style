@@ -6,7 +6,7 @@
 Add tests for config units
 
 ## Rework modifiers
-- enable modifiers who aren't at the end of the required components list
+- enable modifiers who aren't at the end of the required selectors list
 
 # IN PROGRESS
 - style validity (enums, existing units, ...) should be done here directly, not in external (gui here)
@@ -48,6 +48,6 @@ special sel. import  file start file name file end  expression end
 
 
 ## Still TODO:
-- import
-- nested blocks
+- import -> missing tests for this
 - multiple independant style blocks
+- wildcard

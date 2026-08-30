@@ -36,16 +36,16 @@ namespace style {
         DeserializationNode *appendNext(DeserializationNode *next);
 
         /**
-            *Replace the data of the node (value, token, childs and nexts)
+            *Replace the data of the node (value, token, children and nexts)
             *by the ones of the given tree.
-            Delete the last childs
+            Delete the last children
         */
         void replaceData(DeserializationNode *tree);
         void replaceChild(DeserializationNode *child, DeserializationNode *newChild);
 
         DeserializationNode *copyNode() const;
-        DeserializationNode *copyNodeWithChilds() const;
-        DeserializationNode *copyNodeWithChildsAndNexts() const;
+        DeserializationNode *copyNodeWithChildren() const;
+        DeserializationNode *copyNodeWithChildrenAndNexts() const;
         void displayNexts(std::ostream &flow = std::cout) const;
 
         friend bool operator==(const DeserializationNode &, const DeserializationNode &);

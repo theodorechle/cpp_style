@@ -185,15 +185,15 @@ namespace testsParserFileBlock {
     }
 
     test::Result testParsingBlockWithoutDeclaration() {
-        return testsParser::testParserError("{b: #aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseFile: Invalid selectors block"});
+        return testsParser::testParserError("{b: #aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseSelectorsAndBlock: Invalid selectors block"});
     }
 
     test::Result testParsingBlockWithoutOpeningCurlyBracket() {
-        return testsParser::testParserError("a b: #aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseFile: Invalid rules block"});
+        return testsParser::testParserError("a b: #aaaaaa;}", {style::parser::ErrorType::ERROR, "tryParseSelectorsAndBlock: Invalid rules block"});
     }
 
     test::Result testParsingBlockWithoutClosingCurlyBracket() {
-        return testsParser::testParserError("a {b: #aaaaaa;", {style::parser::ErrorType::ERROR, "tryParseFile: Invalid rules block"});
+        return testsParser::testParserError("a {b: #aaaaaa;", {style::parser::ErrorType::ERROR, "tryParseSelectorsAndBlock: Invalid rules block"});
     }
 
     test::Result testParsingBlockWithoutRuleNameAndValue() {
@@ -201,7 +201,7 @@ namespace testsParserFileBlock {
     }
 
     test::Result testParsingBlockWithoutSelectors() {
-        return testsParser::testParserError("{b: #aaaaaa;", {style::parser::ErrorType::ERROR, "tryParseFile: Invalid selectors block"});
+        return testsParser::testParserError("{b: #aaaaaa;", {style::parser::ErrorType::ERROR, "tryParseSelectorsAndBlock: Invalid selectors block"});
     }
 
     test::Result testParsingElementNameSingleChar() {
@@ -637,7 +637,7 @@ label.blue:hovered {
         std::string text = R"(// equivalent of previous two blocks
 label.blue {
     text-color: #0000ff;
-    :hovered {
+    &:hovered {
         text-color: (150,150,150);
     }
 })";
@@ -647,6 +647,7 @@ label.blue {
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock));
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsList));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement, ""));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
         expected = expected->parent();
         expected = expected->parent();
@@ -658,6 +659,7 @@ label.blue {
         expected = expected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock));
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsList));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Modifier, "hovered"));
         expected = expected->parent();
         expected = expected->parent();
@@ -692,6 +694,7 @@ label.blue {
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock));
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsList));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement, ""));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
         expected = expected->parent();
         expected = expected->parent();
@@ -736,11 +739,15 @@ label.blue {
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock));
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsList));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Modifier, "hovered"));
         expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "element"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "red"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Identifier, "root"));
         expected = expected->parent();
         expected = expected->parent();
@@ -785,12 +792,16 @@ label.blue {
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock));
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsList));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Modifier, "hovered"));
         expected = expected->parent();
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsList));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "element"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "red"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Identifier, "root"));
         expected = expected->parent();
         expected = expected->parent();

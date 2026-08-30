@@ -18,6 +18,8 @@ namespace style::parser {
         std::string message;
     };
 
+    std::string errorMessageToString(ErrorMessage message);
+
     bool isValidElementOrRuleName(const std::string &str);
 
     struct ParseResult {

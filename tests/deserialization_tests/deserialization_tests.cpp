@@ -4,7 +4,7 @@
 
 namespace deserializationTests {
 
-    test::Result checkStyleComponentDataList(const style::StyleComponentDataList *testedData, const style::StyleComponentDataList *expectedData) {
+    test::Result checkStyleComponentDataList(const style::SelectorDataList *testedData, const style::SelectorDataList *expectedData) {
         if (testedData == nullptr && expectedData == nullptr) return test::Result::SUCCESS;
         if ((testedData == nullptr && expectedData != nullptr)
             || (testedData != nullptr && expectedData == nullptr)
@@ -12,14 +12,14 @@ namespace deserializationTests {
             std::cerr << "One of the data list is null or the lists doesn't have the same size\n";
             return test::Result::FAILURE;
         }
-        style::StyleComponentDataList::const_iterator testedDataListIt = testedData->cbegin();
-        style::StyleComponentDataList::const_iterator expectedDataListIt = expectedData->cbegin();
+        style::SelectorDataList::const_iterator testedDataListIt = testedData->cbegin();
+        style::SelectorDataList::const_iterator expectedDataListIt = expectedData->cbegin();
         while (testedDataListIt != testedData->cend()) {
             if (testedDataListIt->second != expectedDataListIt->second) {
                 std::cerr
-                    << styleRelationToString(testedDataListIt->second)
+                    << selectorsRelationToString(testedDataListIt->second)
                     << " instead of relation "
-                    << styleRelationToString(expectedDataListIt->second)
+                    << selectorsRelationToString(expectedDataListIt->second)
                     << "\n";
                 return test::Result::FAILURE;
             }
@@ -29,9 +29,9 @@ namespace deserializationTests {
             }
             if (testedDataListIt->first.second != expectedDataListIt->first.second) {
                 std::cerr
-                    << styleComponentTypeToString(testedDataListIt->first.second)
+                    << selectorTypeToString(testedDataListIt->first.second)
                     << " instead of type "
-                    << styleComponentTypeToString(expectedDataListIt->first.second)
+                    << selectorTypeToString(expectedDataListIt->first.second)
                     << "\n";
                 return test::Result::FAILURE;
             }
@@ -56,9 +56,9 @@ namespace deserializationTests {
         if (testedValue->type() != expectedValue->type()) {
             std::cerr
                 << "The type is different (have '"
-                << styleValueTypeToString(testedValue->type())
+                << valueTypeToString(testedValue->type())
                 << "', expected '"
-                << styleValueTypeToString(expectedValue->type())
+                << valueTypeToString(expectedValue->type())
                 << "')\n";
             return test::Result::FAILURE;
         }
@@ -96,8 +96,8 @@ namespace deserializationTests {
         return checkStyleValue(testedRule->value, expectedRule->value);
     }
 
-    test::Result checkStyleMap(const style::StyleValuesMap *testedStyleMap, const style::StyleValuesMap *expectedStyleMap) {
-        style::StyleValuesMap::const_iterator ruleIt;
+    test::Result checkStyleMap(const style::RulesMap *testedStyleMap, const style::RulesMap *expectedStyleMap) {
+        style::RulesMap::const_iterator ruleIt;
         test::Result styleRuleCheckResult;
         if (testedStyleMap == nullptr && expectedStyleMap == nullptr) return test::Result::SUCCESS;
         if ((testedStyleMap == nullptr && expectedStyleMap != nullptr)
@@ -186,17 +186,17 @@ namespace deserializationTests {
     }
 
     test::Result testSingleRule() {
-        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
-        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::SelectorDataList expectedData = style::SelectorDataList();
+        style::RulesMap expectedStyleMap = style::RulesMap();
         style::StyleValue *styleValue;
         style::StyleDefinition *styleDefinition;
         std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
-        expectedData.push_back(std::pair(std::pair("container", style::StyleComponentType::Class), style::StyleRelation::AnyParent));
-        expectedData.push_back(std::pair(std::pair("label", style::StyleComponentType::ElementName), style::StyleRelation::SameElement));
-        expectedData.push_back(std::pair(std::pair("red", style::StyleComponentType::Identifier), style::StyleRelation::SameElement));
-        styleValue = new style::StyleValue("ff0000", style::StyleValueType::Hex);
+        expectedData.push_back(std::pair(std::pair("container", style::SelectorType::Class), style::SelectorsRelation::AnyParent));
+        expectedData.push_back(std::pair(std::pair("label", style::SelectorType::ElementName), style::SelectorsRelation::SameElement));
+        expectedData.push_back(std::pair(std::pair("red", style::SelectorType::Identifier), style::SelectorsRelation::SameElement));
+        styleValue = new style::StyleValue("ff0000", style::ValueType::Hex);
         expectedStyleMap.insert_or_assign("text-color", style::StyleRule{styleValue, true, 111, 0, 0});
         styleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
         expectedStyleDefinitions = {styleDefinition};
@@ -208,17 +208,17 @@ namespace deserializationTests {
     }
 
     test::Result testDirectParent() {
-        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
-        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::SelectorDataList expectedData = style::SelectorDataList();
+        style::RulesMap expectedStyleMap = style::RulesMap();
         style::StyleValue *styleValue;
         style::StyleDefinition *styleDefinition;
         std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
-        expectedData.push_back(std::pair(std::pair("container", style::StyleComponentType::Class), style::StyleRelation::DirectParent));
-        expectedData.push_back(std::pair(std::pair("label", style::StyleComponentType::ElementName), style::StyleRelation::SameElement));
-        expectedData.push_back(std::pair(std::pair("red", style::StyleComponentType::Identifier), style::StyleRelation::SameElement));
-        styleValue = new style::StyleValue("ff0000", style::StyleValueType::Hex);
+        expectedData.push_back(std::pair(std::pair("container", style::SelectorType::Class), style::SelectorsRelation::DirectParent));
+        expectedData.push_back(std::pair(std::pair("label", style::SelectorType::ElementName), style::SelectorsRelation::SameElement));
+        expectedData.push_back(std::pair(std::pair("red", style::SelectorType::Identifier), style::SelectorsRelation::SameElement));
+        styleValue = new style::StyleValue("ff0000", style::ValueType::Hex);
         expectedStyleMap.insert_or_assign("text-color", style::StyleRule{styleValue, true, 111, 0, 0});
         styleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
         expectedStyleDefinitions = {styleDefinition};
@@ -230,17 +230,17 @@ namespace deserializationTests {
     }
 
     test::Result testDirectParentWithoutSpacesAround() {
-        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
-        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::SelectorDataList expectedData = style::SelectorDataList();
+        style::RulesMap expectedStyleMap = style::RulesMap();
         style::StyleValue *styleValue;
         style::StyleDefinition *styleDefinition;
         std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
-        expectedData.push_back(std::pair(std::pair("container", style::StyleComponentType::Class), style::StyleRelation::DirectParent));
-        expectedData.push_back(std::pair(std::pair("label", style::StyleComponentType::ElementName), style::StyleRelation::SameElement));
-        expectedData.push_back(std::pair(std::pair("red", style::StyleComponentType::Identifier), style::StyleRelation::SameElement));
-        styleValue = new style::StyleValue("ff0000", style::StyleValueType::Hex);
+        expectedData.push_back(std::pair(std::pair("container", style::SelectorType::Class), style::SelectorsRelation::DirectParent));
+        expectedData.push_back(std::pair(std::pair("label", style::SelectorType::ElementName), style::SelectorsRelation::SameElement));
+        expectedData.push_back(std::pair(std::pair("red", style::SelectorType::Identifier), style::SelectorsRelation::SameElement));
+        styleValue = new style::StyleValue("ff0000", style::ValueType::Hex);
         expectedStyleMap.insert_or_assign("text-color", style::StyleRule{styleValue, true, 111, 0, 0});
         styleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
         expectedStyleDefinitions = {styleDefinition};
@@ -252,16 +252,16 @@ namespace deserializationTests {
     }
 
     test::Result testRuleNameAndValueStickedToAssignmentColon() {
-        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
-        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::SelectorDataList expectedData = style::SelectorDataList();
+        style::RulesMap expectedStyleMap = style::RulesMap();
         style::StyleValue *styleValue;
         style::StyleDefinition *styleDefinition;
         std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
-        expectedData.push_back(std::pair(std::pair("label", style::StyleComponentType::ElementName), style::StyleRelation::SameElement));
-        styleValue = new style::StyleValue("px", style::StyleValueType::Unit);
-        style::StyleValue *styleValue2 = new style::StyleValue("100", style::StyleValueType::Int);
+        expectedData.push_back(std::pair(std::pair("label", style::SelectorType::ElementName), style::SelectorsRelation::SameElement));
+        styleValue = new style::StyleValue("px", style::ValueType::Unit);
+        style::StyleValue *styleValue2 = new style::StyleValue("100", style::ValueType::Int);
         styleValue->addChild(styleValue2);
         expectedStyleMap.insert_or_assign("padding", style::StyleRule{styleValue, true, 1, 0, 0});
         styleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
@@ -274,16 +274,16 @@ namespace deserializationTests {
     }
 
     test::Result testGlobalModifier() {
-        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
-        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::SelectorDataList expectedData = style::SelectorDataList();
+        style::RulesMap expectedStyleMap = style::RulesMap();
         style::StyleValue *styleValue;
         style::StyleDefinition *styleDefinition;
         std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
-        expectedData.push_back(std::pair(std::pair("hovered", style::StyleComponentType::Modifier), style::StyleRelation::SameElement));
-        styleValue = new style::StyleValue("px", style::StyleValueType::Unit);
-        style::StyleValue *styleValue2 = new style::StyleValue("100", style::StyleValueType::Int);
+        expectedData.push_back(std::pair(std::pair("hovered", style::SelectorType::Modifier), style::SelectorsRelation::SameElement));
+        styleValue = new style::StyleValue("px", style::ValueType::Unit);
+        style::StyleValue *styleValue2 = new style::StyleValue("100", style::ValueType::Int);
         styleValue->addChild(styleValue2);
         expectedStyleMap.insert_or_assign("padding", style::StyleRule{styleValue, true, 10, 0, 0});
         styleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
@@ -302,15 +302,15 @@ namespace deserializationTests {
     }
 
     test::Result testElementNameSpecificity() {
-        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
-        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::SelectorDataList expectedData = style::SelectorDataList();
+        style::RulesMap expectedStyleMap = style::RulesMap();
         style::StyleValue *styleValue;
         style::StyleDefinition *styleDefinition;
         std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
-        expectedData.push_back(std::pair(std::pair("a", style::StyleComponentType::ElementName), style::StyleRelation::SameElement));
-        styleValue = new style::StyleValue("aaaaaa", style::StyleValueType::Hex);
+        expectedData.push_back(std::pair(std::pair("a", style::SelectorType::ElementName), style::SelectorsRelation::SameElement));
+        styleValue = new style::StyleValue("aaaaaa", style::ValueType::Hex);
         expectedStyleMap.insert_or_assign("text-color", style::StyleRule{styleValue, true, 1, 0, 0});
         styleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
         expectedStyleDefinitions = {styleDefinition};
@@ -322,15 +322,15 @@ namespace deserializationTests {
     }
 
     test::Result testClassSpecificity() {
-        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
-        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::SelectorDataList expectedData = style::SelectorDataList();
+        style::RulesMap expectedStyleMap = style::RulesMap();
         style::StyleValue *styleValue;
         style::StyleDefinition *styleDefinition;
         std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
-        expectedData.push_back(std::pair(std::pair("a", style::StyleComponentType::Class), style::StyleRelation::SameElement));
-        styleValue = new style::StyleValue("aaaaaa", style::StyleValueType::Hex);
+        expectedData.push_back(std::pair(std::pair("a", style::SelectorType::Class), style::SelectorsRelation::SameElement));
+        styleValue = new style::StyleValue("aaaaaa", style::ValueType::Hex);
         expectedStyleMap.insert_or_assign("text-color", style::StyleRule{styleValue, true, 10, 0, 0});
         styleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
         expectedStyleDefinitions = {styleDefinition};
@@ -342,15 +342,15 @@ namespace deserializationTests {
     }
 
     test::Result testModifierSpecificity() {
-        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
-        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::SelectorDataList expectedData = style::SelectorDataList();
+        style::RulesMap expectedStyleMap = style::RulesMap();
         style::StyleValue *styleValue;
         style::StyleDefinition *styleDefinition;
         std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
-        expectedData.push_back(std::pair(std::pair("a", style::StyleComponentType::Modifier), style::StyleRelation::SameElement));
-        styleValue = new style::StyleValue("aaaaaa", style::StyleValueType::Hex);
+        expectedData.push_back(std::pair(std::pair("a", style::SelectorType::Modifier), style::SelectorsRelation::SameElement));
+        styleValue = new style::StyleValue("aaaaaa", style::ValueType::Hex);
         expectedStyleMap.insert_or_assign("text-color", style::StyleRule{styleValue, true, 10, 0, 0});
         styleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
         expectedStyleDefinitions = {styleDefinition};
@@ -362,15 +362,15 @@ namespace deserializationTests {
     }
 
     test::Result testIdentifierSpecificity() {
-        style::StyleComponentDataList expectedData = style::StyleComponentDataList();
-        style::StyleValuesMap expectedStyleMap = style::StyleValuesMap();
+        style::SelectorDataList expectedData = style::SelectorDataList();
+        style::RulesMap expectedStyleMap = style::RulesMap();
         style::StyleValue *styleValue;
         style::StyleDefinition *styleDefinition;
         std::list<style::StyleDefinition *> expectedStyleDefinitions;
         test::Result result;
 
-        expectedData.push_back(std::pair(std::pair("a", style::StyleComponentType::Identifier), style::StyleRelation::SameElement));
-        styleValue = new style::StyleValue("aaaaaa", style::StyleValueType::Hex);
+        expectedData.push_back(std::pair(std::pair("a", style::SelectorType::Identifier), style::SelectorsRelation::SameElement));
+        styleValue = new style::StyleValue("aaaaaa", style::ValueType::Hex);
         expectedStyleMap.insert_or_assign("text-color", style::StyleRule{styleValue, true, 100, 0, 0});
         styleDefinition = new style::StyleDefinition(expectedData, expectedStyleMap);
         expectedStyleDefinitions = {styleDefinition};
@@ -383,7 +383,7 @@ namespace deserializationTests {
 
     test::Result testDeserializingIdentifierSelector() {
         style::config::Config *config = testConfig();
-        style::StyleComponentDataList *selectors = style::StyleDeserializer::deserializeSelectors("#a", config);
+        style::SelectorDataList *selectors = style::StyleDeserializer::deserializeSelectors("#a", config);
         delete selectors;
         return test::Result::SUCCESS;
     }

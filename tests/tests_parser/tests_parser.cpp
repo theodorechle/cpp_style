@@ -1,4 +1,5 @@
 #include "tests_parser.hpp"
+#include "../../cpp_commons/src/text.hpp"
 #include "../../src/abstract_configuration.hpp"
 #include "../../src/lexer.hpp"
 #include "../test_config.hpp"
@@ -9,16 +10,22 @@ namespace testsParser {
                                     style::parser::ParsingBlock block) {
         style::config::Config *config = testConfig();
         test::Result testResult;
-        std::cout << "Test if lexing and parsing\n'\n" << expression << "\n'\n";
-        if (equal) std::cout << "equals to\n";
-        else std::cout << "differs from\n";
-        expected->debugDisplay(std::cout);
-        std::cout << ":\n";
+        std::cout << "Test lexing and parsing '\n" << expression << "'\n";
         try {
             style::DeserializationNode *tokens = style::Lexer().lexe(expression, config);
             style::parser::ParseResult result = style::parser::parse(tokens, block);
             if (areSameNodes(result.node, expected) == equal) testResult = test::Result::SUCCESS;
-            else testResult = test::Result::FAILURE;
+            else {
+                if (equal) {
+                    std::ostringstream firstStream;
+                    std::ostringstream secondStream;
+                    expected->debugDisplay(firstStream);
+                    result.node->debugDisplay(secondStream);
+                    commons::showDiff(firstStream.str(), secondStream.str(), "Expected", "Actual");
+                }
+                else std::cerr << "Expected different nodes\n";
+                testResult = test::Result::FAILURE;
+            }
             delete result.node;
             delete result.errors;
             delete tokens;
@@ -46,10 +53,8 @@ namespace testsParser {
             << "Test if lexing and parsing\n'\n"
             << expression
             << "\n'\n gives the error \""
-            << expectedError.message
-            << "\" ("
-            << style::parser::errorTypeToString(expectedError.type)
-            << ") : ";
+            << style::parser::errorMessageToString(expectedError)
+            << " : ";
 #ifdef DEBUG
         std::cout << "\n";
 #endif
@@ -58,10 +63,11 @@ namespace testsParser {
         tokens = style::Lexer().lexe(expression, config);
         result = style::parser::parse(tokens, block);
 
+        std::cout << "Errors:\n";
         for (style::parser::ErrorMessage error : *result.errors) {
+            std::cout << "- " << errorMessageToString(error) << "\n";
             if (error.type == expectedError.type && error.message == expectedError.message) {
                 testResult = test::Result::SUCCESS;
-                break;
             }
         }
 

@@ -14,7 +14,7 @@ namespace style {
         const config::Config *_config = nullptr;
         DeserializationNode *tree = nullptr;
         // for each inner style block, multiple components list definitions (separated by commas in the style files)
-        std::list<std::list<StyleComponentDataList *> *> requiredStyleComponentsLists = std::list<std::list<StyleComponentDataList *> *>();
+        std::list<std::list<SelectorDataList *> *> requiredStyleComponentsLists = std::list<std::list<SelectorDataList *> *>();
         std::list<StyleDefinition *> *styleDefinitions = nullptr;
 
         DeserializationNode *deserializeStyle(const std::string &style);
@@ -29,19 +29,19 @@ namespace style {
         bool ruleValid(const DeserializationNode *rule);
         void filterRulesWithConfiguration(DeserializationNode *style);
 
-        std::list<StyleComponentDataList *> *convertStyleComponents();
+        std::list<SelectorDataList *> *convertStyleSelectors();
 
         StyleValue *convertStyleNodeToStyleValue(DeserializationNode *node);
 
-        StyleValuesMap *convertAppliedStyle(int fileNumber, int *ruleNumber);
+        RulesMap *convertAppliedStyle(int fileNumber, int *ruleNumber);
 
         /**
          * Does not accept a null pointer for "components" parameter
          */
-        std::list<StyleDefinition *> *createStyleComponents(std::list<std::list<StyleComponentDataList *> *>::const_iterator componentsListIt,
-                                                            StyleComponentDataList *components, StyleValuesMap *appliedStyle);
+        std::list<StyleDefinition *> *createStyleComponents(std::list<std::list<SelectorDataList *> *>::const_iterator componentsListIt,
+                                                            SelectorDataList *components, RulesMap *appliedStyle);
 
-        int computeRuleSpecifity(StyleComponentDataList *ruleComponents);
+        int computeRuleSpecifity(SelectorDataList *ruleComponents);
 
         void convertStyleDefinition(int fileNumber, int *ruleNumber);
 
@@ -49,7 +49,7 @@ namespace style {
         NodesToStyleComponents(const config::Config *config) : _config{config} {}
         std::list<StyleDefinition *> *convert(const std::string &style, int fileNumber, int *ruleNumber);
 
-        StyleComponentDataList *convertSelectors(const std::string &selectors);
+        SelectorDataList *convertSelectors(const std::string &selectors);
     };
 
 } // namespace style

@@ -29,6 +29,8 @@ namespace style::parser {
         }
     }
 
+    std::string errorMessageToString(ErrorMessage message) { return message.message + " (" + errorTypeToString(message.type) + ")"; }
+
     namespace {
         std::list<ErrorMessage> *createErrorList(ErrorType type, std::string functionName, std::string message,
                                                  std::list<ErrorMessage> *existingErrors = nullptr) {
@@ -201,12 +203,17 @@ namespace style::parser {
             return state;
         }
 
-        ParsingState tryParseSelectorsList(const DeserializationNode *currentLexedNodeStart) {
+        ParsingState tryParseSelectorsList(const DeserializationNode *currentLexedNodeStart, bool nested = false) {
             const DeserializationNode *currentLexedNode = currentLexedNodeStart;
             ParsingState state;
             ParsingState selectorsRelationState;
 
             DeserializationNode *currentParsedNode = new DeserializationNode{Token::SelectorsList};
+
+            if (nested && currentLexedNode->token() == Token::Ampersand) {
+                currentParsedNode->addChild(new DeserializationNode{Token::SameElement});
+                currentLexedNode = currentLexedNode->next();
+            }
 
             do {
                 state = removeSpaces(selectorsRelationState.currentParsedNode ? selectorsRelationState.currentLexedNode : currentLexedNode);
@@ -235,7 +242,7 @@ namespace style::parser {
                 selectorsRelationState = tryParseSelectorsRelation(currentLexedNode);
             } while (selectorsRelationState.currentLexedNode && selectorsRelationState.currentParsedNode);
 
-            if (!currentParsedNode->nbChilds()) {
+            if (!currentParsedNode->nbChildren()) {
                 delete currentParsedNode;
                 return ParsingState{currentLexedNodeStart, nullptr,
                                     new std::list<ErrorMessage>({{ErrorType::ERROR, "tryParseSelectorsList: No selectors found"}})};
@@ -243,12 +250,12 @@ namespace style::parser {
             return ParsingState{currentLexedNode, currentParsedNode};
         }
 
-        ParsingState tryParseSelectorsBlock(const DeserializationNode *currentLexedNodeStart) {
+        ParsingState tryParseSelectorsBlock(const DeserializationNode *currentLexedNodeStart, bool nested = false) {
             const DeserializationNode *currentLexedNode = currentLexedNodeStart;
             ParsingState removedSpacesState;
             DeserializationNode *currentParsedNodeRoot = new DeserializationNode{Token::SelectorsBlock};
             while (true) {
-                ParsingState state = tryParseSelectorsList(currentLexedNode);
+                ParsingState state = tryParseSelectorsList(currentLexedNode, nested);
                 if (!state.currentParsedNode) {
                     delete currentParsedNodeRoot;
                     return ParsingState{currentLexedNodeStart, nullptr};
@@ -319,7 +326,7 @@ namespace style::parser {
                     delete node;
                     return ParsingState{currentLexedNodeStart, nullptr};
                 }
-                if (!node->nbChilds()) {
+                if (!node->nbChildren()) {
                     delete node;
                     return ParsingState{currentLexedNodeStart, nullptr, createErrorList(ErrorType::ERROR, "tryParseRuleValue", "Empty tuple")};
                 }
@@ -367,10 +374,13 @@ namespace style::parser {
             return ParsingState{removedSpacesState.currentLexedNode->next(), assignment};
         }
 
+        ParsingState tryParseSelectorsAndBlock(const DeserializationNode *currentLexedNodeStart, bool nested = false);
+
         ParsingState tryParseRulesBlock(const DeserializationNode *currentLexedNodeStart) {
             const DeserializationNode *currentLexedNode = currentLexedNodeStart;
             ParsingState removedSpacesState;
             ParsingState state;
+            std::list<ErrorMessage> *errors = nullptr;
 
             removedSpacesState = removeWhiteSpacesAndComment(currentLexedNode);
             if (!isTokenIn(removedSpacesState.currentLexedNode, {Token::OpeningCurlyBracket})) return ParsingState{currentLexedNodeStart, nullptr};
@@ -384,6 +394,17 @@ namespace style::parser {
 
             while (true) {
                 state = tryParseRuleAssignment(currentLexedNode);
+                errors = state.errors;
+                if (!state.currentParsedNode) {
+                    state = tryParseSelectorsAndBlock(currentLexedNode, true);
+                }
+                if (state.errors) {
+                    if (errors) {
+                        errors->splice(errors->cbegin(), *state.errors);
+                        delete state.errors;
+                    }
+                    else errors = state.errors;
+                }
                 if (!state.currentParsedNode) break;
                 currentParsedNodeRoot->addChild(state.currentParsedNode);
                 currentLexedNode = state.currentLexedNode;
@@ -395,9 +416,9 @@ namespace style::parser {
             if (!isTokenIn(removedSpacesState.currentLexedNode, {Token::ClosingCurlyBracket})) {
                 delete currentParsedNodeRoot;
 
-                if (state.errors) { // if there was errors during the parsing of a rule assignment, and the current token does not mean end of rule
-                                    // block, then it's a malformed text
-                    return ParsingState{currentLexedNodeStart, nullptr, state.errors};
+                if (errors) { // if there was errors during the parsing of a rule assignment, and the current token does not mean end of rule
+                              // block, then it's a malformed text
+                    return ParsingState{currentLexedNodeStart, nullptr, errors};
                 }
                 return ParsingState{currentLexedNodeStart, nullptr,
                                     createErrorList(ErrorType::ERROR, "tryParseRulesBlock", "Missing a closing curly bracket")};
@@ -409,16 +430,16 @@ namespace style::parser {
 
         ParsingState tryParseAtRule(const DeserializationNode *currentLexedNode) { return ParsingState{currentLexedNode, nullptr}; }
 
-        ParsingState tryParseFile(const DeserializationNode *currentLexedNodeStart) {
+        ParsingState tryParseSelectorsAndBlock(const DeserializationNode *currentLexedNodeStart, bool nestedBlock) {
             ParsingState state;
 
             state = removeWhiteSpacesAndComment(currentLexedNodeStart);
             if (isNull(state)) return ParsingState{currentLexedNodeStart, nullptr};
 
-            state = tryParseSelectorsBlock(state.currentLexedNode);
+            state = tryParseSelectorsBlock(state.currentLexedNode, nestedBlock);
             if (!state.currentLexedNode || !state.currentParsedNode)
                 return ParsingState{currentLexedNodeStart, nullptr,
-                                    createErrorList(ErrorType::ERROR, "tryParseFile", "Invalid selectors block", state.errors)};
+                                    createErrorList(ErrorType::ERROR, "tryParseSelectorsAndBlock", "Invalid selectors block", state.errors)};
 
             DeserializationNode *currentParsedNodeRoot = new DeserializationNode{Token::StyleBlock};
             currentParsedNodeRoot->addChild(state.currentParsedNode);
@@ -427,13 +448,15 @@ namespace style::parser {
             if (!state.currentParsedNode) {
                 delete currentParsedNodeRoot;
                 return ParsingState{currentLexedNodeStart, nullptr,
-                                    createErrorList(ErrorType::ERROR, "tryParseFile", "Invalid rules block", state.errors)};
+                                    createErrorList(ErrorType::ERROR, "tryParseSelectorsAndBlock", "Invalid rules block", state.errors)};
             }
 
             currentParsedNodeRoot->addChild(state.currentParsedNode);
 
             return ParsingState{state.currentLexedNode, currentParsedNodeRoot};
         }
+
+        ParsingState tryParseFile(const DeserializationNode *currentLexedNodeStart) { return tryParseSelectorsAndBlock(currentLexedNodeStart); }
     }
 
     ParseResult parse(DeserializationNode *currentNode, ParsingBlock block) {

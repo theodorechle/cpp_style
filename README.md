@@ -1,7 +1,7 @@
 ![build status](https://github.com/theodorechle/cpp_style/actions/workflows/c-cpp.yml/badge.svg)
 
 # style
-A lexer and parser for scss-like files.
+A lexer and parser for css-like files.
 
 ## This library supports:
 ### Data types
@@ -25,7 +25,7 @@ The following relations between the above element identifiers are available:
 - any parent: add a space between the identifiers so the right element has the left one as any kind of ancestor (parent, grandparent, ...) (e.g.: `label #my-label` means `label` is an ancestor of `#my-label`)
 
 When using nested style, when we start a path in the nested part, default is any parent.
-```scss
+```css
 label {
     #my-label {}
 }
@@ -33,14 +33,14 @@ label {
 is the same as `label #my-label`.
 
 In order to have them referencing the same element, we need to add a `&` before:
-```scss
+```css
 label {
     &#my-label {}
 }
 ```
 
 For direct-parent, we still only need to add a `>`:
-```scss
+```css
 label {
     >#my-label {}
 }
@@ -49,14 +49,14 @@ label {
 ### Comments
 Single-line and multiline comments are both supported.
 Single-line comments are written with `//` at the start:
-```scss
+```css
 button {
     // this is a comment
 }
 ```
 
 Multi-line comments are surrounded by `/*` and `*/`:
-```scss
+```css
 button {
     /*
     this is a multiline comment
@@ -132,7 +132,7 @@ Here, we defined two possible values for a rule named `text-color`:
 - And a tuple of three integers
 
 For the latter one, we described it as a `Tuple` with an `Int` child who has an `Int` brother who itself has an `Int` brother.
-At the end, it only means we have a `Tuple` with three `Int` childs.
+At the end, it only means we have a `Tuple` with three `Int` children.
 
 For defining rule values, the following tokens can be used:
 - `Enum`

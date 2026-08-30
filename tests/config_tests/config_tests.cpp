@@ -104,7 +104,7 @@ namespace configTests {
         return result;
     }
 
-    test::Result testRuleWithFunctionTokenWithChilds() {
+    test::Result testRuleWithFunctionTokenWithChildren() {
         style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::Function);
         node->addChild(new style::config::ConfigRuleNode(style::Token::String));
         const style::config::Config *config = new style::config::Config{{{"aValidRule", {node}}}, {}};
@@ -113,7 +113,7 @@ namespace configTests {
         return result;
     }
 
-    test::Result testRuleWithTupleTokenWithChilds() {
+    test::Result testRuleWithTupleTokenWithChildren() {
         style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::Tuple);
         node->addChild(new style::config::ConfigRuleNode(style::Token::String));
         const style::config::Config *config = new style::config::Config{{{"aValidRule", {node}}}, {}};
@@ -122,7 +122,7 @@ namespace configTests {
         return result;
     }
 
-    test::Result testRuleWithNonNestableTokenWithChilds() {
+    test::Result testRuleWithNonNestableTokenWithChildren() {
         style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::EnumValue);
         node->addChild(new style::config::ConfigRuleNode(style::Token::String));
         const style::config::Config *config = new style::config::Config{{{"anInvalidRule", {node}}}, {}};
@@ -141,9 +141,9 @@ namespace configTests {
         tests->addTest(testValidRuleNameWithUpperCase, "Valid rule name with upper case");
         tests->addTest(testRuleInvalidToken, "Invalid rule token");
         tests->addTest(testRuleValidToken, "Valid rule token");
-        tests->addTest(testRuleWithFunctionTokenWithChilds, "Rule with function token with childs");
-        tests->addTest(testRuleWithTupleTokenWithChilds, "Rule with tuple token with childs");
-        tests->addTest(testRuleWithNonNestableTokenWithChilds, "Rule with non nestable token with childs");
+        tests->addTest(testRuleWithFunctionTokenWithChildren, "Rule with function token with children");
+        tests->addTest(testRuleWithTupleTokenWithChildren, "Rule with tuple token with children");
+        tests->addTest(testRuleWithNonNestableTokenWithChildren, "Rule with non nestable token with children");
         tests->endTestBlock();
     }
 

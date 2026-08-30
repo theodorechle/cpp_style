@@ -15,19 +15,19 @@ namespace style {
     }
 
     /**
-     *Copy the node and his childs (not the nexts)
+     *Copy the node and his children (not the nexts)
      */
-    DeserializationNode *DeserializationNode::copyNodeWithChilds() const {
+    DeserializationNode *DeserializationNode::copyNodeWithChildren() const {
         DeserializationNode *n = copyNode();
         const DeserializationNode *childNode = child();
-        if (childNode != nullptr) n->setChild(childNode->copyNodeWithChildsAndNexts());
+        if (childNode != nullptr) n->setChild(childNode->copyNodeWithChildrenAndNexts());
         return n;
     }
 
-    DeserializationNode *DeserializationNode::copyNodeWithChildsAndNexts() const {
-        DeserializationNode *n = copyNodeWithChilds();
+    DeserializationNode *DeserializationNode::copyNodeWithChildrenAndNexts() const {
+        DeserializationNode *n = copyNodeWithChildren();
         const DeserializationNode *nextNode = next();
-        if (nextNode != nullptr) n->next(nextNode->copyNodeWithChildsAndNexts());
+        if (nextNode != nullptr) n->next(nextNode->copyNodeWithChildrenAndNexts());
         return n;
     }
 
@@ -48,7 +48,7 @@ namespace style {
     }
 
     void DeserializationNode::setChild(DeserializationNode *childNode) {
-        removeChilds();
+        removeChildren();
         addChild(childNode);
         if (childNode != nullptr) childNode->setParent(this);
     }
@@ -89,7 +89,7 @@ namespace style {
 
     void DeserializationNode::replaceData(DeserializationNode *tree) {
         if (tree == nullptr) return;
-        tree = tree->copyNodeWithChildsAndNexts();
+        tree = tree->copyNodeWithChildrenAndNexts();
         // copy node
         value(tree->value());
         token(tree->token());
@@ -109,7 +109,7 @@ namespace style {
     }
 
     /**
-     *Find the child in the childs of the node and replace it with the new one
+     *Find the child in the children of the node and replace it with the new one
      */
     void DeserializationNode::replaceChild(DeserializationNode *childNode, DeserializationNode *newChild) {
         if (childNode == nullptr || newChild == nullptr) return;
@@ -143,7 +143,7 @@ namespace style {
     bool areSameNodes(const DeserializationNode *node1, const DeserializationNode *node2) {
         if (!node1 || !node2) return false;
         if (*node1 != *node2) return false; // works because != is overriden
-        if (node1->nbChilds() != node2->nbChilds()) return false;
+        if (node1->nbChildren() != node2->nbChildren()) return false;
         const DeserializationNode *child1 = node1->child();
         const DeserializationNode *child2 = node2->child();
         while (child1 != nullptr) {

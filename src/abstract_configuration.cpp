@@ -13,7 +13,7 @@ namespace style::config {
         }
         if (node->child()) {
             if (std::find(NESTABLE_TOKENS.cbegin(), NESTABLE_TOKENS.cend(), node->token()) == VALUE_TYPE_TOKENS.cend()) {
-                throw InvalidStyleConfigException("Node with token '" + tokenToString(node->token()) + "' can't have childs");
+                throw InvalidStyleConfigException("Node with token '" + tokenToString(node->token()) + "' can't have children");
             }
             configNodeChecker(node->child());
         }

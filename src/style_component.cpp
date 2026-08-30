@@ -2,61 +2,61 @@
 
 namespace style {
 
-    std::string styleComponentTypeToString(StyleComponentType token) {
+    std::string selectorTypeToString(SelectorType token) {
         switch (token) {
-        case StyleComponentType::StarWildcard:
+        case SelectorType::StarWildcard:
             return "StarWildcard";
-        case StyleComponentType::ElementName:
+        case SelectorType::ElementName:
             return "ElementName";
-        case StyleComponentType::Class:
+        case SelectorType::Class:
             return "Class";
-        case StyleComponentType::Modifier:
+        case SelectorType::Modifier:
             return "Modifier";
-        case StyleComponentType::Identifier:
+        case SelectorType::Identifier:
             return "Identifier";
-        case StyleComponentType::Null:
+        case SelectorType::Null:
             return "Null";
         default:
             return "Unknown";
         }
     }
 
-    std::string styleValueTypeToString(StyleValueType token) {
+    std::string valueTypeToString(ValueType token) {
         switch (token) {
-        case StyleValueType::Int:
+        case ValueType::Int:
             return "Int";
-        case StyleValueType::Float:
+        case ValueType::Float:
             return "Float";
-        case StyleValueType::Bool:
+        case ValueType::Bool:
             return "Bool";
-        case StyleValueType::String:
+        case ValueType::String:
             return "String";
-        case StyleValueType::Tuple:
+        case ValueType::Tuple:
             return "Tuple";
-        case StyleValueType::Function:
+        case ValueType::Function:
             return "Function";
-        case StyleValueType::Unit:
+        case ValueType::Unit:
             return "Unit";
-        case StyleValueType::Hex:
+        case ValueType::Hex:
             return "Hex";
-        case StyleValueType::EnumValue:
+        case ValueType::EnumValue:
             return "EnumValue";
-        case StyleValueType::Null:
+        case ValueType::Null:
             return "Null";
         default:
             return "Unknown";
         }
     }
 
-    std::string styleRelationToString(StyleRelation token) {
+    std::string selectorsRelationToString(SelectorsRelation token) {
         switch (token) {
-        case StyleRelation::SameElement:
+        case SelectorsRelation::SameElement:
             return "SameElement";
-        case StyleRelation::DirectParent:
+        case SelectorsRelation::DirectParent:
             return "DirectParent";
-        case StyleRelation::AnyParent:
+        case SelectorsRelation::AnyParent:
             return "AnyParent";
-        case StyleRelation::Null:
+        case SelectorsRelation::Null:
             return "Null";
         default:
             return "Unknown";
@@ -70,13 +70,14 @@ namespace style {
         return newValue;
     }
 
-    std::string StyleValue::debugValue() const { return _value + " (" + styleValueTypeToString(_type) + ")"; }
+    std::string StyleValue::debugValue() const { return _value + " (" + valueTypeToString(_type) + ")"; }
 
     StyleRule::StyleRule(StyleValue *value, bool enabled, int specificity, int fileNumber, int ruleNumber)
         : value{value ? value->copy() : nullptr}, enabled{enabled}, specificity{specificity}, fileNumber{fileNumber}, ruleNumber{ruleNumber} {}
 
     StyleRule::StyleRule(const StyleRule &rule)
-        : value{rule.value ? rule.value->copy() : nullptr}, enabled{rule.enabled}, specificity{rule.specificity}, fileNumber{rule.fileNumber}, ruleNumber{rule.ruleNumber} {}
+        : value{rule.value ? rule.value->copy() : nullptr}, enabled{rule.enabled}, specificity{rule.specificity}, fileNumber{rule.fileNumber},
+          ruleNumber{rule.ruleNumber} {}
 
     StyleRule &StyleRule::operator=(const StyleRule &rule) {
         if (this != &rule) {

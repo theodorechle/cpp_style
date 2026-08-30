@@ -14,7 +14,7 @@ namespace style {
                                                                  const config::Config *config);
         static std::list<StyleDefinition *> *deserialize(const std::string &style, int fileNumber, int *ruleNumber, const config::Config *config);
 
-        static StyleComponentDataList *deserializeSelectors(const std::string &selectors, const config::Config *config);
+        static SelectorDataList *deserializeSelectors(const std::string &selectors, const config::Config *config);
     };
 
 } // namespace Style
