@@ -600,6 +600,7 @@ label.blue:hovered {
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock));
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsList));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
         expected = expected->parent();
         expected = expected->parent();
@@ -612,7 +613,9 @@ label.blue:hovered {
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock));
         expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsList));
         expected->addChild(new style::DeserializationNode(style::Token::ElementName, "label"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Class, "blue"));
+        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
         expected->addChild(new style::DeserializationNode(style::Token::Modifier, "hovered"));
         expected = expected->parent();
         expected = expected->parent();

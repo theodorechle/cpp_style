@@ -456,7 +456,37 @@ namespace style::parser {
             return ParsingState{state.currentLexedNode, currentParsedNodeRoot};
         }
 
-        ParsingState tryParseFile(const DeserializationNode *currentLexedNodeStart) { return tryParseSelectorsAndBlock(currentLexedNodeStart); }
+        ParsingState tryParseFile(const DeserializationNode *currentLexedNodeStart) {
+            const DeserializationNode *currentLexedNode = currentLexedNodeStart;
+            ParsingState state = removeWhiteSpacesAndComment(currentLexedNode);
+            std::list<ErrorMessage> *errors = nullptr;
+
+            DeserializationNode *firstParsedNode = nullptr;
+
+            while (state.currentLexedNode) {
+                currentLexedNode = state.currentLexedNode;
+                state = tryParseSelectorsAndBlock(currentLexedNode);
+                if (!state.currentParsedNode) {
+                    errors = state.errors;
+                    state = tryParseAtRule(currentLexedNode);
+                }
+                if (!state.currentParsedNode) {
+                    if (state.errors) {
+                        if (errors) {
+                            errors->splice(errors->cbegin(), *state.errors);
+                            delete state.errors;
+                        }
+                        else errors = state.errors;
+                    }
+                    break;
+                }
+                if (!firstParsedNode) firstParsedNode = state.currentParsedNode;
+                else firstParsedNode->appendNext(state.currentParsedNode);
+                state = removeWhiteSpacesAndComment(state.currentLexedNode);
+            }
+
+            return ParsingState{currentLexedNode, firstParsedNode, errors};
+        }
     }
 
     ParseResult parse(DeserializationNode *currentNode, ParsingBlock block) {
