@@ -125,6 +125,19 @@ namespace testsParserSelectorsBlock {
         return result;
     }
 
+    test::Result testParsingWildcard() {
+        style::DeserializationNode *rootExpected;
+        test::Result result;
+
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        rootExpected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
+            ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
+            ->addChild(new style::DeserializationNode(style::Token::StarWildcard));
+        result = testsParser::testLexerAndParser(true, "* {}", rootExpected, style::parser::ParsingBlock::SELECTORS);
+        delete rootExpected;
+        return result;
+    }
+
     test::Result testParsingAnyParentRelationElementName() {
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
@@ -213,6 +226,7 @@ namespace testsParserSelectorsBlock {
         tests->addTest(testParsingElementNameMultipleChars, "Element name multiple chars");
         tests->addTest(testParsingIdentifierMultipleChars, "Identfier multiple chars");
         tests->addTest(testParsingClassMultipleChars, "Class multiple chars");
+        tests->addTest(testParsingWildcard, "Wildcard");
 
         tests->beginTestBlock("Selectors relations");
         tests->addTest(testParsingDirectParentRelationElementName, "Direct parent relation with element name");

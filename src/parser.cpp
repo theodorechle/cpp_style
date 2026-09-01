@@ -175,11 +175,19 @@ namespace style::parser {
             return ParsingState{currentLexedNode, nullptr};
         }
 
+        ParsingState tryParseWildcard(const DeserializationNode *currentLexedNode) {
+            if (currentLexedNode->token() == Token::Star) {
+                return ParsingState{currentLexedNode->next(), new DeserializationNode(Token::StarWildcard, currentLexedNode->value())};
+            }
+            return ParsingState{currentLexedNode, nullptr};
+        }
+
         ParsingState tryParseSelector(const DeserializationNode *currentLexedNode) {
             ParsingState selectorParsingState = tryParseElementName(currentLexedNode);
             if (!selectorParsingState.currentParsedNode) selectorParsingState = tryParseClass(currentLexedNode);
             if (!selectorParsingState.currentParsedNode) selectorParsingState = tryParseIdentifier(currentLexedNode);
             if (!selectorParsingState.currentParsedNode) selectorParsingState = tryParseModifier(currentLexedNode);
+            if (!selectorParsingState.currentParsedNode) selectorParsingState = tryParseWildcard(currentLexedNode);
             return selectorParsingState;
         }
 
@@ -426,9 +434,27 @@ namespace style::parser {
             return ParsingState{removedSpacesState.currentLexedNode->next(), currentParsedNodeRoot};
         }
 
-        ParsingState tryParseImport(const DeserializationNode *currentLexedNode) { return ParsingState{currentLexedNode, nullptr}; }
+        ParsingState tryParseImport(const DeserializationNode *currentLexedNode) {
+            if (currentLexedNode->value() != "import") return ParsingState{currentLexedNode, nullptr};
+            ParsingState state = removeWhiteSpaces(currentLexedNode->next());
+            if (state.currentLexedNode && state.currentLexedNode->token() == Token::String) {
+                return ParsingState{state.currentLexedNode->next(), new DeserializationNode{Token::Import, state.currentLexedNode->value()}};
+            }
+            return ParsingState{currentLexedNode, nullptr};
+        }
 
-        ParsingState tryParseAtRule(const DeserializationNode *currentLexedNode) { return ParsingState{currentLexedNode, nullptr}; }
+        ParsingState tryParseAtRule(const DeserializationNode *currentLexedNodeStart) {
+            if (currentLexedNodeStart->token() != Token::At || currentLexedNodeStart->next()->token() != Token::RawName) {
+                return ParsingState{currentLexedNodeStart, nullptr};
+            }
+
+            const DeserializationNode *currentLexedNode = currentLexedNodeStart->next();
+
+            ParsingState selectorParsingState = tryParseImport(currentLexedNode);
+
+            if (!selectorParsingState.currentParsedNode) return ParsingState{currentLexedNodeStart, nullptr};
+            return selectorParsingState;
+        }
 
         ParsingState tryParseSelectorsAndBlock(const DeserializationNode *currentLexedNodeStart, bool nestedBlock) {
             ParsingState state;

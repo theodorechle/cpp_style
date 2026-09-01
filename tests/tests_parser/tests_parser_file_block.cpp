@@ -353,96 +353,6 @@ namespace testsParserFileBlock {
         return result;
     }
 
-    test::Result testParsingAnyParentRelationElementName() {
-        style::DeserializationNode *rootExpected;
-        style::DeserializationNode *expected;
-        test::Result result;
-
-        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
-        expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
-                       ->addChild(new style::DeserializationNode(style::Token::SelectorsList));
-        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
-        expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
-        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "b"));
-        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockDeclarations));
-        result = testsParser::testLexerAndParser(true, "a b {}", rootExpected);
-        delete rootExpected;
-        return result;
-    }
-
-    test::Result testParsingAnyParentRelationIdentifier() {
-        style::DeserializationNode *rootExpected;
-        style::DeserializationNode *expected;
-        test::Result result;
-
-        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
-        expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
-                       ->addChild(new style::DeserializationNode(style::Token::SelectorsList));
-        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
-        expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
-        expected->addChild(new style::DeserializationNode(style::Token::Identifier, "b"));
-        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockDeclarations));
-        result = testsParser::testLexerAndParser(true, "a #b {}", rootExpected);
-        delete rootExpected;
-        return result;
-    }
-
-    test::Result testParsingAnyParentRelationClass() {
-        style::DeserializationNode *rootExpected;
-        style::DeserializationNode *expected;
-        test::Result result;
-
-        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
-        expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
-                       ->addChild(new style::DeserializationNode(style::Token::SelectorsList));
-        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
-        expected->addChild(new style::DeserializationNode(style::Token::AnyParent));
-        expected->addChild(new style::DeserializationNode(style::Token::Class, "b"));
-        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockDeclarations));
-        result = testsParser::testLexerAndParser(true, "a .b {}", rootExpected);
-        delete rootExpected;
-        return result;
-    }
-
-    test::Result testParsingAnyParentRelationIdentifierStickedToFirstDeclarationPart() {
-        style::DeserializationNode *rootExpected;
-        style::DeserializationNode *expected;
-        test::Result result;
-
-        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
-        expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
-                       ->addChild(new style::DeserializationNode(style::Token::SelectorsList));
-        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
-        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
-        expected->addChild(new style::DeserializationNode(style::Token::Identifier, "b"));
-        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockDeclarations));
-        result = testsParser::testLexerAndParser(true, "a#b {}", rootExpected);
-        delete rootExpected;
-        return result;
-    }
-
-    test::Result testParsingAnyParentRelationClassStickedToFirstDeclarationPart() {
-        style::DeserializationNode *rootExpected;
-        style::DeserializationNode *expected;
-        test::Result result;
-
-        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
-        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
-        expected = expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
-                       ->addChild(new style::DeserializationNode(style::Token::SelectorsList));
-        expected->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
-        expected->addChild(new style::DeserializationNode(style::Token::SameElement));
-        expected->addChild(new style::DeserializationNode(style::Token::Class, "b"));
-        expected->parent()->parent()->addChild(new style::DeserializationNode(style::Token::BlockDeclarations));
-        result = testsParser::testLexerAndParser(true, "a.b {}", rootExpected);
-        delete rootExpected;
-        return result;
-    }
-
     test::Result testParsingMultipleRulesInline() {
         style::DeserializationNode *rootExpected;
         style::DeserializationNode *expected;
@@ -867,6 +777,18 @@ label.blue {
 
     test::Result testMultilineCommentNotClosed() { return testsParser::testLexerException<style::UnknownValue>("/* not closed comment"); }
 
+    test::Result testImport() {
+        style::DeserializationNode *rootExpected;
+        test::Result result;
+
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        rootExpected->addChild(new style::DeserializationNode(style::Token::Import, "file_to_import.style"));
+
+        result = testsParser::testLexerAndParser(true, "@import 'file_to_import.style';", rootExpected);
+        delete rootExpected;
+        return result;
+    }
+
     void testsParsingFileBlock(test::Tests *tests) {
         tests->beginTestBlock("Parsing file block");
         tests->addTest(testParsingEmpty, "Empty");
@@ -897,28 +819,6 @@ label.blue {
         tests->addTest(testParsingBlockWithoutSelectors, "Block without selectors");
         tests->endTestBlock();
 
-        tests->beginTestBlock("Selectors");
-        tests->addTest(testParsingElementNameSingleChar, "Element name single char");
-        tests->addTest(testParsingIdentifierSingleChar, "Identifier single char");
-        tests->addTest(testParsingClassSingleChar, "Class single char");
-        tests->addTest(testParsingElementNameMultipleChars, "Element name multiple chars");
-        tests->addTest(testParsingIdentifierMultipleChars, "Identfier multiple chars");
-        tests->addTest(testParsingClassMultipleChars, "Class multiple chars");
-
-        tests->beginTestBlock("Selectors relations");
-        tests->addTest(testParsingDirectParentRelationElementName, "Direct parent relation with element name");
-        tests->addTest(testParsingDirectParentRelationIdentifier, "Direct parent relation with identifier");
-        tests->addTest(testParsingDirectParentRelationClass, "Direct parent relation with class");
-        tests->addTest(testParsingAnyParentRelationElementName, "Any parent relation with element name");
-        tests->addTest(testParsingAnyParentRelationIdentifier, "Any parent relation with identifier");
-        tests->addTest(testParsingAnyParentRelationClass, "Any parent relation with class");
-        tests->addTest(testParsingAnyParentRelationIdentifierStickedToFirstDeclarationPart,
-                       "Any parent relation identifier sticked to first declaration part");
-        tests->addTest(testParsingAnyParentRelationClassStickedToFirstDeclarationPart,
-                       "Any parent relation with class sticked to first declaration part");
-        tests->endTestBlock();
-        tests->endTestBlock();
-
         tests->beginTestBlock("Whitespaces");
         tests->addTest(testParsingMultipleRulesInline, "Multiple rules inline");
         tests->addTest(testParsingMultipleRulesMultipleLines, "Multiple rules multiple lines");
@@ -929,7 +829,7 @@ label.blue {
         tests->addTest(testParsingLineBreakBeforeSemiColon, "Line break before semi-colon");
         tests->endTestBlock();
 
-        tests->beginTestBlock("Tests style lexer and parser");
+        tests->beginTestBlock("Style lexer and parser");
         tests->addTest(testTwoStyleBlocks, "Two style blocks");
         tests->addTest(testNestedModifierBlock, "Nested modifier block");
         tests->addTest(testNestedElementNameBlock, "Nested element name block");
@@ -938,6 +838,10 @@ label.blue {
                        "Apply style block to any child component with nested element name");
         tests->addTest(testValuesUnits, "Values units");
         tests->addTest(testMultilineCommentNotClosed, "Multiline comment not closed");
+        tests->endTestBlock();
+
+        tests->beginTestBlock("At rules");
+        tests->addTest(testImport, "Import");
         tests->endTestBlock();
 
         tests->endTestBlock();
