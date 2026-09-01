@@ -154,6 +154,25 @@ namespace testsParserFileBlock {
         return result;
     }
 
+    test::Result testParsingString() {
+        style::DeserializationNode *rootExpected;
+        style::DeserializationNode *expected;
+        test::Result result;
+
+        rootExpected = new style::DeserializationNode(style::Token::NullRoot);
+        expected = rootExpected->addChild(new style::DeserializationNode(style::Token::StyleBlock));
+        expected->addChild(new style::DeserializationNode(style::Token::SelectorsBlock))
+            ->addChild(new style::DeserializationNode(style::Token::SelectorsList))
+            ->addChild(new style::DeserializationNode(style::Token::ElementName, "a"));
+        expected = expected->addChild(new style::DeserializationNode(style::Token::BlockDeclarations))
+                       ->addChild(new style::DeserializationNode(style::Token::Assignment));
+        expected->addChild(new style::DeserializationNode(style::Token::RuleName, "font-name"));
+        expected->addChild(new style::DeserializationNode(style::Token::String, "a-font"));
+        result = testsParser::testLexerAndParser(true, "a {font-name: 'a-font';}", rootExpected);
+        delete rootExpected;
+        return result;
+    }
+
     // TODO: add tests for other data types
 
     test::Result testParsingRuleNoSemiColon() {
@@ -789,6 +808,11 @@ label.blue {
         return result;
     }
 
+    test::Result testImportWithoutSemiColon() {
+        return testsParser::testParserError("@import 'file_to_import.style'",
+                                            {style::parser::ErrorType::ERROR, "tryParseImport: Missing a semi-colon"});
+    }
+
     void testsParsingFileBlock(test::Tests *tests) {
         tests->beginTestBlock("Parsing file block");
         tests->addTest(testParsingEmpty, "Empty");
@@ -802,6 +826,7 @@ label.blue {
         tests->addTest(testParsingEmptyTuple, "Empty tuple");
         tests->addTest(testParsingIntTuple, "Int tuple");
         tests->addTest(testParsingEnumTuple, "Enum tuple");
+        tests->addTest(testParsingString, "String");
         tests->endTestBlock();
 
         tests->beginTestBlock("Invalid blocks structures");
@@ -842,6 +867,7 @@ label.blue {
 
         tests->beginTestBlock("At rules");
         tests->addTest(testImport, "Import");
+        tests->addTest(testImportWithoutSemiColon, "Import without semi-colon");
         tests->endTestBlock();
 
         tests->endTestBlock();

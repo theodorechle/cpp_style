@@ -39,6 +39,14 @@ namespace style::parser {
             return existingErrors;
         }
 
+        std::list<ErrorMessage> *appendErrors(std::list<ErrorMessage> *existingErrors = nullptr, std::list<ErrorMessage> *newErrors = nullptr) {
+            if (!existingErrors) return newErrors;
+            if (!newErrors) return existingErrors;
+            existingErrors->splice(existingErrors->cend(), *newErrors);
+            delete newErrors;
+            return existingErrors;
+        }
+
         /*
          * methods in the parser returning an instance of this structure should always set currentLexedNode.
          * If currentLexedNode is null, it should mean the parsing method has read all nodes.
@@ -311,6 +319,8 @@ namespace style::parser {
                 return tryParseUnit(value->next(), new DeserializationNode{Token::Float, value->value()});
             case Token::Bool:
                 return ParsingState{value->next(), new DeserializationNode{Token::Bool, value->value()}};
+            case Token::String:
+                return ParsingState{value->next(), new DeserializationNode{Token::String, value->value()}};
             case Token::Sharp:
                 if (isTokenIn(value->next(), {Token::RawName, Token::Int}) && isValidHex(value->next()->value())) {
                     return ParsingState{value->next()->next(), new DeserializationNode{Token::Hex, value->next()->value()}};
@@ -406,13 +416,7 @@ namespace style::parser {
                 if (!state.currentParsedNode) {
                     state = tryParseSelectorsAndBlock(currentLexedNode, true);
                 }
-                if (state.errors) {
-                    if (errors) {
-                        errors->splice(errors->cbegin(), *state.errors);
-                        delete state.errors;
-                    }
-                    else errors = state.errors;
-                }
+                errors = appendErrors(errors, state.errors);
                 if (!state.currentParsedNode) break;
                 currentParsedNodeRoot->addChild(state.currentParsedNode);
                 currentLexedNode = state.currentLexedNode;
@@ -434,16 +438,23 @@ namespace style::parser {
             return ParsingState{removedSpacesState.currentLexedNode->next(), currentParsedNodeRoot};
         }
 
-        ParsingState tryParseImport(const DeserializationNode *currentLexedNode) {
-            if (currentLexedNode->value() != "import") return ParsingState{currentLexedNode, nullptr};
+        ParsingState tryParseImport(const DeserializationNode *currentLexedNodeStart) {
+            const DeserializationNode *currentLexedNode = currentLexedNodeStart;
+            if (currentLexedNode->value() != "import") return ParsingState{currentLexedNodeStart, nullptr};
             ParsingState state = removeWhiteSpaces(currentLexedNode->next());
             if (state.currentLexedNode && state.currentLexedNode->token() == Token::String) {
-                return ParsingState{state.currentLexedNode->next(), new DeserializationNode{Token::Import, state.currentLexedNode->value()}};
+                currentLexedNode = state.currentLexedNode->next();
+                if (!currentLexedNode || currentLexedNode->token() != Token::SemiColon) {
+                    return ParsingState{currentLexedNodeStart, nullptr, createErrorList(ErrorType::ERROR, "tryParseImport", "Missing a semi-colon")};
+                }
+                return ParsingState{currentLexedNode->next(), new DeserializationNode{Token::Import, state.currentLexedNode->value()}};
             }
-            return ParsingState{currentLexedNode, nullptr};
+            return ParsingState{currentLexedNodeStart, nullptr};
         }
 
         ParsingState tryParseAtRule(const DeserializationNode *currentLexedNodeStart) {
+            std::list<ErrorMessage> *errors = nullptr;
+
             if (currentLexedNodeStart->token() != Token::At || currentLexedNodeStart->next()->token() != Token::RawName) {
                 return ParsingState{currentLexedNodeStart, nullptr};
             }
@@ -451,8 +462,9 @@ namespace style::parser {
             const DeserializationNode *currentLexedNode = currentLexedNodeStart->next();
 
             ParsingState selectorParsingState = tryParseImport(currentLexedNode);
+            errors = appendErrors(errors, selectorParsingState.errors);
 
-            if (!selectorParsingState.currentParsedNode) return ParsingState{currentLexedNodeStart, nullptr};
+            if (!selectorParsingState.currentParsedNode) return ParsingState{currentLexedNodeStart, nullptr, errors};
             return selectorParsingState;
         }
 

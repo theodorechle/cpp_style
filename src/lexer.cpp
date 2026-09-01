@@ -210,10 +210,10 @@ namespace style {
                 throw UnknownValue(expression.substr(_index, MAX_ERROR_COMPLEMENTARY_INFOS_SIZE));
             }
             _index += increment;
+            _parsedTree = _parsedTree->next();
 #ifdef DEBUG
             std::clog << tokenToString(_parsedTree->token()) << ": '" << _parsedTree->value() << "'\n";
 #endif
-            _parsedTree = _parsedTree->next();
         }
         // remove the NullRoot token at the start
         DeserializationNode *nextList = firstNode->next();
