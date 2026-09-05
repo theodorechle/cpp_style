@@ -225,6 +225,10 @@ namespace testsParserFileBlock {
         return testsParser::testParserError(">& {b: #aaaaaa;}", {style::parser::ErrorType::LOG, "Not a valid selectors block"});
     }
 
+    test::Result testParsingBlockWithoutRulesBlock() {
+        return testsParser::testParserError("a > .b", {style::parser::ErrorType::ERROR, "Missing a rules block"});
+    }
+
     test::Result testParsingElementNameSingleChar() {
         style::parser::ParserNode *rootExpected;
         style::parser::ParserNode *expected;
@@ -784,6 +788,7 @@ label.blue {
         tests->addTest(testParsingBlockWithoutRuleNameAndValue, "Block without rule name and value");
         tests->addTest(testParsingBlockWithoutSelectors, "Block without selectors");
         tests->addTest(testParsingBlockWithInvalidSelectors, "Block with invalid selectors");
+        tests->addTest(testParsingBlockWithoutRulesBlock, "Block without rules block");
         tests->endTestBlock();
 
         tests->beginTestBlock("Whitespaces");

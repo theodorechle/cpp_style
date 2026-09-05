@@ -296,7 +296,7 @@ namespace style::parser {
                     return ParsingState{currentLexedNodeStart, nullptr, state.errors};
                 }
                 currentParsedNodeRoot->addChild(state.currentParsedNode);
-                if (!state.currentLexedNode) return ParsingState{currentLexedNode, currentParsedNodeRoot};
+                if (!state.currentLexedNode) return ParsingState{state.currentLexedNode, currentParsedNodeRoot};
                 removedSpacesState = removeSpaces(state.currentLexedNode);
                 if (!removedSpacesState.currentLexedNode || removedSpacesState.currentLexedNode->token() != lexer::Token::Comma) {
                     return ParsingState{state.currentLexedNode, currentParsedNodeRoot};
@@ -504,9 +504,16 @@ namespace style::parser {
             if (isNull(state)) return ParsingState{currentLexedNodeStart, nullptr};
 
             state = tryParseSelectorsBlock(state.currentLexedNode, nestedBlock);
-            if (!state.currentLexedNode || !state.currentParsedNode)
+            if (!state.currentParsedNode) {
                 return ParsingState{currentLexedNodeStart, nullptr,
                                     createErrorList(ErrorType::LOG, "Not a valid selectors block", currentLexedNodeStart, state.errors)};
+            }
+
+            if (!state.currentLexedNode) {
+                delete state.currentParsedNode;
+                return ParsingState{currentLexedNodeStart, nullptr,
+                                    createErrorList(ErrorType::ERROR, "Missing a rules block", currentLexedNodeStart, state.errors)};
+            }
 
             ParserNode *currentParsedNodeRoot = new ParserNode{Token::StyleBlock};
             currentParsedNodeRoot->addChild(state.currentParsedNode);

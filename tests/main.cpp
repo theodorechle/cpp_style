@@ -6,7 +6,7 @@
 #include "tests_parser/tests_parser_file_block.hpp"
 
 int main() {
-    test::Tests tests = test::Tests(0, true);
+    test::Tests tests = test::Tests();
     configTests::configTests(&tests);
     testsLexer::testsLexer(&tests);
     tests.beginTestBlock("Tests parser");
