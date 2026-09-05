@@ -202,6 +202,7 @@ namespace deserializationTests {
         expectedStyleDefinitions = {styleDefinition};
         result = testDeserialization(".container      label#red{text-color : #ff0000;}", &expectedStyleDefinitions);
         delete styleDefinition;
+        delete styleValue;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -224,6 +225,7 @@ namespace deserializationTests {
         expectedStyleDefinitions = {styleDefinition};
         result = testDeserialization(".container > label#red{text-color : #ff0000;}", &expectedStyleDefinitions);
         delete styleDefinition;
+        delete styleValue;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -246,6 +248,7 @@ namespace deserializationTests {
         expectedStyleDefinitions = {styleDefinition};
         result = testDeserialization(".container>label#red{text-color : #ff0000;}", &expectedStyleDefinitions);
         delete styleDefinition;
+        delete styleValue;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -268,6 +271,7 @@ namespace deserializationTests {
         expectedStyleDefinitions = {styleDefinition};
         result = testDeserialization("label {padding:100px;}", &expectedStyleDefinitions);
         delete styleDefinition;
+        delete styleValue;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -290,6 +294,7 @@ namespace deserializationTests {
         expectedStyleDefinitions = {styleDefinition};
         result = testDeserialization(":hovered {padding:100px;}", &expectedStyleDefinitions);
         delete styleDefinition;
+        delete styleValue;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -316,6 +321,7 @@ namespace deserializationTests {
         expectedStyleDefinitions = {styleDefinition};
         result = testDeserialization("a {text-color: #aaaaaa;}", &expectedStyleDefinitions);
         delete styleDefinition;
+        delete styleValue;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -336,6 +342,7 @@ namespace deserializationTests {
         expectedStyleDefinitions = {styleDefinition};
         result = testDeserialization(".a {text-color: #aaaaaa;}", &expectedStyleDefinitions);
         delete styleDefinition;
+        delete styleValue;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -356,6 +363,7 @@ namespace deserializationTests {
         expectedStyleDefinitions = {styleDefinition};
         result = testDeserialization(":a {text-color: #aaaaaa;}", &expectedStyleDefinitions);
         delete styleDefinition;
+        delete styleValue;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -376,6 +384,7 @@ namespace deserializationTests {
         expectedStyleDefinitions = {styleDefinition};
         result = testDeserialization("#a {text-color: #aaaaaa;}", &expectedStyleDefinitions);
         delete styleDefinition;
+        delete styleValue;
         expectedStyleMap.clear();
         expectedData.clear();
         return result;
@@ -385,6 +394,7 @@ namespace deserializationTests {
         style::config::Config *config = testConfig();
         style::SelectorDataList *selectors = style::StyleDeserializer::deserializeSelectors("#a", config);
         delete selectors;
+        delete config;
         return test::Result::SUCCESS;
     }
 

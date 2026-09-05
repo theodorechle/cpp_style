@@ -248,22 +248,27 @@ namespace style::parser {
 
             do {
                 state = removeSpaces(selectorsRelationState.currentParsedNode ? selectorsRelationState.currentLexedNode : currentLexedNode);
-                if (!state.currentLexedNode) return ParsingState{currentLexedNodeStart, nullptr};
+                if (!state.currentLexedNode) break;
 
                 // parse selectors with no separator between
                 state = tryParseSelector(state.currentLexedNode);
-                if (!state.currentParsedNode) break;
+                if (!state.currentParsedNode) {
+                    // prevent memory leak in case of a malformed block with a selectors relation without a selector after
+                    delete selectorsRelationState.currentParsedNode;
+                    break;
+                }
                 if (selectorsRelationState.currentParsedNode) currentParsedNode->addChild(selectorsRelationState.currentParsedNode);
-                if (!state.currentLexedNode) break;
 
                 currentLexedNode = state.currentLexedNode;
                 currentParsedNode->addChild(state.currentParsedNode);
+                if (!currentLexedNode) break;
 
                 state = tryParseSelector(currentLexedNode);
-                while (state.currentParsedNode && currentLexedNode) {
+                while (state.currentParsedNode) {
                     currentParsedNode->addChild(new ParserNode{Token::SameElement});
                     currentLexedNode = state.currentLexedNode;
                     currentParsedNode->addChild(state.currentParsedNode);
+                    if (!state.currentLexedNode) break;
                     state = tryParseSelector(currentLexedNode);
                 }
 
@@ -290,8 +295,8 @@ namespace style::parser {
                     delete currentParsedNodeRoot;
                     return ParsingState{currentLexedNodeStart, nullptr, state.errors};
                 }
-                if (!state.currentLexedNode) return ParsingState{currentLexedNode, currentParsedNodeRoot};
                 currentParsedNodeRoot->addChild(state.currentParsedNode);
+                if (!state.currentLexedNode) return ParsingState{currentLexedNode, currentParsedNodeRoot};
                 removedSpacesState = removeSpaces(state.currentLexedNode);
                 if (!removedSpacesState.currentLexedNode || removedSpacesState.currentLexedNode->token() != lexer::Token::Comma) {
                     return ParsingState{state.currentLexedNode, currentParsedNodeRoot};
@@ -436,6 +441,8 @@ namespace style::parser {
                 }
                 if (state.errors) errors = appendErrors(errors, state.errors);
                 if (!state.currentParsedNode) break;
+                delete errors;
+                errors = nullptr;
                 currentParsedNodeRoot->addChild(state.currentParsedNode);
                 currentLexedNode = state.currentLexedNode;
                 removedSpacesState = removeWhiteSpacesAndComment(currentLexedNode);
@@ -453,6 +460,9 @@ namespace style::parser {
                 return ParsingState{currentLexedNodeStart, nullptr,
                                     createErrorList(ErrorType::ERROR, "Missing a closing curly bracket", removedSpacesState.currentLexedNode)};
             }
+
+            // there is no real error, it was just a closing curly bracket instead of a rule assignment
+            delete errors;
             return ParsingState{removedSpacesState.currentLexedNode->next(), currentParsedNodeRoot};
         }
 
@@ -532,6 +542,8 @@ namespace style::parser {
                     errors = appendErrors(errors, state.errors);
                     break;
                 }
+                delete errors;
+                errors = nullptr;
                 if (!firstParsedNode) {
                     firstParsedNode = state.currentParsedNode;
                     currentParsedNode = firstParsedNode;
@@ -560,6 +572,7 @@ namespace style::parser {
         if (finalState.errors) {
             errorMessages->splice(errorMessages->begin(), *finalState.errors);
         }
+        delete finalState.errors;
 
         if (!finalState.currentParsedNode) {
             errorMessages->push_back({ErrorType::ERROR, "parse: Can't deserialize (" + parsingBlockToString(block) + ")"});
