@@ -1,6 +1,9 @@
 #include "nodes_to_style_components.hpp"
 #include "lexer.hpp"
+#include "lexer_node.hpp"
 #include "parser.hpp"
+#include "parser_node.hpp"
+#include "parser_tokens.hpp"
 #include "style_component.hpp"
 #include <algorithm>
 #include <fstream>
@@ -10,82 +13,82 @@
 
 namespace style {
 
-    StyleComponentType tokenTypeToStyleComponentType(Token token) {
+    SelectorType tokenTypeToSelectorType(parser::Token token) {
         switch (token) {
-        case Token::StarWildcard:
-            return StyleComponentType::StarWildcard;
-        case Token::ElementName:
-            return StyleComponentType::ElementName;
-        case Token::Class:
-            return StyleComponentType::Class;
-        case Token::Modifier:
-            return StyleComponentType::Modifier;
-        case Token::Identifier:
-            return StyleComponentType::Identifier;
+        case parser::Token::StarWildcard:
+            return SelectorType::StarWildcard;
+        case parser::Token::ElementName:
+            return SelectorType::ElementName;
+        case parser::Token::Class:
+            return SelectorType::Class;
+        case parser::Token::Modifier:
+            return SelectorType::Modifier;
+        case parser::Token::Identifier:
+            return SelectorType::Identifier;
         default:
-            return StyleComponentType::Null;
+            return SelectorType::Null;
         }
     }
 
-    StyleValueType tokenTypeToStyleValueType(Token token) {
+    ValueType tokenTypeToValueType(parser::Token token) {
         switch (token) {
-        case Token::Int:
-            return StyleValueType::Int;
-        case Token::Float:
-            return StyleValueType::Float;
-        case Token::Bool:
-            return StyleValueType::Bool;
-        case Token::String:
-            return StyleValueType::String;
-        case Token::Tuple:
-            return StyleValueType::Tuple;
-        case Token::Function:
-            return StyleValueType::Function;
-        case Token::Unit:
-            return StyleValueType::Unit;
-        case Token::Hex:
-            return StyleValueType::Hex;
-        case Token::EnumValue:
-            return StyleValueType::EnumValue;
+        case parser::Token::Int:
+            return ValueType::Int;
+        case parser::Token::Float:
+            return ValueType::Float;
+        case parser::Token::Bool:
+            return ValueType::Bool;
+        case parser::Token::String:
+            return ValueType::String;
+        case parser::Token::Tuple:
+            return ValueType::Tuple;
+        case parser::Token::Function:
+            return ValueType::Function;
+        case parser::Token::Unit:
+            return ValueType::Unit;
+        case parser::Token::Hex:
+            return ValueType::Hex;
+        case parser::Token::EnumValue:
+            return ValueType::EnumValue;
         default:
-            return StyleValueType::Null;
+            return ValueType::Null;
         }
     }
 
-    StyleRelation tokenTypeToStyleRelation(Token token) {
+    SelectorsRelation tokenTypeToSelectorsRelation(parser::Token token) {
         switch (token) {
-        case Token::DirectParent:
-            return StyleRelation::DirectParent;
-        case Token::AnyParent:
-            return StyleRelation::AnyParent;
-        case Token::SameElement:
-            return StyleRelation::SameElement;
+        case parser::Token::DirectParent:
+            return SelectorsRelation::DirectParent;
+        case parser::Token::AnyParent:
+            return SelectorsRelation::AnyParent;
+        case parser::Token::SameElement:
+            return SelectorsRelation::SameElement;
         default:
-            return StyleRelation::Null;
+            return SelectorsRelation::Null;
         }
     }
 
-    DeserializationNode *NodesToStyleComponents::deserializeStyle(const std::string &style) {
-        DeserializationNode *tokens = nullptr;
-        DeserializationNode *result = nullptr;
-        try {
-            config::configChecker(_config);
-            tokens = Lexer().lexe(style, _config);
-            result = Parser().parse(tokens);
-            delete tokens;
-            return result;
+    parser::ParserNode *NodesToStyleComponents::deserializeStyle(const std::string &style) {
+        lexer::LexerNode *tokens = nullptr;
+        parser::ParseResult result;
+        config::configChecker(_config);
+        tokens = lexer::Lexer().lexe(style, _config);
+        result = parser::parse(tokens);
+        delete tokens;
+
+#ifdef DEBUG
+        for (parser::ErrorMessage error : *result.errors) {
+            std::cerr << "Parser (at ";
+            if (error.line == 0) std::cerr << "unknown location";
+            else std::cerr << error.line << ":" << error.column;
+            std::cerr << "): " << parser::errorTypeToString(error.type) << ": " << error.message << "\n";
         }
-        catch (const ParserException &) {
-            delete tokens;
-            throw;
-        }
-        catch (const LexerException &) {
-            delete tokens;
-            throw;
-        }
+#endif
+        delete result.errors;
+        return result.node;
     }
 
-    DeserializationNode *NodesToStyleComponents::deserializeStyleFromFile(const std::string &fileName) {
+    parser::ParserNode *NodesToStyleComponents::deserializeStyleFromFile(const std::string &fileName) {
         std::ifstream file(fileName);
         std::stringstream buffer;
         if (!file.is_open()) {
@@ -96,47 +99,44 @@ namespace style {
         return deserializeStyle(buffer.str());
     }
 
-    DeserializationNode *NodesToStyleComponents::joinStyleDeclarations(DeserializationNode *firstDeclarations,
-                                                                       DeserializationNode *secondDeclarations) {
-        DeserializationNode *newDeclarations = new DeserializationNode(Token::NullRoot);
-        DeserializationNode *actualDeclaration;
-        DeserializationNode *secondDeclarationsIt;
+    parser::ParserNode *NodesToStyleComponents::joinStyleDeclarations(parser::ParserNode *firstDeclarations, parser::ParserNode *secondDeclarations) {
+        parser::ParserNode *newDeclarations = new parser::ParserNode(parser::Token::NullRoot);
+        parser::ParserNode *actualDeclaration;
 
         while (firstDeclarations != nullptr) {
-            secondDeclarationsIt = secondDeclarations;
-            while (secondDeclarationsIt != nullptr) {
-                actualDeclaration = newDeclarations->appendNext(firstDeclarations->copyNodeWithChilds());
-                if (tokenTypeToStyleRelation(secondDeclarationsIt->child()->token()) == StyleRelation::Null)
-                    actualDeclaration->addChild(new DeserializationNode(Token::AnyParent));
-                if (tokenTypeToStyleRelation(secondDeclarationsIt->child()->token()) == StyleRelation::SameElement)
-                    secondDeclarationsIt->deleteSpecificChild(secondDeclarationsIt->child());
-                actualDeclaration->addChild(secondDeclarationsIt->child()->copyNodeWithChildsAndNexts());
-                secondDeclarationsIt = secondDeclarationsIt->next();
+            while (secondDeclarations != nullptr) {
+                actualDeclaration = newDeclarations->appendNext(firstDeclarations->copyNodeWithChildren());
+                if (tokenTypeToSelectorsRelation(secondDeclarations->child()->token()) == SelectorsRelation::Null)
+                    actualDeclaration->addChild(new parser::ParserNode(parser::Token::AnyParent));
+                if (tokenTypeToSelectorsRelation(secondDeclarations->child()->token()) == SelectorsRelation::SameElement)
+                    secondDeclarations->deleteSpecificChild(secondDeclarations->child());
+                actualDeclaration->addChild(secondDeclarations->child()->copyNodeWithChildrenAndNexts());
+                secondDeclarations = secondDeclarations->next();
             }
             firstDeclarations = firstDeclarations->next();
         }
 
-        DeserializationNode *root = newDeclarations;
+        parser::ParserNode *root = newDeclarations;
         newDeclarations = newDeclarations->next();
         root->next(nullptr);
         delete root;
         return newDeclarations;
     }
 
-    void NodesToStyleComponents::moveNestedBlocksToRoot(DeserializationNode *style) {
-        DeserializationNode *blockDeclarations = style->child();
-        DeserializationNode *content = blockDeclarations->next()->child();
-        DeserializationNode *nextDeclaration;
+    void NodesToStyleComponents::moveNestedBlocksToRoot(parser::ParserNode *style) {
+        parser::ParserNode *blockDeclarations = style->child();
+        parser::ParserNode *content = blockDeclarations->next()->child();
+        parser::ParserNode *nextDeclaration;
 
         while (content != nullptr) {
-            if (content->token() == Token::StyleBlock) {
+            if (content->token() == parser::Token::StyleBlock) {
                 content->child()->replaceChild(content->child()->child(),
                                                joinStyleDeclarations(blockDeclarations->child(), content->child()->child()));
                 nextDeclaration = content->next();
                 content->parent()->removeSpecificChild(content);
                 content->next(style->next());
                 style->next(content);
-                content->setParent(style->parent());
+                content->setParentForCurrentAndNexts(style->parent());
                 style = content;
                 content = nextDeclaration;
                 continue;
@@ -145,13 +145,13 @@ namespace style {
         }
     }
 
-    void NodesToStyleComponents::flattenStyle(DeserializationNode *style) {
+    void NodesToStyleComponents::flattenStyle(parser::ParserNode *style) {
         if (style == nullptr) return;
         style = style->child();
         while (style != nullptr) {
-            if (style->token() == Token::StyleBlock) moveNestedBlocksToRoot(style);
-            else if (style->token() == Token::Import) {
-                DeserializationNode *importedStyle = deserializeStyleFromFile(style->value()); // refactor with StyleManager
+            if (style->token() == parser::Token::StyleBlock) moveNestedBlocksToRoot(style);
+            else if (style->token() == parser::Token::Import) {
+                parser::ParserNode *importedStyle = deserializeStyleFromFile(style->value());
                 if (importedStyle != nullptr) {
                     importedStyle->addChild(style->next());
                     style->next(importedStyle->child());
@@ -163,20 +163,20 @@ namespace style {
         }
     }
 
-    bool NodesToStyleComponents::ruleNodesValid(const DeserializationNode *ruleNode, const config::ConfigRuleNode *configNode) {
+    bool NodesToStyleComponents::ruleNodesValid(const parser::ParserNode *ruleNode, const config::ConfigRuleNode *configNode) {
         if (ruleNode == nullptr && configNode == nullptr) return true;
         if (ruleNode == nullptr || configNode == nullptr) return false;
         if (ruleNode->token() != configNode->token()) return false;
-        if (configNode->token() == Token::EnumValue) {
+        if (configNode->token() == parser::Token::EnumValue) {
             const std::set<std::string> &allowedValues = static_cast<const config::ConfigRuleNodeEnum *>(configNode)->allowedValues();
             return allowedValues.find(ruleNode->value()) != allowedValues.cend();
         }
         return true;
     }
 
-    bool NodesToStyleComponents::ruleValid(const DeserializationNode *rule) {
-        const DeserializationNode *ruleName = rule->child();
-        const DeserializationNode *ruleValue = ruleName->next();
+    bool NodesToStyleComponents::ruleValid(const parser::ParserNode *rule) {
+        const parser::ParserNode *ruleName = rule->child();
+        const parser::ParserNode *ruleValue = ruleName->next();
         std::unordered_map<std::string, std::vector<const config::ConfigRuleNode *>>::const_iterator configRules =
             _config->rules.find(ruleName->value());
         if (configRules == _config->rules.cend()) return false;
@@ -186,13 +186,13 @@ namespace style {
         return false;
     }
 
-    void NodesToStyleComponents::filterRulesWithConfiguration(DeserializationNode *style) {
+    void NodesToStyleComponents::filterRulesWithConfiguration(parser::ParserNode *style) {
         if (style == nullptr) return;
-        DeserializationNode *block = style->child();
-        DeserializationNode *declaration;
-        DeserializationNode *rule;
-        DeserializationNode *nextRule;
-        DeserializationNode *next;
+        parser::ParserNode *block = style->child();
+        parser::ParserNode *declaration;
+        parser::ParserNode *rule;
+        parser::ParserNode *nextRule;
+        parser::ParserNode *next;
 
         while (block) {
             declaration = block->getLastChild();
@@ -203,7 +203,7 @@ namespace style {
             rule = declaration->child();
             while (rule) {
                 nextRule = rule->next();
-                if (rule->token() == Token::Assignment && !ruleValid(rule)) {
+                if (rule->token() == parser::Token::Assignment && !ruleValid(rule)) {
 #ifdef DEBUG
                     std::cerr << "invalid rule:\n";
                     rule->debugDisplay();
@@ -222,7 +222,7 @@ namespace style {
                 }
                 rule = nextRule;
             }
-            if (declaration->nbChilds() == 0) {
+            if (declaration->nbChildren() == 0) {
                 next = block->next();
                 style->removeSpecificChild(block);
                 delete block;
@@ -232,68 +232,52 @@ namespace style {
         }
     }
 
-    std::list<StyleComponentDataList *> *NodesToStyleComponents::convertStyleComponents() {
-        std::list<StyleComponentDataList *> *styleComponentsLists;
-        StyleComponentDataList *requiredStyleComponents;
-        DeserializationNode *declaration;
-        DeserializationNode *declarationPart;
-        Token nextDeclarationToken;
-        StyleComponentType styleComponentType;
-        StyleRelation styleRelationToken;
+    std::list<SelectorDataList *> *NodesToStyleComponents::convertStyleSelectors() {
+        std::list<SelectorDataList *> *selectorsLists;
+        SelectorDataList *requiredSelectors;
+        parser::ParserNode *declaration;
+        parser::ParserNode *declarationPart;
+        SelectorType selectorType;
+        SelectorsRelation styleRelationToken;
         std::string currentValue;
 
-        if (tree == nullptr || tree->token() != Token::BlockSelectors)
-            return nullptr; // TODO: it can't happen if previous steps passed (I think there is a lot of checks who are useless)
+        if (tree == nullptr || tree->token() != parser::Token::SelectorsBlock) return nullptr;
 
-        styleComponentsLists = new std::list<StyleComponentDataList *>();
+        selectorsLists = new std::list<SelectorDataList *>();
         declaration = tree->child();
         // loop through declarations
         while (declaration != nullptr) {
-            if (declaration->token() != Token::Selector) { // invalid block declaration
-                delete styleComponentsLists;               // TODO: how could this even happen?
-                return nullptr;
-            }
-            requiredStyleComponents = new StyleComponentDataList();
+            requiredSelectors = new SelectorDataList();
             declarationPart = declaration->child();
             // loop through each value in a declaration
             while (declarationPart != nullptr) {
-                styleComponentType = tokenTypeToStyleComponentType(declarationPart->token());
+                selectorType = tokenTypeToSelectorType(declarationPart->token());
                 currentValue = declarationPart->value();
                 declarationPart = declarationPart->next();
 
-                // if invalid declaration, skip it
-                // TODO: how can it happen too?
-                if (styleComponentType == StyleComponentType::Null) continue;
-
-                if (declarationPart == nullptr) styleRelationToken = StyleRelation::SameElement; // last value
+                if (declarationPart == nullptr) styleRelationToken = SelectorsRelation::SameElement; // last value
                 else {
-                    nextDeclarationToken = declarationPart->token();
-                    if (tokenTypeToStyleComponentType(nextDeclarationToken) != StyleComponentType::Null) {
-                        styleRelationToken = StyleRelation::SameElement;
-                    }
-                    else {
-                        styleRelationToken = tokenTypeToStyleRelation(nextDeclarationToken);
-                        if (styleRelationToken != StyleRelation::Null) declarationPart = declarationPart->next();
-                    }
+                    styleRelationToken = tokenTypeToSelectorsRelation(declarationPart->token());
+                    if (styleRelationToken != SelectorsRelation::Null) declarationPart = declarationPart->next();
                 }
-                if (styleRelationToken != StyleRelation::Null) {
-                    requiredStyleComponents->push_back(std::pair(StyleComponentData(currentValue, styleComponentType), styleRelationToken));
+                if (styleRelationToken != SelectorsRelation::Null) {
+                    requiredSelectors->push_back(std::pair(SelectorData(currentValue, selectorType), styleRelationToken));
                 }
             }
-            styleComponentsLists->push_back(requiredStyleComponents);
+            selectorsLists->push_back(requiredSelectors);
             declaration = declaration->next();
         }
-        return styleComponentsLists;
+        return selectorsLists;
     }
 
-    StyleValue *NodesToStyleComponents::convertStyleNodeToStyleValue(DeserializationNode *node) {
+    StyleValue *NodesToStyleComponents::convertStyleNodeToStyleValue(parser::ParserNode *node) {
         if (node == nullptr) return nullptr;
-        StyleValueType type;
+        ValueType type;
         StyleValue *styleValue;
         StyleValue *styleNext;
 
-        type = tokenTypeToStyleValueType(node->token());
-        if (type == StyleValueType::Null) return nullptr;
+        type = tokenTypeToValueType(node->token());
+        if (type == ValueType::Null) return nullptr;
 
         styleValue = new StyleValue(node->value(), type);
 
@@ -304,23 +288,23 @@ namespace style {
         return styleValue;
     }
 
-    StyleValuesMap *NodesToStyleComponents::convertAppliedStyle(int fileNumber, int *ruleNumber) {
-        StyleValuesMap *appliedStyleMap;
+    RulesMap *NodesToStyleComponents::convertAppliedStyle(int fileNumber, int *ruleNumber) {
+        RulesMap *appliedStyleMap;
         StyleValue *styleValue;
         std::string ruleName;
-        DeserializationNode *rule;
-        DeserializationNode *oldTree;
-        DeserializationNode *ruleNameNode;
-        Token token;
-        if (tree == nullptr || tree->token() != Token::BlockDeclarations) return nullptr;
+        parser::ParserNode *rule;
+        parser::ParserNode *oldTree;
+        parser::ParserNode *ruleNameNode;
+        parser::Token token;
+        if (tree == nullptr || tree->token() != parser::Token::BlockDeclarations) return nullptr;
 
-        appliedStyleMap = new StyleValuesMap();
+        appliedStyleMap = new RulesMap();
         rule = tree->child();
         while (rule != nullptr) {
             token = rule->token();
-            if (token == Token::Assignment) {
+            if (token == parser::Token::Assignment) {
                 ruleNameNode = rule->child();
-                if (ruleNameNode == nullptr || ruleNameNode->token() != Token::RuleName) {
+                if (ruleNameNode == nullptr || ruleNameNode->token() != parser::Token::RuleName) {
                     rule = rule->next();
                     continue;
                 }
@@ -335,7 +319,7 @@ namespace style {
                     }
                 }
             }
-            else if (token == Token::StyleBlock) {
+            else if (token == parser::Token::StyleBlock) {
                 oldTree = tree;
                 tree = rule;
                 convertStyleDefinition(fileNumber, ruleNumber);
@@ -349,14 +333,14 @@ namespace style {
     }
 
     std::list<StyleDefinition *> *
-    NodesToStyleComponents::createStyleComponents(std::list<std::list<StyleComponentDataList *> *>::const_iterator componentsListIt,
-                                                  StyleComponentDataList *components, StyleValuesMap *appliedStyleMap) {
+    NodesToStyleComponents::createStyleComponents(std::list<std::list<SelectorDataList *> *>::const_iterator componentsListIt,
+                                                  SelectorDataList *components, RulesMap *appliedStyleMap) {
         if (components == nullptr) return nullptr;
         std::list<StyleDefinition *> *styleComponentList = new std::list<StyleDefinition *>();
         std::list<StyleDefinition *> *tmpStyleComponentList;
-        StyleComponentDataList::const_iterator componentsIt;
+        SelectorDataList::const_iterator componentsIt;
         if (std::next(componentsListIt) == requiredStyleComponentsLists.cend()) { // if at end of the declaration list
-            for (StyleComponentDataList *componentsDataList : **componentsListIt) {
+            for (SelectorDataList *componentsDataList : **componentsListIt) {
                 componentsIt = std::prev(components->end());
                 // appliedStyleMap[0]->second.value._value is modified on the next line
                 // is it because the memory was freed (but still used because of an invalid pointer) and this line is when this memory is reused
@@ -372,7 +356,7 @@ namespace style {
             }
         }
         else {
-            for (StyleComponentDataList *componentsList : **componentsListIt) {
+            for (SelectorDataList *componentsList : **componentsListIt) {
                 componentsIt = std::prev(components->end());
                 std::copy(componentsList->begin(), componentsList->end(), std::back_inserter(*components));
                 tmpStyleComponentList = createStyleComponents(std::next(componentsListIt), components, appliedStyleMap);
@@ -386,18 +370,18 @@ namespace style {
         return styleComponentList;
     }
 
-    int NodesToStyleComponents::computeRuleSpecifity(StyleComponentDataList *ruleComponents) {
+    int NodesToStyleComponents::computeRuleSpecifity(SelectorDataList *ruleSelectors) {
         int specificity = 0;
-        for (std::pair<StyleComponentData, StyleRelation> component : *ruleComponents) {
-            switch (component.first.second) {
-            case StyleComponentType::Identifier:
+        for (std::pair<SelectorData, SelectorsRelation> selector : *ruleSelectors) {
+            switch (selector.first.second) {
+            case SelectorType::Identifier:
                 specificity += 100;
                 break;
-            case StyleComponentType::Modifier:
-            case StyleComponentType::Class:
+            case SelectorType::Modifier:
+            case SelectorType::Class:
                 specificity += 10;
                 break;
-            case StyleComponentType::ElementName:
+            case SelectorType::ElementName:
                 specificity += 1;
                 break;
             default:
@@ -408,32 +392,32 @@ namespace style {
     }
 
     void NodesToStyleComponents::convertStyleDefinition(int fileNumber, int *ruleNumber) {
-        std::list<StyleComponentDataList *> *styleComponentsLists;
-        if (tree == nullptr || tree->token() != Token::StyleBlock) return;
+        std::list<SelectorDataList *> *styleComponentsLists;
+        if (tree == nullptr || tree->token() != parser::Token::StyleBlock) return;
         tree = tree->child();
 
-        styleComponentsLists = convertStyleComponents();
+        styleComponentsLists = convertStyleSelectors();
         if (styleComponentsLists == nullptr || styleComponentsLists->empty()) {
             delete styleComponentsLists;
             return;
         }
 
         tree = tree->next();
-        StyleValuesMap *appliedStyleMap = convertAppliedStyle(fileNumber, ruleNumber);
+        RulesMap *appliedStyleMap = convertAppliedStyle(fileNumber, ruleNumber);
         tree = tree->parent();
-        if (appliedStyleMap == nullptr || appliedStyleMap->empty()) { // should be useless since there is now removeEmptyBlocks method
+        if (appliedStyleMap == nullptr || appliedStyleMap->empty()) {
             delete styleComponentsLists;
             delete appliedStyleMap;
             return;
         }
 
         requiredStyleComponentsLists.push_back(styleComponentsLists); // TODO: I think there is one useless list
-        StyleComponentDataList components = StyleComponentDataList();
+        SelectorDataList components = SelectorDataList();
         std::list<StyleDefinition *> *finalStyleComponents =
             createStyleComponents(requiredStyleComponentsLists.cbegin(), &components, appliedStyleMap);
 
         delete appliedStyleMap;
-        for (StyleComponentDataList *componentDataList : *(requiredStyleComponentsLists.back())) {
+        for (SelectorDataList *componentDataList : *(requiredStyleComponentsLists.back())) {
             delete componentDataList;
         }
         delete requiredStyleComponentsLists.back();
@@ -447,7 +431,7 @@ namespace style {
     std::list<StyleDefinition *> *NodesToStyleComponents::convert(const std::string &style, int fileNumber, int *ruleNumber) {
         *ruleNumber = 0;
 
-        DeserializationNode *styleTree = deserializeStyle(style);
+        parser::ParserNode *styleTree = deserializeStyle(style);
 
         flattenStyle(styleTree);
 #ifdef DEBUG
@@ -473,6 +457,12 @@ namespace style {
         delete styleTree;
 
         return styleDefinitions;
+    }
+
+    SelectorDataList *NodesToStyleComponents::convertSelectors(const std::string &selectors) {
+        parser::ParserNode *nodes = deserializeStyle(selectors);
+        delete nodes;
+        return new SelectorDataList();
     }
 
 } // namespace style

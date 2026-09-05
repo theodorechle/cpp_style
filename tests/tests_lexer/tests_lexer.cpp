@@ -1,7 +1,9 @@
 #include "tests_lexer.hpp"
+#include "../../src/lexer.hpp"
+#include "../test_config.hpp"
 
 namespace testsLexer {
-    test::Result testLexer(bool equal, const std::string &expression, const style::DeserializationNode *expected) {
+    test::Result testLexer(bool equal, const std::string &expression, const style::lexer::LexerNode *expected) {
         style::config::Config *config = testConfig();
         test::Result testResult;
         std::cout << "Test if lexing\n'\n" << expression << "\n'\n";
@@ -10,12 +12,12 @@ namespace testsLexer {
         expected->displayNexts(std::cout);
         std::cout << ":\n";
         try {
-            style::DeserializationNode *result = style::Lexer().lexe(expression, config);
-            style::DeserializationNode *n = result;
+            style::lexer::LexerNode *result = style::lexer::Lexer().lexe(expression, config);
+            style::lexer::LexerNode *n = result;
             std::cout << "result:\n";
             n->displayNexts();
             while (n != nullptr) {
-                if ((expected == nullptr || !(*n == *expected)) == equal) {
+                if ((expected == nullptr || !(style::lexer::areSameNodes(n, expected))) == equal) {
                     delete result;
                     delete config;
                     return test::Result::FAILURE;
@@ -44,9 +46,9 @@ namespace testsLexer {
 #ifdef DEBUG
         std::cout << "\n";
 #endif
-        style::DeserializationNode *tokens = nullptr;
+        style::lexer::LexerNode *tokens = nullptr;
         try {
-            tokens = style::Lexer().lexe(expression, config);
+            tokens = style::lexer::Lexer().lexe(expression, config);
 #ifdef DEBUG
             tokens->debugDisplay();
 #endif
@@ -66,7 +68,7 @@ namespace testsLexer {
     }
 
     test::Result testLexingEmpty() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
         rootExpected = nullptr;
@@ -76,382 +78,382 @@ namespace testsLexer {
     }
 
     test::Result testLexingSingleSpace() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Space);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Space);
         result = testLexer(true, " ", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingMultipleSpaces() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Space);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Space);
         result = testLexer(true, "   ", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingTabulation() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Space);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Space);
         result = testLexer(true, "\t", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingSingleLineBreak() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::LineBreak);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::LineBreak);
         result = testLexer(true, "\n", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingMultipleLineBreaks() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::LineBreak);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::LineBreak);
         result = testLexer(true, "\n\n\n\n", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingPositiveInteger() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Int, "1");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Int, "1");
         result = testLexer(true, "1", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingIntegerZero() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Int, "0");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Int, "0");
         result = testLexer(true, "0", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingNegativeInteger() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Int, "-5");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Int, "-5");
         result = testLexer(true, "-5", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingIntegerWithMultipleChars() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Int, "2679");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Int, "2679");
         result = testLexer(true, "2679", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingPositiveFloat() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Float, "26.3");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Float, "26.3");
         result = testLexer(true, "26.3", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingFloatZero() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Float, "0.");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Float, "0.");
         result = testLexer(true, "0.", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingNegativeFloat() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Float, "-12.6");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Float, "-12.6");
         result = testLexer(true, "-12.6", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingFloatNoIntegralPart() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Float, ".3");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Float, ".3");
         result = testLexer(true, ".3", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingFloatNoDecimalPart() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Float, "5.");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Float, "5.");
         result = testLexer(true, "5.", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingNegativeFloatNoIntegerPart() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Float, "-.6");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Float, "-.6");
         result = testLexer(true, "-.6", rootExpected);
         delete rootExpected;
         return result;
     }
 
-    test::Result testLexingNegativeFloatNoParts() { return testLexerException<style::LexerException>("-."); }
+    test::Result testLexingNegativeFloatNoParts() { return testLexerException<style::lexer::LexerException>("-."); }
 
     test::Result testLexingSemiColon() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::SemiColon);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::SemiColon);
         result = testLexer(true, ";", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingColon() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Colon);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Colon);
         result = testLexer(true, ":", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingComma() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Comma);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Comma);
         result = testLexer(true, ",", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingOpeningCurlyBracket() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::OpeningCurlyBracket);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::OpeningCurlyBracket);
         result = testLexer(true, "{", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingClosingCurlyBracket() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::ClosingCurlyBracket);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::ClosingCurlyBracket);
         result = testLexer(true, "}", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingOpeningParenthesis() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::OpeningParenthesis);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::OpeningParenthesis);
         result = testLexer(true, "(", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingClosingParenthesis() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::ClosingParenthesis);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::ClosingParenthesis);
         result = testLexer(true, ")", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingGreatherThan() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::GreaterThan);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::GreaterThan);
         result = testLexer(true, ">", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingSharp() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Sharp);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Sharp);
         result = testLexer(true, "#", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingDot() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Dot);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Dot);
         result = testLexer(true, ".", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingAt() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::At);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::At);
         result = testLexer(true, "@", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingStar() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::Star);
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::Star);
         result = testLexer(true, "*", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingRawName() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::RawName, "test");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::RawName, "test");
         result = testLexer(true, "test", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingRawNameWithHyphen() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::RawName, "test-a");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::RawName, "test-a");
         result = testLexer(true, "test-a", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingRawNameWithNumber() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::RawName, "test2");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::RawName, "test2");
         result = testLexer(true, "test2", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingRawNameWithUnderscore() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::RawName, "test_2");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::RawName, "test_2");
         result = testLexer(true, "test_2", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingRawNameStartingWithNumber() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::RawName, "2a");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::RawName, "2a");
         result = testLexer(true, "2a", rootExpected);
         delete rootExpected;
         return result;
     }
 
-    test::Result testLexingMinusSign() { return testLexerException<style::LexerException>("-"); }
+    test::Result testLexingMinusSign() { return testLexerException<style::lexer::LexerException>("-"); }
 
     test::Result testLexingStringDoubleQuotes() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::String, "value");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::String, "value");
         result = testLexer(true, "\"value\"", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingStringSingleQuotes() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::String, "value");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::String, "value");
         result = testLexer(true, "'value'", rootExpected);
         delete rootExpected;
         return result;
     }
 
-    test::Result testLexingStringUnclosedDoubleQuotes() { return testLexerException<style::LexerException>("\"value"); }
+    test::Result testLexingStringUnclosedDoubleQuotes() { return testLexerException<style::lexer::LexerException>("\"value"); }
 
-    test::Result testLexingStringUnclosedSingleQuotes() { return testLexerException<style::LexerException>("'value"); }
+    test::Result testLexingStringUnclosedSingleQuotes() { return testLexerException<style::lexer::LexerException>("'value"); }
 
     test::Result testLexingStringEmptyDoubleQuotes() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::String, "");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::String, "");
         result = testLexer(true, "\"\"", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingStringEmptySingleQuotes() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::String, "");
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::String, "");
         result = testLexer(true, "''", rootExpected);
         delete rootExpected;
         return result;
     }
 
     test::Result testLexingImport() {
-        style::DeserializationNode *rootExpected;
+        style::lexer::LexerNode *rootExpected;
         test::Result result;
 
-        rootExpected = new style::DeserializationNode(style::Token::At);
-        rootExpected->appendNext(new style::DeserializationNode(style::Token::RawName, "import"))
-            ->appendNext(new style::DeserializationNode(style::Token::Space))
-            ->appendNext(new style::DeserializationNode(style::Token::String, "test"))
-            ->appendNext(new style::DeserializationNode(style::Token::SemiColon));
+        rootExpected = new style::lexer::LexerNode(style::lexer::Token::At);
+        rootExpected->appendNext(new style::lexer::LexerNode(style::lexer::Token::RawName, "import"))
+            ->appendNext(new style::lexer::LexerNode(style::lexer::Token::Space))
+            ->appendNext(new style::lexer::LexerNode(style::lexer::Token::String, "test"))
+            ->appendNext(new style::lexer::LexerNode(style::lexer::Token::SemiColon));
         result = testLexer(true, "@import \"test\";", rootExpected);
         delete rootExpected;
         return result;

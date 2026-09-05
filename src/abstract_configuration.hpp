@@ -2,7 +2,7 @@
 #define ABSTRACT_CONFIGURATION_HPP
 
 #include "../cpp_commons/src/node.hpp"
-#include "tokens.hpp"
+#include "parser_tokens.hpp"
 #include <exception>
 #include <set>
 #include <string>
@@ -20,15 +20,15 @@ namespace style::config {
     };
 
     class ConfigRuleNode : public commons::Node<ConfigRuleNode> {
-        Token _token;
+        parser::Token _token;
 
     protected:
-        std::string debugValue() const override { return style::tokenToString(_token); }
+        std::string debugValue() const override { return parser::tokenToString(_token); }
 
     public:
-        ConfigRuleNode(const Token token, ConfigRuleNode *child = nullptr, ConfigRuleNode *next = nullptr)
+        ConfigRuleNode(const parser::Token token, ConfigRuleNode *child = nullptr, ConfigRuleNode *next = nullptr)
             : commons::Node<ConfigRuleNode>(child, next), _token{token} {}
-        const Token &token() const { return _token; }
+        const parser::Token &token() const { return _token; }
     };
 
     class ConfigRuleNodeEnum : public ConfigRuleNode {
@@ -37,7 +37,7 @@ namespace style::config {
         std::string debugValue() const override;
 
     public:
-        ConfigRuleNodeEnum(const std::set<std::string> allowedValues) : ConfigRuleNode{Token::EnumValue}, _allowedValues{allowedValues} {}
+        ConfigRuleNodeEnum(const std::set<std::string> allowedValues) : ConfigRuleNode{parser::Token::EnumValue}, _allowedValues{allowedValues} {}
         const std::set<std::string> &allowedValues() const { return _allowedValues; }
     };
 
@@ -49,7 +49,7 @@ namespace style::config {
         ~Config();
     };
 
-    extern std::array<Token, 2> NESTABLE_TOKENS;
+    extern std::array<parser::Token, 2> NESTABLE_TOKENS;
 
     void configNodeChecker(const ConfigRuleNode *node);
 

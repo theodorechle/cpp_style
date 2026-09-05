@@ -41,7 +41,7 @@ namespace configTests {
     }
 
     test::Result testInvalidRuleNameWithSpaces() {
-        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::Int);
+        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::parser::Token::Int);
         const style::config::Config *config = new style::config::Config{{{"an invalid rule", {node}}}, {}};
         test::Result result = checkConfigError<style::config::InvalidStyleConfigException>(config);
         delete config;
@@ -49,7 +49,7 @@ namespace configTests {
     }
 
     test::Result testInvalidRuleNameWithSpecialFirstCharacter() {
-        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::Int);
+        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::parser::Token::Int);
         const style::config::Config *config = new style::config::Config{{{"#anInvalidRule", {node}}}, {}};
         test::Result result = checkConfigError<style::config::InvalidStyleConfigException>(config);
         delete config;
@@ -57,7 +57,7 @@ namespace configTests {
     }
 
     test::Result testInvalidRuleNameWithNumericFirstCharacter() {
-        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::Int);
+        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::parser::Token::Int);
         const style::config::Config *config = new style::config::Config{{{"1anInvalidRule", {node}}}, {}};
         test::Result result = checkConfigError<style::config::InvalidStyleConfigException>(config);
         delete config;
@@ -65,7 +65,7 @@ namespace configTests {
     }
 
     test::Result testInvalidRuleNameWithSpecialCharacter() {
-        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::Int);
+        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::parser::Token::Int);
         const style::config::Config *config = new style::config::Config{{{"an&InvalidRule", {node}}}, {}};
         test::Result result = checkConfigError<style::config::InvalidStyleConfigException>(config);
         delete config;
@@ -73,7 +73,7 @@ namespace configTests {
     }
 
     test::Result testValidRuleName() {
-        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::Int);
+        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::parser::Token::Int);
         const style::config::Config *config = new style::config::Config{{{"rule", {node}}}, {}};
         test::Result result = checkConfigValid(config);
         delete config;
@@ -81,7 +81,7 @@ namespace configTests {
     }
 
     test::Result testValidRuleNameWithUpperCase() {
-        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::Int);
+        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::parser::Token::Int);
         const style::config::Config *config = new style::config::Config{{{"aValidRule", {node}}}, {}};
         test::Result result = checkConfigValid(config);
         delete config;
@@ -89,7 +89,7 @@ namespace configTests {
     }
 
     test::Result testRuleInvalidToken() {
-        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::NullRoot);
+        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::parser::Token::NullRoot);
         const style::config::Config *config = new style::config::Config{{{"anInvalidRule", {node}}}, {}};
         test::Result result = checkConfigError<style::config::InvalidStyleConfigException>(config);
         delete config;
@@ -97,34 +97,34 @@ namespace configTests {
     }
 
     test::Result testRuleValidToken() {
-        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::Int);
+        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::parser::Token::Int);
         const style::config::Config *config = new style::config::Config{{{"aValidRule", {node}}}, {}};
         test::Result result = checkConfigValid(config);
         delete config;
         return result;
     }
 
-    test::Result testRuleWithFunctionTokenWithChilds() {
-        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::Function);
-        node->addChild(new style::config::ConfigRuleNode(style::Token::String));
+    test::Result testRuleWithFunctionTokenWithChildren() {
+        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::parser::Token::Function);
+        node->addChild(new style::config::ConfigRuleNode(style::parser::Token::String));
         const style::config::Config *config = new style::config::Config{{{"aValidRule", {node}}}, {}};
         test::Result result = checkConfigValid(config);
         delete config;
         return result;
     }
 
-    test::Result testRuleWithTupleTokenWithChilds() {
-        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::Tuple);
-        node->addChild(new style::config::ConfigRuleNode(style::Token::String));
+    test::Result testRuleWithTupleTokenWithChildren() {
+        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::parser::Token::Tuple);
+        node->addChild(new style::config::ConfigRuleNode(style::parser::Token::String));
         const style::config::Config *config = new style::config::Config{{{"aValidRule", {node}}}, {}};
         test::Result result = checkConfigValid(config);
         delete config;
         return result;
     }
 
-    test::Result testRuleWithNonNestableTokenWithChilds() {
-        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::Token::EnumValue);
-        node->addChild(new style::config::ConfigRuleNode(style::Token::String));
+    test::Result testRuleWithNonNestableTokenWithChildren() {
+        style::config::ConfigRuleNode *node = new style::config::ConfigRuleNode(style::parser::Token::EnumValue);
+        node->addChild(new style::config::ConfigRuleNode(style::parser::Token::String));
         const style::config::Config *config = new style::config::Config{{{"anInvalidRule", {node}}}, {}};
         test::Result result = checkConfigValid(config);
         delete config;
@@ -141,9 +141,9 @@ namespace configTests {
         tests->addTest(testValidRuleNameWithUpperCase, "Valid rule name with upper case");
         tests->addTest(testRuleInvalidToken, "Invalid rule token");
         tests->addTest(testRuleValidToken, "Valid rule token");
-        tests->addTest(testRuleWithFunctionTokenWithChilds, "Rule with function token with childs");
-        tests->addTest(testRuleWithTupleTokenWithChilds, "Rule with tuple token with childs");
-        tests->addTest(testRuleWithNonNestableTokenWithChilds, "Rule with non nestable token with childs");
+        tests->addTest(testRuleWithFunctionTokenWithChildren, "Rule with function token with children");
+        tests->addTest(testRuleWithTupleTokenWithChildren, "Rule with tuple token with children");
+        tests->addTest(testRuleWithNonNestableTokenWithChildren, "Rule with non nestable token with children");
         tests->endTestBlock();
     }
 
