@@ -5,7 +5,6 @@
 #include <string>
 
 #include "../../cpp_tests/src/tests.hpp"
-#include "../../src/deserialization_node.hpp"
 #include "../../src/lexer.hpp"
 #include "../../src/parser.hpp"
 #include "../test_config.hpp"
@@ -15,7 +14,7 @@ namespace testsParser {
 
     std::string getFileContent(std::string fileName);
 
-    test::Result testLexerAndParser(bool equal, const std::string &expr, const style::DeserializationNode *expected,
+    test::Result testLexerAndParser(bool equal, const std::string &expr, const style::parser::ParserNode *expected,
                                     style::parser::ParsingBlock block = style::parser::ParsingBlock::FILE);
 
     /**
@@ -32,10 +31,10 @@ namespace testsParser {
 #ifdef DEBUG
         std::cout << "\n";
 #endif
-        style::DeserializationNode *tokens = nullptr;
-        style::DeserializationNode *result = nullptr;
+        style::lexer::LexerNode *tokens = nullptr;
+        style::lexer::LexerNode *result = nullptr;
         try {
-            tokens = style::Lexer().lexe(expression, config);
+            tokens = style::lexer::Lexer().lexe(expression, config);
             testResult = test::Result::FAILURE;
         }
         catch (std::exception &exception) {

@@ -2,8 +2,8 @@
 
 style::config::Config *testConfig() {
     style::config::ConfigRuleNode *paddingConfig =
-        new style::config::ConfigRuleNode(style::Token::Unit, new style::config::ConfigRuleNode(style::Token::Int));
-    style::config::ConfigRuleNode *textColorConfig = new style::config::ConfigRuleNode(style::Token::Hex);
+        new style::config::ConfigRuleNode(style::parser::Token::Unit, new style::config::ConfigRuleNode(style::parser::Token::Int));
+    style::config::ConfigRuleNode *textColorConfig = new style::config::ConfigRuleNode(style::parser::Token::Hex);
 
     std::string PIXEL_UNIT = "px";
     std::string PERCENTAGE_UNIT = "%";

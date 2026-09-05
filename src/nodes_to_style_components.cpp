@@ -1,7 +1,9 @@
 #include "nodes_to_style_components.hpp"
-#include "deserialization_node.hpp"
 #include "lexer.hpp"
+#include "lexer_node.hpp"
 #include "parser.hpp"
+#include "parser_node.hpp"
+#include "parser_tokens.hpp"
 #include "style_component.hpp"
 #include <algorithm>
 #include <fstream>
@@ -11,77 +13,82 @@
 
 namespace style {
 
-    SelectorType tokenTypeToSelectorType(Token token) {
+    SelectorType tokenTypeToSelectorType(parser::Token token) {
         switch (token) {
-        case Token::StarWildcard:
+        case parser::Token::StarWildcard:
             return SelectorType::StarWildcard;
-        case Token::ElementName:
+        case parser::Token::ElementName:
             return SelectorType::ElementName;
-        case Token::Class:
+        case parser::Token::Class:
             return SelectorType::Class;
-        case Token::Modifier:
+        case parser::Token::Modifier:
             return SelectorType::Modifier;
-        case Token::Identifier:
+        case parser::Token::Identifier:
             return SelectorType::Identifier;
         default:
             return SelectorType::Null;
         }
     }
 
-    ValueType tokenTypeToValueType(Token token) {
+    ValueType tokenTypeToValueType(parser::Token token) {
         switch (token) {
-        case Token::Int:
+        case parser::Token::Int:
             return ValueType::Int;
-        case Token::Float:
+        case parser::Token::Float:
             return ValueType::Float;
-        case Token::Bool:
+        case parser::Token::Bool:
             return ValueType::Bool;
-        case Token::String:
+        case parser::Token::String:
             return ValueType::String;
-        case Token::Tuple:
+        case parser::Token::Tuple:
             return ValueType::Tuple;
-        case Token::Function:
+        case parser::Token::Function:
             return ValueType::Function;
-        case Token::Unit:
+        case parser::Token::Unit:
             return ValueType::Unit;
-        case Token::Hex:
+        case parser::Token::Hex:
             return ValueType::Hex;
-        case Token::EnumValue:
+        case parser::Token::EnumValue:
             return ValueType::EnumValue;
         default:
             return ValueType::Null;
         }
     }
 
-    SelectorsRelation tokenTypeToSelectorsRelation(Token token) {
+    SelectorsRelation tokenTypeToSelectorsRelation(parser::Token token) {
         switch (token) {
-        case Token::DirectParent:
+        case parser::Token::DirectParent:
             return SelectorsRelation::DirectParent;
-        case Token::AnyParent:
+        case parser::Token::AnyParent:
             return SelectorsRelation::AnyParent;
-        case Token::SameElement:
+        case parser::Token::SameElement:
             return SelectorsRelation::SameElement;
         default:
             return SelectorsRelation::Null;
         }
     }
 
-    DeserializationNode *NodesToStyleComponents::deserializeStyle(const std::string &style) {
-        DeserializationNode *tokens = nullptr;
+    parser::ParserNode *NodesToStyleComponents::deserializeStyle(const std::string &style) {
+        lexer::LexerNode *tokens = nullptr;
         parser::ParseResult result;
         config::configChecker(_config);
-        tokens = Lexer().lexe(style, _config);
+        tokens = lexer::Lexer().lexe(style, _config);
         result = parser::parse(tokens);
         delete tokens;
 
+#ifdef DEBUG
         for (parser::ErrorMessage error : *result.errors) {
-            std::cerr << "Parsing Error: " << parser::errorTypeToString(error.type) << ": " << error.message << "\n";
+            std::cerr << "Parser (at ";
+            if (error.line == 0) std::cerr << "unknown location";
+            else std::cerr << error.line << ":" << error.column;
+            std::cerr << "): " << parser::errorTypeToString(error.type) << ": " << error.message << "\n";
         }
+#endif
         delete result.errors;
         return result.node;
     }
 
-    DeserializationNode *NodesToStyleComponents::deserializeStyleFromFile(const std::string &fileName) {
+    parser::ParserNode *NodesToStyleComponents::deserializeStyleFromFile(const std::string &fileName) {
         std::ifstream file(fileName);
         std::stringstream buffer;
         if (!file.is_open()) {
@@ -92,16 +99,15 @@ namespace style {
         return deserializeStyle(buffer.str());
     }
 
-    DeserializationNode *NodesToStyleComponents::joinStyleDeclarations(DeserializationNode *firstDeclarations,
-                                                                       DeserializationNode *secondDeclarations) {
-        DeserializationNode *newDeclarations = new DeserializationNode(Token::NullRoot);
-        DeserializationNode *actualDeclaration;
+    parser::ParserNode *NodesToStyleComponents::joinStyleDeclarations(parser::ParserNode *firstDeclarations, parser::ParserNode *secondDeclarations) {
+        parser::ParserNode *newDeclarations = new parser::ParserNode(parser::Token::NullRoot);
+        parser::ParserNode *actualDeclaration;
 
         while (firstDeclarations != nullptr) {
             while (secondDeclarations != nullptr) {
                 actualDeclaration = newDeclarations->appendNext(firstDeclarations->copyNodeWithChildren());
                 if (tokenTypeToSelectorsRelation(secondDeclarations->child()->token()) == SelectorsRelation::Null)
-                    actualDeclaration->addChild(new DeserializationNode(Token::AnyParent));
+                    actualDeclaration->addChild(new parser::ParserNode(parser::Token::AnyParent));
                 if (tokenTypeToSelectorsRelation(secondDeclarations->child()->token()) == SelectorsRelation::SameElement)
                     secondDeclarations->deleteSpecificChild(secondDeclarations->child());
                 actualDeclaration->addChild(secondDeclarations->child()->copyNodeWithChildrenAndNexts());
@@ -110,27 +116,27 @@ namespace style {
             firstDeclarations = firstDeclarations->next();
         }
 
-        DeserializationNode *root = newDeclarations;
+        parser::ParserNode *root = newDeclarations;
         newDeclarations = newDeclarations->next();
         root->next(nullptr);
         delete root;
         return newDeclarations;
     }
 
-    void NodesToStyleComponents::moveNestedBlocksToRoot(DeserializationNode *style) {
-        DeserializationNode *blockDeclarations = style->child();
-        DeserializationNode *content = blockDeclarations->next()->child();
-        DeserializationNode *nextDeclaration;
+    void NodesToStyleComponents::moveNestedBlocksToRoot(parser::ParserNode *style) {
+        parser::ParserNode *blockDeclarations = style->child();
+        parser::ParserNode *content = blockDeclarations->next()->child();
+        parser::ParserNode *nextDeclaration;
 
         while (content != nullptr) {
-            if (content->token() == Token::StyleBlock) {
+            if (content->token() == parser::Token::StyleBlock) {
                 content->child()->replaceChild(content->child()->child(),
                                                joinStyleDeclarations(blockDeclarations->child(), content->child()->child()));
                 nextDeclaration = content->next();
                 content->parent()->removeSpecificChild(content);
                 content->next(style->next());
                 style->next(content);
-                content->setParent(style->parent());
+                content->setParentForCurrentAndNexts(style->parent());
                 style = content;
                 content = nextDeclaration;
                 continue;
@@ -139,13 +145,13 @@ namespace style {
         }
     }
 
-    void NodesToStyleComponents::flattenStyle(DeserializationNode *style) {
+    void NodesToStyleComponents::flattenStyle(parser::ParserNode *style) {
         if (style == nullptr) return;
         style = style->child();
         while (style != nullptr) {
-            if (style->token() == Token::StyleBlock) moveNestedBlocksToRoot(style);
-            else if (style->token() == Token::Import) {
-                DeserializationNode *importedStyle = deserializeStyleFromFile(style->value());
+            if (style->token() == parser::Token::StyleBlock) moveNestedBlocksToRoot(style);
+            else if (style->token() == parser::Token::Import) {
+                parser::ParserNode *importedStyle = deserializeStyleFromFile(style->value());
                 if (importedStyle != nullptr) {
                     importedStyle->addChild(style->next());
                     style->next(importedStyle->child());
@@ -157,20 +163,20 @@ namespace style {
         }
     }
 
-    bool NodesToStyleComponents::ruleNodesValid(const DeserializationNode *ruleNode, const config::ConfigRuleNode *configNode) {
+    bool NodesToStyleComponents::ruleNodesValid(const parser::ParserNode *ruleNode, const config::ConfigRuleNode *configNode) {
         if (ruleNode == nullptr && configNode == nullptr) return true;
         if (ruleNode == nullptr || configNode == nullptr) return false;
         if (ruleNode->token() != configNode->token()) return false;
-        if (configNode->token() == Token::EnumValue) {
+        if (configNode->token() == parser::Token::EnumValue) {
             const std::set<std::string> &allowedValues = static_cast<const config::ConfigRuleNodeEnum *>(configNode)->allowedValues();
             return allowedValues.find(ruleNode->value()) != allowedValues.cend();
         }
         return true;
     }
 
-    bool NodesToStyleComponents::ruleValid(const DeserializationNode *rule) {
-        const DeserializationNode *ruleName = rule->child();
-        const DeserializationNode *ruleValue = ruleName->next();
+    bool NodesToStyleComponents::ruleValid(const parser::ParserNode *rule) {
+        const parser::ParserNode *ruleName = rule->child();
+        const parser::ParserNode *ruleValue = ruleName->next();
         std::unordered_map<std::string, std::vector<const config::ConfigRuleNode *>>::const_iterator configRules =
             _config->rules.find(ruleName->value());
         if (configRules == _config->rules.cend()) return false;
@@ -180,13 +186,13 @@ namespace style {
         return false;
     }
 
-    void NodesToStyleComponents::filterRulesWithConfiguration(DeserializationNode *style) {
+    void NodesToStyleComponents::filterRulesWithConfiguration(parser::ParserNode *style) {
         if (style == nullptr) return;
-        DeserializationNode *block = style->child();
-        DeserializationNode *declaration;
-        DeserializationNode *rule;
-        DeserializationNode *nextRule;
-        DeserializationNode *next;
+        parser::ParserNode *block = style->child();
+        parser::ParserNode *declaration;
+        parser::ParserNode *rule;
+        parser::ParserNode *nextRule;
+        parser::ParserNode *next;
 
         while (block) {
             declaration = block->getLastChild();
@@ -197,7 +203,7 @@ namespace style {
             rule = declaration->child();
             while (rule) {
                 nextRule = rule->next();
-                if (rule->token() == Token::Assignment && !ruleValid(rule)) {
+                if (rule->token() == parser::Token::Assignment && !ruleValid(rule)) {
 #ifdef DEBUG
                     std::cerr << "invalid rule:\n";
                     rule->debugDisplay();
@@ -229,13 +235,13 @@ namespace style {
     std::list<SelectorDataList *> *NodesToStyleComponents::convertStyleSelectors() {
         std::list<SelectorDataList *> *selectorsLists;
         SelectorDataList *requiredSelectors;
-        DeserializationNode *declaration;
-        DeserializationNode *declarationPart;
+        parser::ParserNode *declaration;
+        parser::ParserNode *declarationPart;
         SelectorType selectorType;
         SelectorsRelation styleRelationToken;
         std::string currentValue;
 
-        if (tree == nullptr || tree->token() != Token::SelectorsBlock) return nullptr;
+        if (tree == nullptr || tree->token() != parser::Token::SelectorsBlock) return nullptr;
 
         selectorsLists = new std::list<SelectorDataList *>();
         declaration = tree->child();
@@ -264,7 +270,7 @@ namespace style {
         return selectorsLists;
     }
 
-    StyleValue *NodesToStyleComponents::convertStyleNodeToStyleValue(DeserializationNode *node) {
+    StyleValue *NodesToStyleComponents::convertStyleNodeToStyleValue(parser::ParserNode *node) {
         if (node == nullptr) return nullptr;
         ValueType type;
         StyleValue *styleValue;
@@ -286,19 +292,19 @@ namespace style {
         RulesMap *appliedStyleMap;
         StyleValue *styleValue;
         std::string ruleName;
-        DeserializationNode *rule;
-        DeserializationNode *oldTree;
-        DeserializationNode *ruleNameNode;
-        Token token;
-        if (tree == nullptr || tree->token() != Token::BlockDeclarations) return nullptr;
+        parser::ParserNode *rule;
+        parser::ParserNode *oldTree;
+        parser::ParserNode *ruleNameNode;
+        parser::Token token;
+        if (tree == nullptr || tree->token() != parser::Token::BlockDeclarations) return nullptr;
 
         appliedStyleMap = new RulesMap();
         rule = tree->child();
         while (rule != nullptr) {
             token = rule->token();
-            if (token == Token::Assignment) {
+            if (token == parser::Token::Assignment) {
                 ruleNameNode = rule->child();
-                if (ruleNameNode == nullptr || ruleNameNode->token() != Token::RuleName) {
+                if (ruleNameNode == nullptr || ruleNameNode->token() != parser::Token::RuleName) {
                     rule = rule->next();
                     continue;
                 }
@@ -313,7 +319,7 @@ namespace style {
                     }
                 }
             }
-            else if (token == Token::StyleBlock) {
+            else if (token == parser::Token::StyleBlock) {
                 oldTree = tree;
                 tree = rule;
                 convertStyleDefinition(fileNumber, ruleNumber);
@@ -387,7 +393,7 @@ namespace style {
 
     void NodesToStyleComponents::convertStyleDefinition(int fileNumber, int *ruleNumber) {
         std::list<SelectorDataList *> *styleComponentsLists;
-        if (tree == nullptr || tree->token() != Token::StyleBlock) return;
+        if (tree == nullptr || tree->token() != parser::Token::StyleBlock) return;
         tree = tree->child();
 
         styleComponentsLists = convertStyleSelectors();
@@ -425,7 +431,7 @@ namespace style {
     std::list<StyleDefinition *> *NodesToStyleComponents::convert(const std::string &style, int fileNumber, int *ruleNumber) {
         *ruleNumber = 0;
 
-        DeserializationNode *styleTree = deserializeStyle(style);
+        parser::ParserNode *styleTree = deserializeStyle(style);
 
         flattenStyle(styleTree);
 #ifdef DEBUG
@@ -454,7 +460,7 @@ namespace style {
     }
 
     SelectorDataList *NodesToStyleComponents::convertSelectors(const std::string &selectors) {
-        DeserializationNode *nodes = deserializeStyle(selectors);
+        parser::ParserNode *nodes = deserializeStyle(selectors);
         delete nodes;
         return new SelectorDataList();
     }

@@ -1,18 +1,19 @@
 #include "abstract_configuration.hpp"
 
 #include "parser.hpp"
+#include "parser_tokens.hpp"
 #include <algorithm>
 
 namespace style::config {
-    std::array<Token, 2> NESTABLE_TOKENS = {Token::Function, Token::Tuple};
+    std::array<parser::Token, 2> NESTABLE_TOKENS = {parser::Token::Function, parser::Token::Tuple};
 
     void configNodeChecker(const ConfigRuleNode *node) {
         if (!node) return;
-        if (std::find(VALUE_TYPE_TOKENS.cbegin(), VALUE_TYPE_TOKENS.cend(), node->token()) == VALUE_TYPE_TOKENS.cend()) {
-            throw InvalidStyleConfigException("'" + tokenToString(node->token()) + "' is not a valid token.");
+        if (std::find(parser::VALUE_TYPE_TOKENS.cbegin(), parser::VALUE_TYPE_TOKENS.cend(), node->token()) == parser::VALUE_TYPE_TOKENS.cend()) {
+            throw InvalidStyleConfigException("'" + tokenToString(node->token()) + "' is not a valid value token.");
         }
         if (node->child()) {
-            if (std::find(NESTABLE_TOKENS.cbegin(), NESTABLE_TOKENS.cend(), node->token()) == VALUE_TYPE_TOKENS.cend()) {
+            if (std::find(NESTABLE_TOKENS.cbegin(), NESTABLE_TOKENS.cend(), node->token()) == parser::VALUE_TYPE_TOKENS.cend()) {
                 throw InvalidStyleConfigException("Node with token '" + tokenToString(node->token()) + "' can't have children");
             }
             configNodeChecker(node->child());

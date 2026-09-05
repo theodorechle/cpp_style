@@ -6,13 +6,13 @@
 
 namespace testsParser {
 
-    test::Result testLexerAndParser(bool equal, const std::string &expression, const style::DeserializationNode *expected,
+    test::Result testLexerAndParser(bool equal, const std::string &expression, const style::parser::ParserNode *expected,
                                     style::parser::ParsingBlock block) {
         style::config::Config *config = testConfig();
         test::Result testResult;
         std::cout << "Test lexing and parsing '\n" << expression << "'\n";
         try {
-            style::DeserializationNode *tokens = style::Lexer().lexe(expression, config);
+            style::lexer::LexerNode *tokens = style::lexer::Lexer().lexe(expression, config);
             style::parser::ParseResult result = style::parser::parse(tokens, block);
             if (areSameNodes(result.node, expected) == equal) testResult = test::Result::SUCCESS;
             else {
@@ -50,17 +50,17 @@ namespace testsParser {
         style::config::Config *config = testConfig();
         test::Result testResult = test::Result::FAILURE;
         std::cout
-            << "Test if lexing and parsing\n'\n"
+            << "Test if lexing and parsing'"
             << expression
-            << "\n'\n gives the error \""
+            << "' gives the error \""
             << style::parser::errorMessageToString(expectedError)
-            << " : ";
+            << " :\n";
 #ifdef DEBUG
         std::cout << "\n";
 #endif
-        style::DeserializationNode *tokens = nullptr;
+        style::lexer::LexerNode *tokens = nullptr;
         style::parser::ParseResult result;
-        tokens = style::Lexer().lexe(expression, config);
+        tokens = style::lexer::Lexer().lexe(expression, config);
         result = style::parser::parse(tokens, block);
 
         std::cout << "Errors:\n";

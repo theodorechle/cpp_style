@@ -6,11 +6,12 @@
 #include <vector>
 
 #include "abstract_configuration.hpp"
-#include "deserialization_node.hpp"
+#include "lexer_node.hpp"
 
-constexpr int MAX_ERROR_COMPLEMENTARY_INFOS_SIZE = 20;
-
-namespace style {
+namespace style::lexer {
+    constexpr int MAX_ERROR_COMPLEMENTARY_INFOS_SIZE = 20;
+    constexpr std::string_view TRUE = "true";
+    constexpr std::string_view FALSE = "false";
 
     class LexerException : public std::exception {
         std::string message;
@@ -22,7 +23,8 @@ namespace style {
 
     class UnknownValue : public LexerException {
     public:
-        UnknownValue(const std::string &value) : LexerException{"Error : Unknown value '" + value + "'"} {};
+        UnknownValue(const std::string &value, size_t line, size_t column)
+            : LexerException{"Error (at " + std::to_string(line) + ':' + std::to_string(column) + ": Unknown value '" + value + '\''} {};
     };
 
     const std::map<char, Token> RESERVED_CHARACTERS = {{'(', Token::OpeningParenthesis},
@@ -45,10 +47,12 @@ namespace style {
         const config::Config *_config = nullptr;
         size_t _index = 0;
         std::string _expression = "";
-        DeserializationNode *_parsedTree = nullptr;
+        lexer::LexerNode *_lexedTree = nullptr;
+        size_t _line = 1;
+        size_t _column = 0;
 
     public:
-        DeserializationNode *lexe(const std::string &expression, const config::Config *config);
+        lexer::LexerNode *lexe(const std::string &expression, const config::Config *config);
         size_t lexeSpace();
         size_t lexeLineReturn();
         size_t lexeOneLineComment();
@@ -64,6 +68,6 @@ namespace style {
         size_t lexeReservedCharacters();
     };
 
-} // namespace style
+} // namespace style::lexer
 
 #endif // TOKENIZER_HPP

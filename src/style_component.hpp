@@ -2,7 +2,7 @@
 #define STYLE_COMPONENT_HPP
 
 #include "../cpp_commons/src/node.hpp"
-#include "tokens.hpp"
+#include "parser_tokens.hpp"
 
 #include <list>
 #include <string>
@@ -17,9 +17,9 @@ namespace style {
 
     enum class SelectorsRelation { SameElement, DirectParent, AnyParent, Null };
 
-    SelectorType tokenTypeToSelectorType(Token token);
-    ValueType tokenTypeToValueType(Token token);
-    SelectorsRelation tokenTypeToSelectorsRelation(Token token);
+    SelectorType tokenTypeToSelectorType(parser::Token token);
+    ValueType tokenTypeToValueType(parser::Token token);
+    SelectorsRelation tokenTypeToSelectorsRelation(parser::Token token);
 
     std::string selectorTypeToString(SelectorType token);
     std::string valueTypeToString(ValueType token);
