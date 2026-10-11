@@ -1,7 +1,7 @@
 #ifndef TESTS_LEXER_HPP
 #define TESTS_LEXER_HPP
 
-#include "../../cpp_tests/src/tests.hpp"
+#include <cpptests/tests.hpp>
 #include "../../src/lexer_node.hpp"
 
 namespace testsLexer {

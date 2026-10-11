@@ -4,7 +4,7 @@
 #include <bits/stdc++.h>
 #include <string>
 
-#include "../../cpp_tests/src/tests.hpp"
+#include <cpptests/tests.hpp>
 #include "../../src/lexer.hpp"
 #include "../../src/parser.hpp"
 #include "../test_config.hpp"

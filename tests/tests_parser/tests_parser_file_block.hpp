@@ -1,4 +1,4 @@
-#include "../../cpp_tests/src/tests.hpp"
+#include <cpptests/tests.hpp>
 
 namespace testsParserFileBlock {
     void testsParsingFileBlock(test::Tests *tests);

@@ -1,7 +1,7 @@
 #ifndef DESERIALIZATION_TESTS_HPP
 #define DESERIALIZATION_TESTS_HPP
 
-#include "../../cpp_tests/src/tests.hpp"
+#include <cpptests/tests.hpp>
 #include "../../src/style_component.hpp"
 
 namespace deserializationTests {

@@ -1,4 +1,4 @@
-#include "tests_lexer.hpp"
+#include <cpptests/tests.hpp>
 #include "../../src/lexer.hpp"
 #include "../test_config.hpp"
 
