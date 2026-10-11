@@ -25,8 +25,8 @@ jobs:
       run: |
         git clone https://github.com/theodorechle/cpp_tests
         cd cpp_tests
-        make -j $(nproc) INSTALL_PATH=/tmp/cpptests
-        make install
+        make -j $(nproc)
+        make install INSTALL_PATH=/tmp/cpptests
         cd ..
 
     - name: Compile tests
