@@ -30,6 +30,6 @@ jobs:
         cd ..
 
     - name: Compile tests
-      run: make -j $(nproc) tests
+      run: make -j $(nproc) tests SHARED_LIBS_BASE_PATH=/tmp/cpptests
     - name: Execute tests
       run: bin/tests

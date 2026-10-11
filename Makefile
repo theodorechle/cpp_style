@@ -1,5 +1,6 @@
-SHARED_LIBS_PATH:=/usr/local/lib
-SHARED_LIBS_INCLUDES_PATH:=/usr/local/include
+SHARED_LIBS_BASE_PATH?=/usr/local
+SHARED_LIBS_PATH:=$(SHARED_LIBS_BASE_PATH)/lib
+SHARED_LIBS_INCLUDES_PATH:=$(SHARED_LIBS_BASE_PATH)/include
 CPP_C:=g++
 CPP_FLAGS:=-std=c++23 -Wall -g -MMD -MP -I$(SHARED_LIBS_INCLUDES_PATH)/cpptests
 BIN_DIR:=bin
@@ -63,6 +64,5 @@ $(COMMONS_LIB):
 
 # Clean all generated files
 clean:
-	@find obj -mindepth 1 ! -name .gitkeep -delete
-	@find bin -mindepth 1 ! -name .gitkeep -delete
+	rm -rf bin obj
 	$(MAKE) -C cpp_commons clean
