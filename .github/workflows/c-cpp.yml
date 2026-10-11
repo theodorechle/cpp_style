@@ -24,8 +24,10 @@ jobs:
     - name: Install tests lib
       run: |
         git clone https://github.com/theodorechle/cpp_tests
-        make -j $(nproc)
-        sudo make install
+        cd cpp_tests
+        make -j $(nproc) INSTALL_PATH=/tmp/cpptests
+        make install
+        cd ..
 
     - name: Compile tests
       run: make -j $(nproc) tests
