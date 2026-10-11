@@ -21,6 +21,12 @@ jobs:
       with:
         submodules: true
 
+    - name: Install tests lib
+      run: |
+        git clone https://github.com/theodore/cpp_tests
+        make -j
+        sudo make install
+
     - name: Compile tests
       run: make -j $(nproc) tests
     - name: Execute tests
