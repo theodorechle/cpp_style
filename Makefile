@@ -2,7 +2,7 @@ SHARED_LIBS_BASE_PATH?=/usr/local
 SHARED_LIBS_PATH:=$(SHARED_LIBS_BASE_PATH)/lib
 SHARED_LIBS_INCLUDES_PATH:=$(SHARED_LIBS_BASE_PATH)/include
 CPP_C:=g++
-CPP_FLAGS:=-std=c++23 -Wall -g -MMD -MP -I$(SHARED_LIBS_INCLUDES_PATH)/cpptests
+CPP_FLAGS:=-std=c++23 -Wall -g -MMD -MP -I$(SHARED_LIBS_INCLUDES_PATH)
 BIN_DIR:=bin
 OBJ_DIR:=obj/lib
 OBJ_TEST_DIR:=obj/test
@@ -52,7 +52,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 # Build the tests executable (tests + all style sources)
 $(TESTS): $(OBJ_TESTS) $(LIB).a $(COMMONS_LIB) $(TESTS_LIB)
 	@mkdir -p $(BIN_DIR)
-	$(CPP_C) -o $@ $^ -lcpptests -Wl,-rpath,'$(SHARED_LIBS_PATH)'
+	$(CPP_C) $(CPP_FLAGS) -o $@ $^ -Wl,-rpath,'$(SHARED_LIBS_PATH)'
 
 # Rule for compiling all test files
 $(OBJ_TEST_DIR)/%.o: $(TESTS_DIR)/%.cpp
