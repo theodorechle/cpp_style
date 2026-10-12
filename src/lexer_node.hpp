@@ -2,8 +2,8 @@
 #define LEXER_NODE_HPP
 #include <string>
 
-#include "../cpp_commons/src/node.hpp"
 #include "lexer_tokens.hpp"
+#include <cppcommons/node.hpp>
 
 namespace style::lexer {
     class LexerNode : public commons::Node<LexerNode> {

@@ -1,5 +1,5 @@
 #include "tests_parser.hpp"
-#include "../../cpp_commons/src/text.hpp"
+#include <cppcommons/text.hpp>
 #include "../../src/abstract_configuration.hpp"
 #include "../../src/lexer.hpp"
 #include "../test_config.hpp"

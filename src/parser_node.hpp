@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "../cpp_commons/src/node.hpp"
+#include <cppcommons/node.hpp>
 #include "parser_tokens.hpp"
 
 namespace style::parser {

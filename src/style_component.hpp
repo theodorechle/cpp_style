@@ -1,7 +1,7 @@
 #ifndef STYLE_COMPONENT_HPP
 #define STYLE_COMPONENT_HPP
 
-#include "../cpp_commons/src/node.hpp"
+#include <cppcommons/node.hpp>
 #include "parser_tokens.hpp"
 
 #include <list>

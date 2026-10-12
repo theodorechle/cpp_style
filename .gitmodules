@@ -1,4 +1,0 @@
-[submodule "cpp_commons"]
-	path = cpp_commons
-	url = https://github.com/theodorechle/cpp_commons
-	branch = main

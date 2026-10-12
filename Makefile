@@ -8,7 +8,7 @@ OBJ_DIR:=obj/lib
 OBJ_TEST_DIR:=obj/test
 SRC_DIR:=src
 TESTS_DIR:=tests
-COMMONS_LIB:=cpp_commons/bin/cpp_commons_lib.a
+COMMONS_LIB:=$(SHARED_LIBS_PATH)/libcppcommons.so
 TESTS_LIB:=$(SHARED_LIBS_PATH)/libcpptests.so
 
 # Source files
@@ -18,6 +18,7 @@ SRC_TESTS:=$(wildcard $(TESTS_DIR)/*.cpp) $(wildcard $(TESTS_DIR)/*/*.cpp)
 # Object files
 OBJ_STYLE:=$(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SRC_STYLE))
 OBJ_TESTS:=$(patsubst $(TESTS_DIR)/%.cpp, $(OBJ_TEST_DIR)/%.o, $(SRC_TESTS))
+DEPS:=$(OBJ_STYLE:.o=.d) $(OBJ_TESTS:.o=.d)
 
 # Executable targets
 LIB:=$(BIN_DIR)/cpp_style_lib
@@ -59,10 +60,8 @@ $(OBJ_TEST_DIR)/%.o: $(TESTS_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CPP_C) $(CPP_FLAGS) -c $< -o $@
 
-$(COMMONS_LIB):
-	$(MAKE) -C cpp_commons lib DEBUG=$(DEBUG)
+-include $(DEPS)
 
 # Clean all generated files
 clean:
 	rm -rf bin obj
-	$(MAKE) -C cpp_commons clean

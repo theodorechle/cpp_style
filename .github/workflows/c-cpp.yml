@@ -26,10 +26,18 @@ jobs:
         git clone https://github.com/theodorechle/cpp_tests
         cd cpp_tests
         make -j $(nproc)
-        make install INSTALL_PATH=/tmp/cpptests
+        make install INSTALL_PATH=/tmp/libs
+        cd ..
+
+    - name: Install commons lib
+      run: |
+        git clone https://github.com/theodorechle/cpp_commons
+        cd cpp_commons
+        make -j $(nproc)
+        make install INSTALL_PATH=/tmp/libs
         cd ..
 
     - name: Compile tests
-      run: make -j $(nproc) tests SHARED_LIBS_BASE_PATH=/tmp/cpptests
+      run: make -j $(nproc) tests SHARED_LIBS_BASE_PATH=/tmp/libs
     - name: Execute tests
       run: bin/tests

@@ -1,8 +1,8 @@
 #ifndef ABSTRACT_CONFIGURATION_HPP
 #define ABSTRACT_CONFIGURATION_HPP
 
-#include "../cpp_commons/src/node.hpp"
 #include "parser_tokens.hpp"
+#include <cppcommons/node.hpp>
 #include <exception>
 #include <set>
 #include <string>
